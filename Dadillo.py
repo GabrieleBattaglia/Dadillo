@@ -6,7 +6,7 @@
 import itertools, time, sys, json, functools
 from GBUtils import dgt, key
 TEMPO=time.time()
-VERSIONE="1.0.4, di dicembre 2025."
+VERSIONE="1.0.5, di dicembre 2025."
 FIELDS=['Nome','Punti','Vittorie','Pareggi','Sconfitte']
 # Funzione per convertire le chiavi numeriche di un dizionario (che in json vengono caricate come stringhe)
 def conv_key_int(d): 
@@ -434,6 +434,9 @@ def Immissione():
 	while True:
 		nome=dgt("Giocatore "+str(j)+": ",kind="s",smin=0)
 		if nome=="":
+			if j==1:
+				print("Nessun giocatore inserito. Uscita dal programma.")
+				sys.exit()
 			break
 		nome=nome[:16].title()
 		if nome not in giocatori:
