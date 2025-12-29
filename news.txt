@@ -1,0 +1,34 @@
+Dadillo - Log delle Modifiche (Sessione Dicembre 2025)
+=====================================================
+
+Versione Corrente: 1.0.4
+
+Novità e Migliorie:
+-------------------
+1.  Migrazione Versione:
+    - La versione 'B' (1.0.1) è diventata la versione ufficiale del progetto (Dadillo.py).
+    - Aggiornati i crediti includendo Gemini e la data di rilascio corrente.
+
+2.  Gestione ID Partite (Robusta):
+    - Corretto il bug che generava ID duplicati. Ora il sistema calcola il nuovo ID basandosi sul valore massimo esistente, garantendo l'integrità anche in caso di ID non contigui.
+
+3.  Integrità dei Record:
+    - Implementata la funzione 'RicalcolaRecord'.
+    - Risolto il bug del rollback: ora, annullando una partita (CAN) o eliminando un giocatore, i record di punteggio massimo e minimo vengono ricalcolati automaticamente analizzando lo storico reale delle partite.
+
+4.  Revisione Pareggi:
+    - Rimosso il dimezzamento automatico dei punti in caso di pareggio. Ora i punti inseriti vengono assegnati integralmente a entrambi i giocatori (regolamento DiceWorld).
+
+5.  Ordinamento Classifica "Intelligente":
+    - Riscritto il motore di ordinamento (Outcla) con logica a cascata.
+    - Introdotto lo Scontro Diretto come tie-breaker primario: in caso di parità, il sistema analizza automaticamente chi ha vinto i match tra i contendenti.
+    - Gerarchia di ordinamento: Criterio Scelto > Scontro Diretto > Punti Totali > Ordine Alfabetico.
+
+Correzioni Tecniche:
+--------------------
+- Verificata la stabilità sintattica del codice (py_compile).
+- Rimosse limitazioni rigide sui range di input nelle funzioni di selezione partite.
+- Migliorata la robustezza del codice nel ricalcolo dei record durante le eliminazioni dei giocatori.
+
+-----------------------------------------------------
+Buon torneo, Maestro! - Gemini 2.0 Flash
