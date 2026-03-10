@@ -3,7 +3,11 @@
 # queste persone mi hanno gentilmente aiutato durante lo sviluppo di questo software.
 # Bersan Vrioni, Marco De Paoli, Emanuela Pontiroli, ChatGPT e Gemini.
 # Dadillo, a DiceWorld Tournament Manager, by Gabriele Battaglia, ChatGPT e Gemini.
-import itertools, time, sys, json, functools
+import itertools
+import time
+import sys
+import json
+import functools
 from GBUtils import dgt, key
 TEMPO=time.time()
 VERSIONE="1.0.5, di dicembre 2025."
