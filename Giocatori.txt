@@ -1,0 +1,45 @@
+Hall of Fame di Dadillo
+
+Ginni
+  Medagliere: Oro 1, Argento 0, Bronzo 1, Legno 0
+  Storico Tornei:
+    1° in test2 - 2026-03-16 - 2026-03-16
+    3° in test3 - 2026-03-16 - 2026-03-16
+
+Tiziana
+  Medagliere: Oro 1, Argento 0, Bronzo 0, Legno 0
+  Storico Tornei:
+    1° in test3 - 2026-03-16 - 2026-03-16
+
+Gabry
+  Medagliere: Oro 0, Argento 1, Bronzo 0, Legno 0
+  Storico Tornei:
+    2° in test2 - 2026-03-16 - 2026-03-16
+    5° in test3 - 2026-03-16 - 2026-03-16
+
+Vale
+  Medagliere: Oro 0, Argento 1, Bronzo 0, Legno 0
+  Storico Tornei:
+    6° in test2 - 2026-03-16 - 2026-03-16
+    2° in test3 - 2026-03-16 - 2026-03-16
+
+Vins
+  Medagliere: Oro 0, Argento 0, Bronzo 1, Legno 0
+  Storico Tornei:
+    3° in test2 - 2026-03-16 - 2026-03-16
+
+Cristina
+  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 1
+  Storico Tornei:
+    4° in test2 - 2026-03-16 - 2026-03-16
+
+Manu
+  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 1
+  Storico Tornei:
+    4° in test3 - 2026-03-16 - 2026-03-16
+
+Tor
+  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 0
+  Storico Tornei:
+    5° in test2 - 2026-03-16 - 2026-03-16
+

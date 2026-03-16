@@ -1,0 +1,392 @@
+import wx
+import os
+import itertools
+from datetime import datetime
+from data import TournamentData, DATA_FILE, SettingsData
+from dialogs import SetupTournamentDialog, SetupPlayersDialog, MatchResultDialog, SettingsDialog, AddPlayerDialog, RetirePlayerDialog
+from standings import StandingsPanel
+from version import VERSION
+
+class MainFrame(wx.Frame):
+    def __init__(self):
+        super().__init__(None, title=f"Dadillo v{VERSION} - L'Altare del Sacrificio", size=(800, 600))
+        self.Maximize(True)
+        self.tourney = TournamentData()
+        self.settings = SettingsData()
+        self.settings.load()
+        
+        self.panel = None # Riferimento al pannello corrente
+
+        if not self.tourney.load() or not self.tourney.title:
+            wx.CallAfter(self.startup_sequence)
+        else:
+            wx.CallAfter(self.check_state_and_show)
+            
+    def startup_sequence(self):
+        dlg1 = SetupTournamentDialog(self)
+        if dlg1.ShowModal() == wx.ID_OK:
+            title, comment = dlg1.get_data()
+            if not title:
+                title = "Torneo dell'Infinita Clemenza"
+            self.tourney.title = title
+            self.tourney.comment = comment
+            self.tourney.start_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            dlg1.Destroy()
+            
+            dlg2 = SetupPlayersDialog(self)
+            if dlg2.ShowModal() == wx.ID_OK:
+                for p in dlg2.players:
+                    self.tourney.players[p] = [0, 0, 0, 0] # points, wins, draws, losses
+                
+                # Generazione partite (tutte le permutazioni = andata e ritorno)
+                match_id = 1
+                for j in itertools.permutations(self.tourney.players.keys(), 2):
+                    self.tourney.unplayed_matches[match_id] = list(j)
+                    match_id += 1
+                
+                self.tourney.save()
+                dlg2.Destroy()
+                self.check_state_and_show()
+            else:
+                dlg2.Destroy()
+                self.Close()
+        else:
+            dlg1.Destroy()
+            self.Close()
+
+    def check_state_and_show(self):
+        if not self.tourney.unplayed_matches and self.tourney.played_matches:
+            self.show_standings()
+        else:
+            self.init_main_ui()
+
+    def init_main_ui(self):
+        self.SetTitle(f"Dadillo v{VERSION} - {self.tourney.title}")
+        if self.panel:
+            self.panel.Destroy()
+            
+        self.panel = wx.Panel(self)
+        if not self.GetMenuBar():
+            self.create_menu()
+        
+        main_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        
+        # Pannello Sinistro: Non Giocate
+        left_vbox = wx.BoxSizer(wx.VERTICAL)
+        self.lbl_unplayed = wx.StaticText(self.panel, label="Non giocate...")
+        left_vbox.Add(self.lbl_unplayed, 0, wx.ALL | wx.EXPAND, 5)
+        
+        filter_box = wx.BoxSizer(wx.HORIZONTAL)
+        lbl_filter = wx.StaticText(self.panel, label="Filtro (cerca giocatore):")
+        self.txt_filter = wx.TextCtrl(self.panel)
+        self.txt_filter.Bind(wx.EVT_TEXT, self.on_filter_change)
+        filter_box.Add(lbl_filter, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        filter_box.Add(self.txt_filter, 1, wx.ALL | wx.EXPAND, 5)
+        left_vbox.Add(filter_box, 0, wx.EXPAND)
+        
+        self.list_unplayed = wx.ListBox(self.panel, style=wx.LB_SINGLE)
+        self.list_unplayed.Bind(wx.EVT_LISTBOX_DCLICK, self.on_match_selected)
+        self.list_unplayed.Bind(wx.EVT_CHAR_HOOK, self.on_unplayed_key)
+        left_vbox.Add(self.list_unplayed, 1, wx.ALL | wx.EXPAND, 5)
+        
+        main_sizer.Add(left_vbox, 1, wx.EXPAND | wx.ALL, 10)
+        
+        # Pannello Destro: Giocate
+        right_vbox = wx.BoxSizer(wx.VERTICAL)
+        self.lbl_played = wx.StaticText(self.panel, label="Giocate...")
+        right_vbox.Add(self.lbl_played, 0, wx.ALL | wx.EXPAND, 5)
+        
+        self.list_played = wx.ListBox(self.panel, style=wx.LB_SINGLE)
+        self.list_played.Bind(wx.EVT_CHAR_HOOK, self.on_played_key)
+        right_vbox.Add(self.list_played, 1, wx.ALL | wx.EXPAND, 5)
+        
+        main_sizer.Add(right_vbox, 1, wx.EXPAND | wx.ALL, 10)
+        
+        self.panel.SetSizer(main_sizer)
+        self.update_lists()
+        self.Layout()
+        self.Show()
+        
+        # Forza il focus per lo screen reader dopo aver costruito l'interfaccia
+        wx.CallAfter(self.list_unplayed.SetFocus)
+
+    def create_menu(self):
+        menubar = wx.MenuBar()
+        
+        menu_file = wx.Menu()
+        item_new = menu_file.Append(wx.ID_ANY, "Nuovo Torneo\tCtrl+N")
+        item_save = menu_file.Append(wx.ID_ANY, "Salva\tCtrl+S")
+        menu_file.AppendSeparator()
+        item_exit = menu_file.Append(wx.ID_ANY, "Esci\tCtrl+Q")
+        
+        menu_players = wx.Menu()
+        item_add = menu_players.Append(wx.ID_ANY, "Aggiungi Giocatore")
+        item_retire = menu_players.Append(wx.ID_ANY, "Ritira Giocatore")
+        
+        menu_options = wx.Menu()
+        item_rules = menu_options.Append(wx.ID_ANY, "Regole Torneo")
+        
+        menubar.Append(menu_file, "File")
+        menubar.Append(menu_players, "Giocatori")
+        menubar.Append(menu_options, "Opzioni")
+        
+        self.SetMenuBar(menubar)
+        
+        self.Bind(wx.EVT_MENU, self.on_menu_new, item_new)
+        self.Bind(wx.EVT_MENU, self.on_menu_save, item_save)
+        self.Bind(wx.EVT_MENU, self.on_menu_exit, item_exit)
+        self.Bind(wx.EVT_MENU, self.on_menu_add_player, item_add)
+        self.Bind(wx.EVT_MENU, self.on_menu_retire_player, item_retire)
+        self.Bind(wx.EVT_MENU, self.on_menu_rules, item_rules)
+        self.Bind(wx.EVT_CLOSE, self.on_close)
+
+    def on_close(self, event):
+        self.tourney.save()
+        event.Skip()
+
+    def on_filter_change(self, event):
+        self.update_lists()
+
+    def update_lists(self):
+        self.list_unplayed.Clear()
+        self.list_played.Clear()
+        
+        tot_unplayed = len(self.tourney.unplayed_matches)
+        tot_played = len(self.tourney.played_matches)
+        tot_matches = tot_unplayed + tot_played
+        
+        if tot_matches > 0:
+            perc_unplayed = (tot_unplayed / tot_matches) * 100
+            perc_played = (tot_played / tot_matches) * 100
+        else:
+            perc_unplayed = perc_played = 0.0
+            
+        self.lbl_unplayed.SetLabel(f"Non giocate {tot_unplayed} su {tot_matches}: {perc_unplayed:.1f}%")
+        self.lbl_played.SetLabel(f"Giocate {tot_played} su {tot_matches}: {perc_played:.1f}%")
+        
+        filt = self.txt_filter.GetValue().strip().lower()
+        
+        for m_id, (p1, p2) in sorted(self.tourney.unplayed_matches.items()):
+            text = f"({m_id}) {p1} vs {p2}"
+            if filt == "" or filt in text.lower():
+                self.list_unplayed.Append(text, m_id)
+                
+        for m_id, data in sorted(self.tourney.played_matches.items()):
+            p1, p2, res, pts = data
+            if res == '1': winner = f"Vince {p1}"
+            elif res == '2': winner = f"Vince {p2}"
+            else: winner = "Pareggio"
+            text = f"({m_id}) {p1} vs {p2} - {winner} (Punti base: {pts})"
+            self.list_played.Append(text, m_id)
+
+    def on_unplayed_key(self, event):
+        if event.GetKeyCode() in [wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER]:
+            self.process_selected_unplayed()
+        else:
+            event.Skip()
+
+    def on_match_selected(self, event):
+        self.process_selected_unplayed()
+
+    def _get_draw_points(self, pts):
+        if self.settings.draw_points_split == "Metà ciascuno":
+            return pts / 2.0, pts / 2.0
+        elif self.settings.draw_points_split == "Nessun Punto":
+            return 0, 0
+        elif self.settings.draw_points_split == "Punti Pieni a Entrambi":
+            return pts, pts
+        else:
+            # Inserimento Manuale: usiamo il valore immesso come punti per ciascuno per ora
+            return pts, pts
+
+    def process_selected_unplayed(self):
+        sel = self.list_unplayed.GetSelection()
+        if sel == wx.NOT_FOUND: return
+        
+        m_id = self.list_unplayed.GetClientData(sel)
+        p1, p2 = self.tourney.unplayed_matches[m_id]
+        
+        dlg = MatchResultDialog(self, m_id, p1, p2)
+        if dlg.ShowModal() == wx.ID_OK:
+            res, pts = dlg.get_result()
+            
+            if res == '1':
+                self.tourney.players[p1][0] += pts
+                self.tourney.players[p1][1] += 1
+                self.tourney.players[p2][3] += 1
+            elif res == '2':
+                self.tourney.players[p2][0] += pts
+                self.tourney.players[p2][1] += 1
+                self.tourney.players[p1][3] += 1
+            elif res == '3':
+                pt1, pt2 = self._get_draw_points(pts)
+                # Chiediamo punti separati se manuale? Per ora assegniamo uguali o in base alla regola.
+                if self.settings.draw_points_split == "Inserimento Manuale":
+                    # Potremmo chiedere quanto a p1 e quanto a p2, ma per non bloccare il flusso usiamo 'pts' per entrambi, 
+                    # che equivale a "Somma e Dividi" come inteso in precedenza (utente calcola a mente).
+                    pass
+
+                self.tourney.players[p1][0] += pt1
+                self.tourney.players[p2][0] += pt2
+                self.tourney.players[p1][2] += 1
+                self.tourney.players[p2][2] += 1
+                
+            self.tourney.played_matches[m_id] = [p1, p2, res, pts]
+            del self.tourney.unplayed_matches[m_id]
+            
+            self.tourney.save()
+            
+            self.update_lists()
+            self.list_unplayed.SetFocus()
+            
+            if len(self.tourney.unplayed_matches) == 0:
+                self.tourney.end_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                self.tourney.save()
+                wx.MessageBox("Oh insuperabile divinità, tutte le battaglie sono concluse! Ti accompagno alla sala delle classifiche.", "Torneo Concluso")
+                self.show_standings()
+                
+        dlg.Destroy()
+
+    def on_played_key(self, event):
+        if event.GetKeyCode() == wx.WXK_DELETE:
+            sel = self.list_played.GetSelection()
+            if sel == wx.NOT_FOUND: return
+            
+            m_id = self.list_played.GetClientData(sel)
+            if wx.MessageBox("Mio padrone, sei sicuro di voler annullare questo risultato e riportare la partita tra le non giocate?", "Conferma annullamento", wx.YES_NO | wx.ICON_QUESTION) == wx.YES:
+                data = self.tourney.played_matches[m_id]
+                p1, p2, res, pts = data
+                
+                if res == '1':
+                    self.tourney.players[p1][0] -= pts
+                    self.tourney.players[p1][1] -= 1
+                    self.tourney.players[p2][3] -= 1
+                elif res == '2':
+                    self.tourney.players[p2][0] -= pts
+                    self.tourney.players[p2][1] -= 1
+                    self.tourney.players[p1][3] -= 1
+                elif res == '3':
+                    pt1, pt2 = self._get_draw_points(pts)
+                    self.tourney.players[p1][0] -= pt1
+                    self.tourney.players[p2][0] -= pt2
+                    self.tourney.players[p1][2] -= 1
+                    self.tourney.players[p2][2] -= 1
+                    
+                self.tourney.unplayed_matches[m_id] = [p1, p2]
+                del self.tourney.played_matches[m_id]
+                self.tourney.save()
+                self.update_lists()
+                self.list_played.SetFocus()
+        else:
+            event.Skip()
+
+    def show_standings(self):
+        if self.panel:
+            self.panel.Destroy()
+        self.panel = StandingsPanel(self, self.tourney, self.settings)
+        if not self.GetMenuBar():
+            self.create_menu()
+        self.Layout()
+        self.Show()
+        # Forza il focus per lo screen reader dopo aver costruito l'interfaccia
+        wx.CallAfter(self.panel.txt_display.SetFocus)
+
+    def on_menu_new(self, event):
+        if wx.MessageBox("Mio incommensurabile sovrano, azzerare tutto e iniziare un nuovo torneo?", "Nuovo Torneo", wx.YES_NO | wx.ICON_WARNING) == wx.YES:
+            if os.path.exists(DATA_FILE):
+                os.remove(DATA_FILE)
+            self.tourney = TournamentData()
+            self.panel.Destroy()
+            self.startup_sequence()
+            
+    def on_menu_save(self, event):
+        self.tourney.save()
+        wx.MessageBox("La tua volontà è stata incisa nella pietra digitale.", "Salvato")
+        
+    def on_menu_exit(self, event):
+        self.tourney.save()
+        from data import PlayerDB
+        db = PlayerDB()
+        db.export_to_txt()
+        self.Close()
+
+        
+    def on_menu_add_player(self, event):
+        if not self.tourney.unplayed_matches and self.tourney.played_matches:
+            wx.MessageBox("Oh possente, il torneo è già concluso. Inizia un nuovo torneo per aggiungere vittime.", "Troppo tardi", wx.OK | wx.ICON_INFORMATION)
+            return
+            
+        dlg = AddPlayerDialog(self, list(self.tourney.players.keys()))
+        if dlg.ShowModal() == wx.ID_OK:
+            name = dlg.new_name
+            self.tourney.players[name] = [0, 0, 0, 0]
+            
+            existing_players = [p for p in self.tourney.players.keys() if p != name]
+            
+            # Trova l'id massimo attuale
+            all_ids = list(self.tourney.unplayed_matches.keys()) + list(self.tourney.played_matches.keys())
+            max_id = max(all_ids) if all_ids else 0
+            
+            for p in existing_players:
+                # Andata e ritorno
+                max_id += 1
+                self.tourney.unplayed_matches[max_id] = [name, p]
+                max_id += 1
+                self.tourney.unplayed_matches[max_id] = [p, name]
+                
+            self.tourney.save()
+            self.update_lists()
+            wx.MessageBox(f"Il nuovo stolto {name} è stato gettato nell'arena. Sono state generate {len(existing_players)*2} nuove sfide.", "Vittima Aggiunta")
+        dlg.Destroy()
+        
+    def on_menu_retire_player(self, event):
+        if not self.tourney.unplayed_matches and self.tourney.played_matches:
+            wx.MessageBox("Nessuno può più fuggire, il torneo è terminato.", "Troppo tardi", wx.OK | wx.ICON_INFORMATION)
+            return
+            
+        dlg = RetirePlayerDialog(self, list(self.tourney.players.keys()))
+        if dlg.ShowModal() == wx.ID_OK:
+            name = dlg.get_selected()
+            if not name:
+                dlg.Destroy()
+                return
+                
+            if wx.MessageBox(f"Sei certo di voler sopprimere {name}? Perderà a tavolino tutte le partite rimanenti e verrà cancellato dalla classifica.", "Conferma Soppressione", wx.YES_NO | wx.ICON_WARNING) == wx.YES:
+                to_delete = []
+                # Trova tutte le sue partite non giocate e assegna vittoria a tavolino all'avversario
+                for m_id, (p1, p2) in self.tourney.unplayed_matches.items():
+                    if p1 == name:
+                        to_delete.append((m_id, p2, '2'))
+                    elif p2 == name:
+                        to_delete.append((m_id, p1, '1'))
+                        
+                for m_id, opp, res in to_delete:
+                    # L'avversario prende la vittoria ma nessun punto (per evitare di falsare le statistiche punti totali)
+                    self.tourney.players[opp][1] += 1
+                    
+                    p1, p2 = self.tourney.unplayed_matches[m_id]
+                    self.tourney.played_matches[m_id] = [p1, p2, res, 0] # 0 punti a tavolino
+                    del self.tourney.unplayed_matches[m_id]
+                    
+                # Rimuovi il giocatore dalle statistiche (non apparirà più in classifica)
+                del self.tourney.players[name]
+                
+                self.tourney.save()
+                self.update_lists()
+                wx.MessageBox(f"{name} è stato soppresso. Sono state assegnate a tavolino {len(to_delete)} vittorie ai suoi avversari.", "Esecuzione Completata")
+                
+                if len(self.tourney.unplayed_matches) == 0:
+                    self.tourney.end_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    self.tourney.save()
+                    wx.MessageBox("Questa esecuzione ha concluso le battaglie! Ti accompagno alla sala delle classifiche.", "Torneo Concluso")
+                    self.show_standings()
+                    
+        dlg.Destroy()
+
+    def on_menu_rules(self, event):
+        dlg = SettingsDialog(self, self.settings)
+        if dlg.ShowModal() == wx.ID_OK:
+            self.settings = dlg.get_settings()
+            self.settings.save()
+        dlg.Destroy()
+

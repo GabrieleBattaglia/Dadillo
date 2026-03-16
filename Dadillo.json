@@ -1,0 +1,394 @@
+{
+    "title": "test4",
+    "comment": "riprova",
+    "start_date": "2026-03-16 15:10:14",
+    "end_date": "",
+    "players": {
+        "Ginni": [
+            669.0,
+            3,
+            1,
+            4
+        ],
+        "Vale": [
+            820.0,
+            3,
+            1,
+            0
+        ],
+        "Manu": [
+            0,
+            2,
+            0,
+            1
+        ],
+        "Gabry": [
+            140,
+            2,
+            0,
+            1
+        ],
+        "Rocco": [
+            0,
+            2,
+            0,
+            0
+        ],
+        "Scriba": [
+            135,
+            3,
+            0,
+            1
+        ],
+        "Dadillo": [
+            288,
+            2,
+            0,
+            1
+        ],
+        "Giuntino": [
+            265,
+            1,
+            0,
+            2
+        ]
+    },
+    "unplayed_matches": {
+        "5": [
+            "Ginni",
+            "Rocco"
+        ],
+        "7": [
+            "Ginni",
+            "Dadillo"
+        ],
+        "8": [
+            "Vale",
+            "Ginni"
+        ],
+        "9": [
+            "Vale",
+            "Manu"
+        ],
+        "10": [
+            "Vale",
+            "Gabry"
+        ],
+        "12": [
+            "Vale",
+            "Rocco"
+        ],
+        "13": [
+            "Vale",
+            "Scriba"
+        ],
+        "14": [
+            "Vale",
+            "Dadillo"
+        ],
+        "15": [
+            "Manu",
+            "Ginni"
+        ],
+        "16": [
+            "Manu",
+            "Vale"
+        ],
+        "17": [
+            "Manu",
+            "Gabry"
+        ],
+        "19": [
+            "Manu",
+            "Rocco"
+        ],
+        "20": [
+            "Manu",
+            "Scriba"
+        ],
+        "21": [
+            "Manu",
+            "Dadillo"
+        ],
+        "22": [
+            "Gabry",
+            "Ginni"
+        ],
+        "23": [
+            "Gabry",
+            "Vale"
+        ],
+        "24": [
+            "Gabry",
+            "Manu"
+        ],
+        "26": [
+            "Gabry",
+            "Rocco"
+        ],
+        "27": [
+            "Gabry",
+            "Scriba"
+        ],
+        "28": [
+            "Gabry",
+            "Dadillo"
+        ],
+        "36": [
+            "Rocco",
+            "Ginni"
+        ],
+        "37": [
+            "Rocco",
+            "Vale"
+        ],
+        "38": [
+            "Rocco",
+            "Manu"
+        ],
+        "39": [
+            "Rocco",
+            "Gabry"
+        ],
+        "41": [
+            "Rocco",
+            "Scriba"
+        ],
+        "42": [
+            "Rocco",
+            "Dadillo"
+        ],
+        "43": [
+            "Scriba",
+            "Ginni"
+        ],
+        "45": [
+            "Scriba",
+            "Manu"
+        ],
+        "46": [
+            "Scriba",
+            "Gabry"
+        ],
+        "48": [
+            "Scriba",
+            "Rocco"
+        ],
+        "49": [
+            "Scriba",
+            "Dadillo"
+        ],
+        "50": [
+            "Dadillo",
+            "Ginni"
+        ],
+        "51": [
+            "Dadillo",
+            "Vale"
+        ],
+        "52": [
+            "Dadillo",
+            "Manu"
+        ],
+        "53": [
+            "Dadillo",
+            "Gabry"
+        ],
+        "55": [
+            "Dadillo",
+            "Rocco"
+        ],
+        "56": [
+            "Dadillo",
+            "Scriba"
+        ],
+        "59": [
+            "Giuntino",
+            "Vale"
+        ],
+        "60": [
+            "Vale",
+            "Giuntino"
+        ],
+        "61": [
+            "Giuntino",
+            "Manu"
+        ],
+        "62": [
+            "Manu",
+            "Giuntino"
+        ],
+        "63": [
+            "Giuntino",
+            "Gabry"
+        ],
+        "64": [
+            "Gabry",
+            "Giuntino"
+        ],
+        "65": [
+            "Giuntino",
+            "Rocco"
+        ],
+        "66": [
+            "Rocco",
+            "Giuntino"
+        ],
+        "67": [
+            "Giuntino",
+            "Scriba"
+        ],
+        "68": [
+            "Scriba",
+            "Giuntino"
+        ],
+        "69": [
+            "Giuntino",
+            "Dadillo"
+        ]
+    },
+    "played_matches": {
+        "11": [
+            "Vale",
+            "Ronco",
+            "1",
+            333
+        ],
+        "25": [
+            "Gabry",
+            "Ronco",
+            "2",
+            550
+        ],
+        "2": [
+            "Ginni",
+            "Manu",
+            "1",
+            233
+        ],
+        "4": [
+            "Ginni",
+            "Ronco",
+            "2",
+            426
+        ],
+        "54": [
+            "Dadillo",
+            "Ronco",
+            "2",
+            522
+        ],
+        "18": [
+            "Manu",
+            "Ronco",
+            "1",
+            0
+        ],
+        "29": [
+            "Ronco",
+            "Ginni",
+            "2",
+            0
+        ],
+        "30": [
+            "Ronco",
+            "Vale",
+            "2",
+            0
+        ],
+        "31": [
+            "Ronco",
+            "Manu",
+            "2",
+            0
+        ],
+        "32": [
+            "Ronco",
+            "Gabry",
+            "2",
+            0
+        ],
+        "33": [
+            "Ronco",
+            "Rocco",
+            "2",
+            0
+        ],
+        "34": [
+            "Ronco",
+            "Scriba",
+            "2",
+            0
+        ],
+        "35": [
+            "Ronco",
+            "Dadillo",
+            "2",
+            0
+        ],
+        "40": [
+            "Rocco",
+            "Ronco",
+            "1",
+            0
+        ],
+        "47": [
+            "Scriba",
+            "Ronco",
+            "1",
+            0
+        ],
+        "44": [
+            "Scriba",
+            "Vale",
+            "2",
+            365
+        ],
+        "57": [
+            "Giuntino",
+            "Ginni",
+            "1",
+            265
+        ],
+        "58": [
+            "Ginni",
+            "Giuntino",
+            "1",
+            314
+        ],
+        "70": [
+            "Dadillo",
+            "Giuntino",
+            "1",
+            288
+        ],
+        "6": [
+            "Ginni",
+            "Scriba",
+            "2",
+            135
+        ],
+        "1": [
+            "Ginni",
+            "Vale",
+            "3",
+            244
+        ],
+        "3": [
+            "Ginni",
+            "Gabry",
+            "2",
+            140
+        ]
+    },
+    "records_high": [
+        "Giocatore sconosciuto",
+        "Partita sconosciuta",
+        -99999
+    ],
+    "records_low": [
+        "Giocatore sconosciuto",
+        "Partita sconosciuta",
+        99999
+    ]
+}
