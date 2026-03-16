@@ -149,6 +149,7 @@ class MatchResultDialog(wx.Dialog):
         
         btn_box = wx.BoxSizer(wx.HORIZONTAL)
         self.btn_ok = wx.Button(panel, wx.ID_OK, "Suggella il fato!")
+        self.btn_ok.Bind(wx.EVT_BUTTON, self.on_ok)
         btn_cancel = wx.Button(panel, wx.ID_CANCEL, "Ripensamento...")
         btn_box.Add(self.btn_ok, 0, wx.ALL, 5)
         btn_box.Add(btn_cancel, 0, wx.ALL, 5)
@@ -163,7 +164,17 @@ class MatchResultDialog(wx.Dialog):
             self.ProcessEvent(event_ok)
         else:
             event.Skip()
-        
+
+    def on_ok(self, event):
+        val = self.txt_pts.GetValue().strip()
+        try:
+            int(val)
+            event.Skip()
+        except ValueError:
+            wx.MessageBox("Oh creatura imperfetta, i punti devono essere un valore numerico valido!", "Valore Invalido", wx.OK | wx.ICON_WARNING)
+            self.txt_pts.SelectAll()
+            self.txt_pts.SetFocus()
+            
     def get_result(self):
         sel = self.rb_result.GetSelection()
         res_str = str(sel + 1)
