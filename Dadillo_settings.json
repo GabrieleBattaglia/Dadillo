@@ -1,6 +1,6 @@
 {
-    "main_criterion": "Vittorie",
-    "tiebreaker_1": "Scontro Diretto (Punti)",
-    "tiebreaker_2": "Punti Totali",
-    "draw_points_split": "Met\u00e0 ciascuno"
+    "main_criterion": "Punti Totali",
+    "tiebreaker_1": "Scontro Diretto (Vittorie)",
+    "tiebreaker_2": "Vittorie Totali",
+    "draw_points_split": "Punti Pieni a Entrambi"
 }

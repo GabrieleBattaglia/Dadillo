@@ -68,6 +68,22 @@ class MainFrame(wx.Frame):
         self.panel = wx.Panel(self)
         if not self.GetMenuBar():
             self.create_menu()
+            
+        # Ordine di creazione per controllare l'ordine di tabulazione:
+        # 1. Filtro Non Giocate
+        # 2. Lista Non Giocate
+        # 3. Lista Giocate
+        # 4. Filtro Giocate
+        self.txt_filter_unplayed = wx.TextCtrl(self.panel)
+        self.list_unplayed = wx.ListBox(self.panel, style=wx.LB_SINGLE)
+        self.list_played = wx.ListBox(self.panel, style=wx.LB_SINGLE)
+        self.txt_filter_played = wx.TextCtrl(self.panel)
+        
+        self.txt_filter_unplayed.Bind(wx.EVT_TEXT, self.on_filter_change)
+        self.txt_filter_played.Bind(wx.EVT_TEXT, self.on_filter_change)
+        self.list_unplayed.Bind(wx.EVT_LISTBOX_DCLICK, self.on_match_selected)
+        self.list_unplayed.Bind(wx.EVT_CHAR_HOOK, self.on_unplayed_key)
+        self.list_played.Bind(wx.EVT_CHAR_HOOK, self.on_played_key)
         
         main_sizer = wx.BoxSizer(wx.HORIZONTAL)
         
@@ -76,17 +92,12 @@ class MainFrame(wx.Frame):
         self.lbl_unplayed = wx.StaticText(self.panel, label="Non giocate...")
         left_vbox.Add(self.lbl_unplayed, 0, wx.ALL | wx.EXPAND, 5)
         
-        filter_box = wx.BoxSizer(wx.HORIZONTAL)
-        lbl_filter = wx.StaticText(self.panel, label="Filtro (cerca giocatore):")
-        self.txt_filter = wx.TextCtrl(self.panel)
-        self.txt_filter.Bind(wx.EVT_TEXT, self.on_filter_change)
-        filter_box.Add(lbl_filter, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
-        filter_box.Add(self.txt_filter, 1, wx.ALL | wx.EXPAND, 5)
-        left_vbox.Add(filter_box, 0, wx.EXPAND)
+        filter_box_u = wx.BoxSizer(wx.HORIZONTAL)
+        lbl_filter_u = wx.StaticText(self.panel, label="Filtro (cerca giocatore):")
+        filter_box_u.Add(lbl_filter_u, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        filter_box_u.Add(self.txt_filter_unplayed, 1, wx.ALL | wx.EXPAND, 5)
+        left_vbox.Add(filter_box_u, 0, wx.EXPAND)
         
-        self.list_unplayed = wx.ListBox(self.panel, style=wx.LB_SINGLE)
-        self.list_unplayed.Bind(wx.EVT_LISTBOX_DCLICK, self.on_match_selected)
-        self.list_unplayed.Bind(wx.EVT_CHAR_HOOK, self.on_unplayed_key)
         left_vbox.Add(self.list_unplayed, 1, wx.ALL | wx.EXPAND, 5)
         
         main_sizer.Add(left_vbox, 1, wx.EXPAND | wx.ALL, 10)
@@ -96,8 +107,15 @@ class MainFrame(wx.Frame):
         self.lbl_played = wx.StaticText(self.panel, label="Giocate...")
         right_vbox.Add(self.lbl_played, 0, wx.ALL | wx.EXPAND, 5)
         
-        self.list_played = wx.ListBox(self.panel, style=wx.LB_SINGLE)
-        self.list_played.Bind(wx.EVT_CHAR_HOOK, self.on_played_key)
+        filter_box_p = wx.BoxSizer(wx.HORIZONTAL)
+        lbl_filter_p = wx.StaticText(self.panel, label="Filtro (cerca giocatore):")
+        filter_box_p.Add(lbl_filter_p, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        filter_box_p.Add(self.txt_filter_played, 1, wx.ALL | wx.EXPAND, 5)
+        # Il filtro per la lista giocate andrà sotto come desiderato o sopra la lista?
+        # Il prompt non lo specifica, ma di solito i filtri stanno sopra.
+        # L'ordine di tabulazione è quello che conta, visivamente mettiamolo sopra per simmetria
+        right_vbox.Add(filter_box_p, 0, wx.EXPAND)
+        
         right_vbox.Add(self.list_played, 1, wx.ALL | wx.EXPAND, 5)
         
         main_sizer.Add(right_vbox, 1, wx.EXPAND | wx.ALL, 10)
@@ -164,11 +182,25 @@ class MainFrame(wx.Frame):
         self.lbl_unplayed.SetLabel(f"Non giocate {tot_unplayed} su {tot_matches}: {perc_unplayed:.1f}%")
         self.lbl_played.SetLabel(f"Giocate {tot_played} su {tot_matches}: {perc_played:.1f}%")
         
-        filt = self.txt_filter.GetValue().strip().lower()
+        filt_u = self.txt_filter_unplayed.GetValue().strip().lower()
+        filt_p = self.txt_filter_played.GetValue().strip().lower()
+        
+        def match_filter(text, p1, p2, filt_str):
+            if not filt_str:
+                return True
+            parts = filt_str.split()
+            if len(parts) == 1:
+                return parts[0] in text.lower()
+            elif len(parts) >= 2:
+                s1, s2 = parts[0], parts[1]
+                p1_low = p1.lower()
+                p2_low = p2.lower()
+                return s1 in p1_low and s2 in p2_low
+            return False
         
         for m_id, (p1, p2) in sorted(self.tourney.unplayed_matches.items()):
             text = f"({m_id}) {p1} vs {p2}"
-            if filt == "" or filt in text.lower():
+            if match_filter(text, p1, p2, filt_u):
                 self.list_unplayed.Append(text, m_id)
                 
         for m_id, data in sorted(self.tourney.played_matches.items()):
@@ -177,7 +209,8 @@ class MainFrame(wx.Frame):
             elif res == '2': winner = f"Vince {p2}"
             else: winner = "Pareggio"
             text = f"({m_id}) {p1} vs {p2} - {winner} (Punti base: {pts})"
-            self.list_played.Append(text, m_id)
+            if match_filter(text, p1, p2, filt_p):
+                self.list_played.Append(text, m_id)
 
     def on_unplayed_key(self, event):
         if event.GetKeyCode() in [wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER]:

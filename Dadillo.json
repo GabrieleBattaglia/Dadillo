@@ -1,384 +1,1212 @@
 {
-    "title": "test4",
-    "comment": "riprova",
-    "start_date": "2026-03-16 15:10:14",
+    "title": "Farkle Bonus",
+    "comment": "Primo torneo gestito con la nuova versione di Dadillo",
+    "start_date": "2026-03-17 08:07:06",
     "end_date": "",
     "players": {
-        "Ginni": [
-            669.0,
-            3,
+        "Siddharta33": [
+            11700,
             1,
-            4
-        ],
-        "Vale": [
-            820.0,
-            3,
-            1,
-            0
-        ],
-        "Manu": [
-            0,
-            2,
             0,
             1
         ],
-        "Gabry": [
-            140,
-            2,
+        "Anny.88": [
             0,
-            1
-        ],
-        "Rocco": [
             0,
-            2,
             0,
             0
         ],
-        "Scriba": [
-            135,
-            3,
+        "Peppe": [
             0,
-            1
-        ],
-        "Dadillo": [
-            288,
-            2,
             0,
-            1
+            0,
+            0
         ],
-        "Giuntino": [
-            265,
-            1,
+        "Vero80": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Piellino88": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Rinaldo": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Ninfa81": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Princi": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Gas": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Manu1504": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Dj Dany": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Bazzi87": [
+            0,
+            0,
             0,
             2
+        ],
+        "Gegg\u00e8": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Il Difetto88": [
+            30900,
+            3,
+            0,
+            2
+        ],
+        "Selene157": [
+            0,
+            0,
+            0,
+            0
+        ],
+        "Isotta2604": [
+            10100,
+            1,
+            0,
+            0
+        ],
+        "Geypi": [
+            0,
+            0,
+            0,
+            0
         ]
     },
     "unplayed_matches": {
+        "1": [
+            "Siddharta33",
+            "Anny.88"
+        ],
+        "2": [
+            "Siddharta33",
+            "Peppe"
+        ],
+        "3": [
+            "Siddharta33",
+            "Vero80"
+        ],
+        "4": [
+            "Siddharta33",
+            "Piellino88"
+        ],
         "5": [
-            "Ginni",
-            "Rocco"
+            "Siddharta33",
+            "Rinaldo"
+        ],
+        "6": [
+            "Siddharta33",
+            "Ninfa81"
         ],
         "7": [
-            "Ginni",
-            "Dadillo"
+            "Siddharta33",
+            "Princi"
         ],
         "8": [
-            "Vale",
-            "Ginni"
+            "Siddharta33",
+            "Gas"
         ],
         "9": [
-            "Vale",
-            "Manu"
+            "Siddharta33",
+            "Manu1504"
         ],
         "10": [
-            "Vale",
-            "Gabry"
+            "Siddharta33",
+            "Dj Dany"
+        ],
+        "11": [
+            "Siddharta33",
+            "Bazzi87"
         ],
         "12": [
-            "Vale",
-            "Rocco"
-        ],
-        "13": [
-            "Vale",
-            "Scriba"
+            "Siddharta33",
+            "Gegg\u00e8"
         ],
         "14": [
-            "Vale",
-            "Dadillo"
+            "Siddharta33",
+            "Selene157"
         ],
         "15": [
-            "Manu",
-            "Ginni"
+            "Siddharta33",
+            "Isotta2604"
         ],
         "16": [
-            "Manu",
-            "Vale"
+            "Siddharta33",
+            "Geypi"
         ],
         "17": [
-            "Manu",
-            "Gabry"
+            "Anny.88",
+            "Siddharta33"
+        ],
+        "18": [
+            "Anny.88",
+            "Peppe"
         ],
         "19": [
-            "Manu",
-            "Rocco"
+            "Anny.88",
+            "Vero80"
         ],
         "20": [
-            "Manu",
-            "Scriba"
+            "Anny.88",
+            "Piellino88"
         ],
         "21": [
-            "Manu",
-            "Dadillo"
+            "Anny.88",
+            "Rinaldo"
         ],
         "22": [
-            "Gabry",
-            "Ginni"
+            "Anny.88",
+            "Ninfa81"
         ],
         "23": [
-            "Gabry",
-            "Vale"
+            "Anny.88",
+            "Princi"
         ],
         "24": [
-            "Gabry",
-            "Manu"
+            "Anny.88",
+            "Gas"
+        ],
+        "25": [
+            "Anny.88",
+            "Manu1504"
         ],
         "26": [
-            "Gabry",
-            "Rocco"
+            "Anny.88",
+            "Dj Dany"
         ],
         "27": [
-            "Gabry",
-            "Scriba"
+            "Anny.88",
+            "Bazzi87"
         ],
         "28": [
-            "Gabry",
-            "Dadillo"
+            "Anny.88",
+            "Gegg\u00e8"
+        ],
+        "29": [
+            "Anny.88",
+            "Il Difetto88"
+        ],
+        "30": [
+            "Anny.88",
+            "Selene157"
+        ],
+        "31": [
+            "Anny.88",
+            "Isotta2604"
+        ],
+        "32": [
+            "Anny.88",
+            "Geypi"
+        ],
+        "33": [
+            "Peppe",
+            "Siddharta33"
+        ],
+        "34": [
+            "Peppe",
+            "Anny.88"
+        ],
+        "35": [
+            "Peppe",
+            "Vero80"
         ],
         "36": [
-            "Rocco",
-            "Ginni"
+            "Peppe",
+            "Piellino88"
         ],
         "37": [
-            "Rocco",
-            "Vale"
+            "Peppe",
+            "Rinaldo"
         ],
         "38": [
-            "Rocco",
-            "Manu"
+            "Peppe",
+            "Ninfa81"
         ],
         "39": [
-            "Rocco",
-            "Gabry"
+            "Peppe",
+            "Princi"
+        ],
+        "40": [
+            "Peppe",
+            "Gas"
         ],
         "41": [
-            "Rocco",
-            "Scriba"
+            "Peppe",
+            "Manu1504"
         ],
         "42": [
-            "Rocco",
-            "Dadillo"
+            "Peppe",
+            "Dj Dany"
         ],
         "43": [
-            "Scriba",
-            "Ginni"
+            "Peppe",
+            "Bazzi87"
+        ],
+        "44": [
+            "Peppe",
+            "Gegg\u00e8"
         ],
         "45": [
-            "Scriba",
-            "Manu"
+            "Peppe",
+            "Il Difetto88"
         ],
         "46": [
-            "Scriba",
-            "Gabry"
+            "Peppe",
+            "Selene157"
+        ],
+        "47": [
+            "Peppe",
+            "Isotta2604"
         ],
         "48": [
-            "Scriba",
-            "Rocco"
+            "Peppe",
+            "Geypi"
         ],
         "49": [
-            "Scriba",
-            "Dadillo"
+            "Vero80",
+            "Siddharta33"
         ],
         "50": [
-            "Dadillo",
-            "Ginni"
+            "Vero80",
+            "Anny.88"
         ],
         "51": [
-            "Dadillo",
-            "Vale"
+            "Vero80",
+            "Peppe"
         ],
         "52": [
-            "Dadillo",
-            "Manu"
+            "Vero80",
+            "Piellino88"
         ],
         "53": [
-            "Dadillo",
-            "Gabry"
+            "Vero80",
+            "Rinaldo"
+        ],
+        "54": [
+            "Vero80",
+            "Ninfa81"
         ],
         "55": [
-            "Dadillo",
-            "Rocco"
+            "Vero80",
+            "Princi"
         ],
         "56": [
-            "Dadillo",
-            "Scriba"
+            "Vero80",
+            "Gas"
+        ],
+        "57": [
+            "Vero80",
+            "Manu1504"
+        ],
+        "58": [
+            "Vero80",
+            "Dj Dany"
         ],
         "59": [
-            "Giuntino",
-            "Vale"
+            "Vero80",
+            "Bazzi87"
         ],
         "60": [
-            "Vale",
-            "Giuntino"
+            "Vero80",
+            "Gegg\u00e8"
         ],
         "61": [
-            "Giuntino",
-            "Manu"
+            "Vero80",
+            "Il Difetto88"
         ],
         "62": [
-            "Manu",
-            "Giuntino"
+            "Vero80",
+            "Selene157"
         ],
         "63": [
-            "Giuntino",
-            "Gabry"
+            "Vero80",
+            "Isotta2604"
         ],
         "64": [
-            "Gabry",
-            "Giuntino"
+            "Vero80",
+            "Geypi"
         ],
         "65": [
-            "Giuntino",
-            "Rocco"
+            "Piellino88",
+            "Siddharta33"
         ],
         "66": [
-            "Rocco",
-            "Giuntino"
+            "Piellino88",
+            "Anny.88"
         ],
         "67": [
-            "Giuntino",
-            "Scriba"
+            "Piellino88",
+            "Peppe"
         ],
         "68": [
-            "Scriba",
-            "Giuntino"
+            "Piellino88",
+            "Vero80"
         ],
         "69": [
-            "Giuntino",
-            "Dadillo"
+            "Piellino88",
+            "Rinaldo"
+        ],
+        "70": [
+            "Piellino88",
+            "Ninfa81"
+        ],
+        "71": [
+            "Piellino88",
+            "Princi"
+        ],
+        "72": [
+            "Piellino88",
+            "Gas"
+        ],
+        "73": [
+            "Piellino88",
+            "Manu1504"
+        ],
+        "74": [
+            "Piellino88",
+            "Dj Dany"
+        ],
+        "75": [
+            "Piellino88",
+            "Bazzi87"
+        ],
+        "76": [
+            "Piellino88",
+            "Gegg\u00e8"
+        ],
+        "77": [
+            "Piellino88",
+            "Il Difetto88"
+        ],
+        "78": [
+            "Piellino88",
+            "Selene157"
+        ],
+        "79": [
+            "Piellino88",
+            "Isotta2604"
+        ],
+        "80": [
+            "Piellino88",
+            "Geypi"
+        ],
+        "81": [
+            "Rinaldo",
+            "Siddharta33"
+        ],
+        "82": [
+            "Rinaldo",
+            "Anny.88"
+        ],
+        "83": [
+            "Rinaldo",
+            "Peppe"
+        ],
+        "84": [
+            "Rinaldo",
+            "Vero80"
+        ],
+        "85": [
+            "Rinaldo",
+            "Piellino88"
+        ],
+        "86": [
+            "Rinaldo",
+            "Ninfa81"
+        ],
+        "87": [
+            "Rinaldo",
+            "Princi"
+        ],
+        "88": [
+            "Rinaldo",
+            "Gas"
+        ],
+        "89": [
+            "Rinaldo",
+            "Manu1504"
+        ],
+        "90": [
+            "Rinaldo",
+            "Dj Dany"
+        ],
+        "91": [
+            "Rinaldo",
+            "Bazzi87"
+        ],
+        "92": [
+            "Rinaldo",
+            "Gegg\u00e8"
+        ],
+        "93": [
+            "Rinaldo",
+            "Il Difetto88"
+        ],
+        "94": [
+            "Rinaldo",
+            "Selene157"
+        ],
+        "95": [
+            "Rinaldo",
+            "Isotta2604"
+        ],
+        "96": [
+            "Rinaldo",
+            "Geypi"
+        ],
+        "97": [
+            "Ninfa81",
+            "Siddharta33"
+        ],
+        "98": [
+            "Ninfa81",
+            "Anny.88"
+        ],
+        "99": [
+            "Ninfa81",
+            "Peppe"
+        ],
+        "100": [
+            "Ninfa81",
+            "Vero80"
+        ],
+        "101": [
+            "Ninfa81",
+            "Piellino88"
+        ],
+        "102": [
+            "Ninfa81",
+            "Rinaldo"
+        ],
+        "103": [
+            "Ninfa81",
+            "Princi"
+        ],
+        "104": [
+            "Ninfa81",
+            "Gas"
+        ],
+        "105": [
+            "Ninfa81",
+            "Manu1504"
+        ],
+        "106": [
+            "Ninfa81",
+            "Dj Dany"
+        ],
+        "107": [
+            "Ninfa81",
+            "Bazzi87"
+        ],
+        "108": [
+            "Ninfa81",
+            "Gegg\u00e8"
+        ],
+        "109": [
+            "Ninfa81",
+            "Il Difetto88"
+        ],
+        "110": [
+            "Ninfa81",
+            "Selene157"
+        ],
+        "111": [
+            "Ninfa81",
+            "Isotta2604"
+        ],
+        "112": [
+            "Ninfa81",
+            "Geypi"
+        ],
+        "113": [
+            "Princi",
+            "Siddharta33"
+        ],
+        "114": [
+            "Princi",
+            "Anny.88"
+        ],
+        "115": [
+            "Princi",
+            "Peppe"
+        ],
+        "116": [
+            "Princi",
+            "Vero80"
+        ],
+        "117": [
+            "Princi",
+            "Piellino88"
+        ],
+        "118": [
+            "Princi",
+            "Rinaldo"
+        ],
+        "119": [
+            "Princi",
+            "Ninfa81"
+        ],
+        "120": [
+            "Princi",
+            "Gas"
+        ],
+        "121": [
+            "Princi",
+            "Manu1504"
+        ],
+        "122": [
+            "Princi",
+            "Dj Dany"
+        ],
+        "123": [
+            "Princi",
+            "Bazzi87"
+        ],
+        "124": [
+            "Princi",
+            "Gegg\u00e8"
+        ],
+        "125": [
+            "Princi",
+            "Il Difetto88"
+        ],
+        "126": [
+            "Princi",
+            "Selene157"
+        ],
+        "127": [
+            "Princi",
+            "Isotta2604"
+        ],
+        "128": [
+            "Princi",
+            "Geypi"
+        ],
+        "129": [
+            "Gas",
+            "Siddharta33"
+        ],
+        "130": [
+            "Gas",
+            "Anny.88"
+        ],
+        "131": [
+            "Gas",
+            "Peppe"
+        ],
+        "132": [
+            "Gas",
+            "Vero80"
+        ],
+        "133": [
+            "Gas",
+            "Piellino88"
+        ],
+        "134": [
+            "Gas",
+            "Rinaldo"
+        ],
+        "135": [
+            "Gas",
+            "Ninfa81"
+        ],
+        "136": [
+            "Gas",
+            "Princi"
+        ],
+        "137": [
+            "Gas",
+            "Manu1504"
+        ],
+        "138": [
+            "Gas",
+            "Dj Dany"
+        ],
+        "139": [
+            "Gas",
+            "Bazzi87"
+        ],
+        "140": [
+            "Gas",
+            "Gegg\u00e8"
+        ],
+        "141": [
+            "Gas",
+            "Il Difetto88"
+        ],
+        "142": [
+            "Gas",
+            "Selene157"
+        ],
+        "143": [
+            "Gas",
+            "Isotta2604"
+        ],
+        "144": [
+            "Gas",
+            "Geypi"
+        ],
+        "145": [
+            "Manu1504",
+            "Siddharta33"
+        ],
+        "146": [
+            "Manu1504",
+            "Anny.88"
+        ],
+        "147": [
+            "Manu1504",
+            "Peppe"
+        ],
+        "148": [
+            "Manu1504",
+            "Vero80"
+        ],
+        "149": [
+            "Manu1504",
+            "Piellino88"
+        ],
+        "150": [
+            "Manu1504",
+            "Rinaldo"
+        ],
+        "151": [
+            "Manu1504",
+            "Ninfa81"
+        ],
+        "152": [
+            "Manu1504",
+            "Princi"
+        ],
+        "153": [
+            "Manu1504",
+            "Gas"
+        ],
+        "154": [
+            "Manu1504",
+            "Dj Dany"
+        ],
+        "155": [
+            "Manu1504",
+            "Bazzi87"
+        ],
+        "156": [
+            "Manu1504",
+            "Gegg\u00e8"
+        ],
+        "157": [
+            "Manu1504",
+            "Il Difetto88"
+        ],
+        "158": [
+            "Manu1504",
+            "Selene157"
+        ],
+        "159": [
+            "Manu1504",
+            "Isotta2604"
+        ],
+        "160": [
+            "Manu1504",
+            "Geypi"
+        ],
+        "161": [
+            "Dj Dany",
+            "Siddharta33"
+        ],
+        "162": [
+            "Dj Dany",
+            "Anny.88"
+        ],
+        "163": [
+            "Dj Dany",
+            "Peppe"
+        ],
+        "164": [
+            "Dj Dany",
+            "Vero80"
+        ],
+        "165": [
+            "Dj Dany",
+            "Piellino88"
+        ],
+        "166": [
+            "Dj Dany",
+            "Rinaldo"
+        ],
+        "167": [
+            "Dj Dany",
+            "Ninfa81"
+        ],
+        "168": [
+            "Dj Dany",
+            "Princi"
+        ],
+        "169": [
+            "Dj Dany",
+            "Gas"
+        ],
+        "170": [
+            "Dj Dany",
+            "Manu1504"
+        ],
+        "171": [
+            "Dj Dany",
+            "Bazzi87"
+        ],
+        "172": [
+            "Dj Dany",
+            "Gegg\u00e8"
+        ],
+        "173": [
+            "Dj Dany",
+            "Il Difetto88"
+        ],
+        "174": [
+            "Dj Dany",
+            "Selene157"
+        ],
+        "175": [
+            "Dj Dany",
+            "Isotta2604"
+        ],
+        "176": [
+            "Dj Dany",
+            "Geypi"
+        ],
+        "177": [
+            "Bazzi87",
+            "Siddharta33"
+        ],
+        "178": [
+            "Bazzi87",
+            "Anny.88"
+        ],
+        "179": [
+            "Bazzi87",
+            "Peppe"
+        ],
+        "180": [
+            "Bazzi87",
+            "Vero80"
+        ],
+        "181": [
+            "Bazzi87",
+            "Piellino88"
+        ],
+        "182": [
+            "Bazzi87",
+            "Rinaldo"
+        ],
+        "183": [
+            "Bazzi87",
+            "Ninfa81"
+        ],
+        "184": [
+            "Bazzi87",
+            "Princi"
+        ],
+        "185": [
+            "Bazzi87",
+            "Gas"
+        ],
+        "186": [
+            "Bazzi87",
+            "Manu1504"
+        ],
+        "187": [
+            "Bazzi87",
+            "Dj Dany"
+        ],
+        "188": [
+            "Bazzi87",
+            "Gegg\u00e8"
+        ],
+        "190": [
+            "Bazzi87",
+            "Selene157"
+        ],
+        "191": [
+            "Bazzi87",
+            "Isotta2604"
+        ],
+        "192": [
+            "Bazzi87",
+            "Geypi"
+        ],
+        "193": [
+            "Gegg\u00e8",
+            "Siddharta33"
+        ],
+        "194": [
+            "Gegg\u00e8",
+            "Anny.88"
+        ],
+        "195": [
+            "Gegg\u00e8",
+            "Peppe"
+        ],
+        "196": [
+            "Gegg\u00e8",
+            "Vero80"
+        ],
+        "197": [
+            "Gegg\u00e8",
+            "Piellino88"
+        ],
+        "198": [
+            "Gegg\u00e8",
+            "Rinaldo"
+        ],
+        "199": [
+            "Gegg\u00e8",
+            "Ninfa81"
+        ],
+        "200": [
+            "Gegg\u00e8",
+            "Princi"
+        ],
+        "201": [
+            "Gegg\u00e8",
+            "Gas"
+        ],
+        "202": [
+            "Gegg\u00e8",
+            "Manu1504"
+        ],
+        "203": [
+            "Gegg\u00e8",
+            "Dj Dany"
+        ],
+        "204": [
+            "Gegg\u00e8",
+            "Bazzi87"
+        ],
+        "205": [
+            "Gegg\u00e8",
+            "Il Difetto88"
+        ],
+        "206": [
+            "Gegg\u00e8",
+            "Selene157"
+        ],
+        "207": [
+            "Gegg\u00e8",
+            "Isotta2604"
+        ],
+        "208": [
+            "Gegg\u00e8",
+            "Geypi"
+        ],
+        "210": [
+            "Il Difetto88",
+            "Anny.88"
+        ],
+        "211": [
+            "Il Difetto88",
+            "Peppe"
+        ],
+        "212": [
+            "Il Difetto88",
+            "Vero80"
+        ],
+        "213": [
+            "Il Difetto88",
+            "Piellino88"
+        ],
+        "214": [
+            "Il Difetto88",
+            "Rinaldo"
+        ],
+        "215": [
+            "Il Difetto88",
+            "Ninfa81"
+        ],
+        "216": [
+            "Il Difetto88",
+            "Princi"
+        ],
+        "217": [
+            "Il Difetto88",
+            "Gas"
+        ],
+        "218": [
+            "Il Difetto88",
+            "Manu1504"
+        ],
+        "219": [
+            "Il Difetto88",
+            "Dj Dany"
+        ],
+        "221": [
+            "Il Difetto88",
+            "Gegg\u00e8"
+        ],
+        "222": [
+            "Il Difetto88",
+            "Selene157"
+        ],
+        "224": [
+            "Il Difetto88",
+            "Geypi"
+        ],
+        "225": [
+            "Selene157",
+            "Siddharta33"
+        ],
+        "226": [
+            "Selene157",
+            "Anny.88"
+        ],
+        "227": [
+            "Selene157",
+            "Peppe"
+        ],
+        "228": [
+            "Selene157",
+            "Vero80"
+        ],
+        "229": [
+            "Selene157",
+            "Piellino88"
+        ],
+        "230": [
+            "Selene157",
+            "Rinaldo"
+        ],
+        "231": [
+            "Selene157",
+            "Ninfa81"
+        ],
+        "232": [
+            "Selene157",
+            "Princi"
+        ],
+        "233": [
+            "Selene157",
+            "Gas"
+        ],
+        "234": [
+            "Selene157",
+            "Manu1504"
+        ],
+        "235": [
+            "Selene157",
+            "Dj Dany"
+        ],
+        "236": [
+            "Selene157",
+            "Bazzi87"
+        ],
+        "237": [
+            "Selene157",
+            "Gegg\u00e8"
+        ],
+        "238": [
+            "Selene157",
+            "Il Difetto88"
+        ],
+        "239": [
+            "Selene157",
+            "Isotta2604"
+        ],
+        "240": [
+            "Selene157",
+            "Geypi"
+        ],
+        "241": [
+            "Isotta2604",
+            "Siddharta33"
+        ],
+        "242": [
+            "Isotta2604",
+            "Anny.88"
+        ],
+        "243": [
+            "Isotta2604",
+            "Peppe"
+        ],
+        "244": [
+            "Isotta2604",
+            "Vero80"
+        ],
+        "245": [
+            "Isotta2604",
+            "Piellino88"
+        ],
+        "246": [
+            "Isotta2604",
+            "Rinaldo"
+        ],
+        "247": [
+            "Isotta2604",
+            "Ninfa81"
+        ],
+        "248": [
+            "Isotta2604",
+            "Princi"
+        ],
+        "249": [
+            "Isotta2604",
+            "Gas"
+        ],
+        "250": [
+            "Isotta2604",
+            "Manu1504"
+        ],
+        "251": [
+            "Isotta2604",
+            "Dj Dany"
+        ],
+        "252": [
+            "Isotta2604",
+            "Bazzi87"
+        ],
+        "253": [
+            "Isotta2604",
+            "Gegg\u00e8"
+        ],
+        "254": [
+            "Isotta2604",
+            "Il Difetto88"
+        ],
+        "255": [
+            "Isotta2604",
+            "Selene157"
+        ],
+        "256": [
+            "Isotta2604",
+            "Geypi"
+        ],
+        "257": [
+            "Geypi",
+            "Siddharta33"
+        ],
+        "258": [
+            "Geypi",
+            "Anny.88"
+        ],
+        "259": [
+            "Geypi",
+            "Peppe"
+        ],
+        "260": [
+            "Geypi",
+            "Vero80"
+        ],
+        "261": [
+            "Geypi",
+            "Piellino88"
+        ],
+        "262": [
+            "Geypi",
+            "Rinaldo"
+        ],
+        "263": [
+            "Geypi",
+            "Ninfa81"
+        ],
+        "264": [
+            "Geypi",
+            "Princi"
+        ],
+        "265": [
+            "Geypi",
+            "Gas"
+        ],
+        "266": [
+            "Geypi",
+            "Manu1504"
+        ],
+        "267": [
+            "Geypi",
+            "Dj Dany"
+        ],
+        "268": [
+            "Geypi",
+            "Bazzi87"
+        ],
+        "269": [
+            "Geypi",
+            "Gegg\u00e8"
+        ],
+        "270": [
+            "Geypi",
+            "Il Difetto88"
+        ],
+        "271": [
+            "Geypi",
+            "Selene157"
+        ],
+        "272": [
+            "Geypi",
+            "Isotta2604"
         ]
     },
     "played_matches": {
-        "11": [
-            "Vale",
-            "Ronco",
+        "13": [
+            "Siddharta33",
+            "Il Difetto88",
             "1",
-            333
+            11700
         ],
-        "25": [
-            "Gabry",
-            "Ronco",
-            "2",
-            550
-        ],
-        "2": [
-            "Ginni",
-            "Manu",
+        "209": [
+            "Il Difetto88",
+            "Siddharta33",
             "1",
-            233
+            10300
         ],
-        "4": [
-            "Ginni",
-            "Ronco",
+        "223": [
+            "Il Difetto88",
+            "Isotta2604",
             "2",
-            426
+            10100
         ],
-        "54": [
-            "Dadillo",
-            "Ronco",
-            "2",
-            522
-        ],
-        "18": [
-            "Manu",
-            "Ronco",
+        "220": [
+            "Il Difetto88",
+            "Bazzi87",
             "1",
-            0
+            10150
         ],
-        "29": [
-            "Ronco",
-            "Ginni",
+        "189": [
+            "Bazzi87",
+            "Il Difetto88",
             "2",
-            0
-        ],
-        "30": [
-            "Ronco",
-            "Vale",
-            "2",
-            0
-        ],
-        "31": [
-            "Ronco",
-            "Manu",
-            "2",
-            0
-        ],
-        "32": [
-            "Ronco",
-            "Gabry",
-            "2",
-            0
-        ],
-        "33": [
-            "Ronco",
-            "Rocco",
-            "2",
-            0
-        ],
-        "34": [
-            "Ronco",
-            "Scriba",
-            "2",
-            0
-        ],
-        "35": [
-            "Ronco",
-            "Dadillo",
-            "2",
-            0
-        ],
-        "40": [
-            "Rocco",
-            "Ronco",
-            "1",
-            0
-        ],
-        "47": [
-            "Scriba",
-            "Ronco",
-            "1",
-            0
-        ],
-        "44": [
-            "Scriba",
-            "Vale",
-            "2",
-            365
-        ],
-        "57": [
-            "Giuntino",
-            "Ginni",
-            "1",
-            265
-        ],
-        "58": [
-            "Ginni",
-            "Giuntino",
-            "1",
-            314
-        ],
-        "70": [
-            "Dadillo",
-            "Giuntino",
-            "1",
-            288
-        ],
-        "6": [
-            "Ginni",
-            "Scriba",
-            "2",
-            135
-        ],
-        "1": [
-            "Ginni",
-            "Vale",
-            "3",
-            244
-        ],
-        "3": [
-            "Ginni",
-            "Gabry",
-            "2",
-            140
+            10450
         ]
     },
     "records_high": [
