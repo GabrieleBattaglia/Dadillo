@@ -86,14 +86,14 @@ class SetupPlayersDialog(wx.Dialog):
         panel.SetSizer(vbox)
         
     def on_add_player(self, event):
-        name = self.txt_player.GetValue().strip().title()
+        name = self.txt_player.GetValue().strip()
         if not name:
             return
         if len(name) < 3:
             wx.MessageBox("Oh insondabile pozzo di saggezza, un nome di sole 2 lettere è un insulto alla tua grandezza! Servono almeno 3 caratteri.", "Nome troppo corto", wx.OK | wx.ICON_WARNING)
             self.txt_player.SelectAll()
             return
-        if name in self.players:
+        if any(p.lower() == name.lower() for p in self.players):
             wx.MessageBox(f"Mi scudiscio per la vergogna, ma {name} l'abbiamo già convertito al nostro volere.", "Nome duplicato", wx.OK | wx.ICON_WARNING)
             self.txt_player.SelectAll()
             return
@@ -270,12 +270,12 @@ class AddPlayerDialog(wx.Dialog):
         self.ProcessEvent(event_ok)
         
     def on_ok(self, event):
-        name = self.txt_player.GetValue().strip().title()
+        name = self.txt_player.GetValue().strip()
         if len(name) < 3:
             wx.MessageBox("Troppo corto! Almeno 3 caratteri.", "Errore", wx.OK | wx.ICON_WARNING)
             self.txt_player.SelectAll()
             return
-        if name in self.existing_players:
+        if any(p.lower() == name.lower() for p in self.existing_players):
             wx.MessageBox("Questo discepolo è già tra noi.", "Errore", wx.OK | wx.ICON_WARNING)
             self.txt_player.SelectAll()
             return

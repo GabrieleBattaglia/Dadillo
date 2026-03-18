@@ -105,10 +105,16 @@ class PlayerDB:
         self.export_to_txt()
 
     def add_or_update_player(self, name, position, is_oro, is_argento, is_bronzo, is_legno, tourney_title, start_date, end_date):
-        if name not in self.players:
-            self.players[name] = {"medals": {"oro": 0, "argento": 0, "bronzo": 0, "legno": 0}, "history": []}
-        
-        p = self.players[name]
+        actual_name = name
+        for existing_name in self.players.keys():
+            if existing_name.lower() == name.lower():
+                actual_name = existing_name
+                break
+
+        if actual_name not in self.players:
+            self.players[actual_name] = {"medals": {"oro": 0, "argento": 0, "bronzo": 0, "legno": 0}, "history": []}
+
+        p = self.players[actual_name]
         if is_oro: p["medals"]["oro"] += 1
         if is_argento: p["medals"]["argento"] += 1
         if is_bronzo: p["medals"]["bronzo"] += 1
@@ -117,7 +123,6 @@ class PlayerDB:
         # Es: 3° in Torneo di Natale - 25 dicembre 2026 - 15 gennaio 2027
         history_entry = f"{position}° in {tourney_title} - {start_date} - {end_date}"
         p["history"].append(history_entry)
-
     def export_to_txt(self):
         with open(self.txt_filename, 'w', encoding='utf-8') as f:
             f.write("Hall of Fame di Dadillo\n\n")
