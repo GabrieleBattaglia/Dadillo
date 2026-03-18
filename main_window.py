@@ -69,14 +69,20 @@ class MainFrame(wx.Frame):
         if not self.GetMenuBar():
             self.create_menu()
             
-        # Ordine di creazione per controllare l'ordine di tabulazione:
-        # 1. Filtro Non Giocate
-        # 2. Lista Non Giocate
-        # 3. Lista Giocate
-        # 4. Filtro Giocate
+        # Ordine di creazione (Z-order) per controllare sia l'ordine di tabulazione
+        # sia l'associazione delle etichette (StaticText) per NVDA.
+        # NVDA associa il campo al precedente StaticText creato.
+        
+        lbl_filter_u = wx.StaticText(self.panel, label="Cerca non giocate: <termine> | [<nome1> <nome2>]")
         self.txt_filter_unplayed = wx.TextCtrl(self.panel)
+        
+        self.lbl_unplayed = wx.StaticText(self.panel, label="Non giocate...")
         self.list_unplayed = wx.ListBox(self.panel, style=wx.LB_SINGLE)
+        
+        self.lbl_played = wx.StaticText(self.panel, label="Giocate...")
         self.list_played = wx.ListBox(self.panel, style=wx.LB_SINGLE)
+        
+        lbl_filter_p = wx.StaticText(self.panel, label="Cerca giocate: <termine> | [<nome1> <nome2>]")
         self.txt_filter_played = wx.TextCtrl(self.panel)
         
         self.txt_filter_unplayed.Bind(wx.EVT_TEXT, self.on_filter_change)
@@ -89,11 +95,9 @@ class MainFrame(wx.Frame):
         
         # Pannello Sinistro: Non Giocate
         left_vbox = wx.BoxSizer(wx.VERTICAL)
-        self.lbl_unplayed = wx.StaticText(self.panel, label="Non giocate...")
         left_vbox.Add(self.lbl_unplayed, 0, wx.ALL | wx.EXPAND, 5)
         
         filter_box_u = wx.BoxSizer(wx.HORIZONTAL)
-        lbl_filter_u = wx.StaticText(self.panel, label="Filtro (cerca giocatore):")
         filter_box_u.Add(lbl_filter_u, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
         filter_box_u.Add(self.txt_filter_unplayed, 1, wx.ALL | wx.EXPAND, 5)
         left_vbox.Add(filter_box_u, 0, wx.EXPAND)
@@ -104,16 +108,12 @@ class MainFrame(wx.Frame):
         
         # Pannello Destro: Giocate
         right_vbox = wx.BoxSizer(wx.VERTICAL)
-        self.lbl_played = wx.StaticText(self.panel, label="Giocate...")
         right_vbox.Add(self.lbl_played, 0, wx.ALL | wx.EXPAND, 5)
         
         filter_box_p = wx.BoxSizer(wx.HORIZONTAL)
-        lbl_filter_p = wx.StaticText(self.panel, label="Filtro (cerca giocatore):")
         filter_box_p.Add(lbl_filter_p, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
         filter_box_p.Add(self.txt_filter_played, 1, wx.ALL | wx.EXPAND, 5)
-        # Il filtro per la lista giocate andrà sotto come desiderato o sopra la lista?
-        # Il prompt non lo specifica, ma di solito i filtri stanno sopra.
-        # L'ordine di tabulazione è quello che conta, visivamente mettiamolo sopra per simmetria
+        
         right_vbox.Add(filter_box_p, 0, wx.EXPAND)
         
         right_vbox.Add(self.list_played, 1, wx.ALL | wx.EXPAND, 5)
