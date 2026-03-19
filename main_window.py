@@ -203,7 +203,9 @@ class MainFrame(wx.Frame):
             if match_filter(text, p1, p2, filt_u):
                 self.list_unplayed.Append(text, m_id)
                 
-        for m_id, data in sorted(self.tourney.played_matches.items()):
+        # Mostriamo le partite giocate in ordine inverso (l'ultima giocata in cima)
+        # In Python 3.7+ i dizionari preservano l'ordine di inserimento.
+        for m_id, data in reversed(list(self.tourney.played_matches.items())):
             p1, p2, res, pts = data
             if res == '1': winner = f"Vince {p1}"
             elif res == '2': winner = f"Vince {p2}"
