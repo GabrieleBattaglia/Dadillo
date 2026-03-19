@@ -1,6 +1,6 @@
 {
-    "main_criterion": "Punti Totali",
+    "main_criterion": "Vittorie",
     "tiebreaker_1": "Scontro Diretto (Vittorie)",
-    "tiebreaker_2": "Vittorie Totali",
+    "tiebreaker_2": "Punti Totali",
     "draw_points_split": "Punti Pieni a Entrambi"
 }

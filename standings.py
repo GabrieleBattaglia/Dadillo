@@ -2,10 +2,11 @@ import wx
 from datetime import datetime
 
 class StandingsPanel(wx.Panel):
-    def __init__(self, parent, tourney, settings):
+    def __init__(self, parent, tourney, settings, is_final=True):
         super().__init__(parent)
         self.tourney = tourney
         self.settings = settings
+        self.is_final = is_final
         
         main_sizer = wx.BoxSizer(wx.VERTICAL)
         
@@ -43,16 +44,22 @@ class StandingsPanel(wx.Panel):
         
         main_sizer.Add(self.txt_display, 1, wx.EXPAND | wx.ALL, 10)
         
-        # Aggiunta pulsanti DB
+        # Aggiunta pulsanti DB o ritorno al torneo
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.btn_db = wx.Button(self, label="Aggiorna DB giocatori")
-        self.btn_db.Bind(wx.EVT_BUTTON, self.on_update_db)
         
-        self.btn_db_all = wx.Button(self, label="Aggiorna tutti senza chiedere")
-        self.btn_db_all.Bind(wx.EVT_BUTTON, self.on_update_db_all)
-        
-        btn_sizer.Add(self.btn_db, 0, wx.ALL, 5)
-        btn_sizer.Add(self.btn_db_all, 0, wx.ALL, 5)
+        if self.is_final:
+            self.btn_db = wx.Button(self, label="Aggiorna DB giocatori")
+            self.btn_db.Bind(wx.EVT_BUTTON, self.on_update_db)
+            
+            self.btn_db_all = wx.Button(self, label="Aggiorna tutti senza chiedere")
+            self.btn_db_all.Bind(wx.EVT_BUTTON, self.on_update_db_all)
+            
+            btn_sizer.Add(self.btn_db, 0, wx.ALL, 5)
+            btn_sizer.Add(self.btn_db_all, 0, wx.ALL, 5)
+        else:
+            self.btn_back = wx.Button(self, label="Torna alle Partite")
+            self.btn_back.Bind(wx.EVT_BUTTON, self.on_back_to_tourney)
+            btn_sizer.Add(self.btn_back, 0, wx.ALL, 5)
         
         main_sizer.Add(btn_sizer, 0, wx.ALIGN_CENTER | wx.ALL, 5)
         
@@ -167,14 +174,14 @@ class StandingsPanel(wx.Panel):
         lines.append("")
         
         start = self.tourney.start_date
-        end = self.tourney.end_date
+        end = self.tourney.end_date if self.tourney.end_date else "In corso"
         lines.append(f"Data inizio: {start}")
         lines.append(f"Data fine: {end}")
         
         try:
             fmt = "%Y-%m-%d %H:%M:%S"
             dt_start = datetime.strptime(start, fmt)
-            dt_end = datetime.strptime(end, fmt)
+            dt_end = datetime.strptime(self.tourney.end_date, fmt) if self.tourney.end_date else datetime.now()
             diff = dt_end - dt_start
             hours, remainder = divmod(diff.seconds, 3600)
             minutes, seconds = divmod(remainder, 60)
@@ -182,13 +189,16 @@ class StandingsPanel(wx.Panel):
             dur_str = ""
             if days > 0: dur_str += f"{days} giorni, "
             dur_str += f"{hours} ore, {minutes} minuti."
+            if not self.is_final:
+                dur_str += " (Provvisoria)"
             lines.append(f"Durata complessiva: {dur_str}")
         except Exception:
             lines.append("Durata complessiva: Sconosciuta")
             
         lines.append("")
         lines.append("-" * 60)
-        lines.append("CLASSIFICA FINALE")
+        header_text = "CLASSIFICA FINALE" if self.is_final else "CLASSIFICA PARZIALE"
+        lines.append(header_text)
         lines.append("-" * 60)
         
         medals = ["🥇 ORO", "🥈 ARGENTO", "🥉 BRONZO", "🪵 LEGNO (4° posto)"]
@@ -226,6 +236,9 @@ class StandingsPanel(wx.Panel):
         
         self.txt_display.SetValue("\n".join(lines))
         self.current_standings = flat
+
+    def on_back_to_tourney(self, event):
+        self.GetParent().check_state_and_show()
 
     def on_update_db(self, event):
         self._process_db_update(ask_confirmation=True)

@@ -137,6 +137,9 @@ class MainFrame(wx.Frame):
         menu_file.AppendSeparator()
         item_exit = menu_file.Append(wx.ID_ANY, "Esci\tCtrl+Q")
         
+        menu_view = wx.Menu()
+        item_standings = menu_view.Append(wx.ID_ANY, "Classifica Parziale\tCtrl+L")
+        
         menu_players = wx.Menu()
         item_add = menu_players.Append(wx.ID_ANY, "Aggiungi Giocatore")
         item_retire = menu_players.Append(wx.ID_ANY, "Ritira Giocatore")
@@ -145,6 +148,7 @@ class MainFrame(wx.Frame):
         item_rules = menu_options.Append(wx.ID_ANY, "Regole Torneo")
         
         menubar.Append(menu_file, "File")
+        menubar.Append(menu_view, "Visualizza")
         menubar.Append(menu_players, "Giocatori")
         menubar.Append(menu_options, "Opzioni")
         
@@ -153,6 +157,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_menu_new, item_new)
         self.Bind(wx.EVT_MENU, self.on_menu_save, item_save)
         self.Bind(wx.EVT_MENU, self.on_menu_exit, item_exit)
+        self.Bind(wx.EVT_MENU, self.on_menu_standings, item_standings)
         self.Bind(wx.EVT_MENU, self.on_menu_add_player, item_add)
         self.Bind(wx.EVT_MENU, self.on_menu_retire_player, item_retire)
         self.Bind(wx.EVT_MENU, self.on_menu_rules, item_rules)
@@ -161,6 +166,12 @@ class MainFrame(wx.Frame):
     def on_close(self, event):
         self.tourney.save()
         event.Skip()
+
+    def on_menu_standings(self, event):
+        if not self.tourney.played_matches:
+            wx.MessageBox("Nessuna partita è stata ancora giocata. L'Altare attende il primo sacrificio!", "Attesa", wx.OK | wx.ICON_INFORMATION)
+            return
+        self.show_standings(is_final=False)
 
     def on_filter_change(self, event):
         self.update_lists()
@@ -315,10 +326,10 @@ class MainFrame(wx.Frame):
         else:
             event.Skip()
 
-    def show_standings(self):
+    def show_standings(self, is_final=True):
         if self.panel:
             self.panel.Destroy()
-        self.panel = StandingsPanel(self, self.tourney, self.settings)
+        self.panel = StandingsPanel(self, self.tourney, self.settings, is_final=is_final)
         if not self.GetMenuBar():
             self.create_menu()
         self.Layout()
