@@ -110,14 +110,26 @@ class StandingsPanel(wx.Panel):
         
         # Prep player data
         # players: name -> [points, wins, draws, losses]
+        
+        # Calcola le partite da giocare per ogni giocatore (per la colonna Giocate/Totale)
+        unplayed_counts = {name: 0 for name in self.tourney.players.keys()}
+        for m_id, (p1, p2) in self.tourney.unplayed_matches.items():
+            if p1 in unplayed_counts: unplayed_counts[p1] += 1
+            if p2 in unplayed_counts: unplayed_counts[p2] += 1
+            
         flat = []
         for name, stats in self.tourney.players.items():
+            played = stats[1] + stats[2] + stats[3]
+            total = played + unplayed_counts[name]
+            played_str = f"{played}/{total}"
+            
             flat.append({
                 'name': name,
                 'points': stats[0],
                 'wins': stats[1],
                 'draws': stats[2],
-                'losses': stats[3]
+                'losses': stats[3],
+                'played_str': played_str
             })
             
         import functools
@@ -204,35 +216,93 @@ class StandingsPanel(wx.Panel):
         medals = ["🥇 ORO", "🥈 ARGENTO", "🥉 BRONZO", "🪵 LEGNO (4° posto)"]
         
         # Intestazione colonne
-        lines.append(f"{'Pos':<5} | {'Giocatore':<20} | {'Punti':<8} | {'Vit':<5} | {'Par':<5} | {'Sco':<5} | Medaglia")
-        lines.append("-" * 80)
+        lines.append(f"{'Pos':<4} | {'Giocatore':<18} | {'Gio/Tot':<7} | {'Punti':<6} | {'Vit':<4} | {'Par':<4} | {'Sco':<4} | Medaglia")
+        lines.append("-" * 85)
         
         for idx, row in enumerate(flat):
             pos = idx + 1
             med_str = medals[idx] if idx < len(medals) else ""
-            lines.append(f"{pos:<5} | {row['name']:<20} | {row['points']:<8.1f} | {row['wins']:<5} | {row['draws']:<5} | {row['losses']:<5} | {med_str}")
             
-        lines.append("-" * 80)
-        lines.append("")
-        lines.append("RECORD DEL TORNEO")
-        
-        # Trova record ricalcolando
-        recalto = ["Nessuno", "Nessuna", -99999]
-        recbasso = ["Nessuno", "Nessuna", 99999]
-        for m_id, data in self.tourney.played_matches.items():
-            mn1, mn2, mres, mpts = data
-            if mres == '1': winner = mn1
-            elif mres == '2': winner = mn2
-            else: winner = f"{mn1} (Pareggio) {mn2}"
-            desc = f"({m_id}) {mn1} vs {mn2}"
-            
-            if mpts > recalto[2]:
-                recalto = [winner, desc, mpts]
-            if mpts < recbasso[2]:
-                recbasso = [winner, desc, mpts]
+            # Formattazione punti senza .0 se intero
+            p_val = row['points']
+            if isinstance(p_val, (int, float)) and float(p_val).is_integer():
+                p_str = str(int(p_val))
+            else:
+                p_str = f"{p_val:.1f}"
                 
-        lines.append(f"Punteggio più alto: {recalto[0]} in {recalto[1]} con {recalto[2]} punti.")
-        lines.append(f"Punteggio più basso: {recbasso[0]} in {recbasso[1]} con {recbasso[2]} punti.")
+            lines.append(f"{pos:<4} | {row['name']:<18} | {row['played_str']:<7} | {p_str:<6} | {row['wins']:<4} | {row['draws']:<4} | {row['losses']:<4} | {med_str}")
+            
+        lines.append("-" * 85)
+        lines.append("")
+        lines.append("STATISTICHE E RECORD")
+        
+        if not self.tourney.played_matches:
+            lines.append("Nessuna partita ancora giocata.")
+        else:
+            recalto_val = -99999
+            recbasso_val = 99999
+            recalto_list = []
+            recbasso_list = []
+            
+            strikes = {name: 0 for name in self.tourney.players.keys()}
+            current_strikes = {name: 0 for name in self.tourney.players.keys()}
+            
+            for m_id, data in self.tourney.played_matches.items():
+                mn1, mn2, mres, mpts = data
+                
+                # Winner
+                if mres == '1': winner = mn1
+                elif mres == '2': winner = mn2
+                else: winner = f"{mn1} (Pareggio) {mn2}"
+                desc = f"{winner} in ({m_id}) {mn1} vs {mn2}"
+                
+                if mpts > recalto_val:
+                    recalto_val = mpts
+                    recalto_list = [desc]
+                elif mpts == recalto_val:
+                    recalto_list.append(desc)
+                    
+                if mpts < recbasso_val:
+                    recbasso_val = mpts
+                    recbasso_list = [desc]
+                elif mpts == recbasso_val:
+                    recbasso_list.append(desc)
+                    
+                # Strikes
+                if mres == '1':
+                    current_strikes[mn1] += 1
+                    if current_strikes[mn1] > strikes[mn1]:
+                        strikes[mn1] = current_strikes[mn1]
+                    current_strikes[mn2] = 0
+                elif mres == '2':
+                    current_strikes[mn2] += 1
+                    if current_strikes[mn2] > strikes[mn2]:
+                        strikes[mn2] = current_strikes[mn2]
+                    current_strikes[mn1] = 0
+                else:
+                    current_strikes[mn1] = 0
+                    current_strikes[mn2] = 0
+
+            def fmt_pts(p):
+                return str(int(p)) if isinstance(p, (int, float)) and float(p).is_integer() else str(p)
+
+            lines.append(f"Punteggio più alto: {fmt_pts(recalto_val)} punti.")
+            for d in recalto_list:
+                lines.append(f"  - {d}")
+                
+            lines.append(f"Punteggio più basso: {fmt_pts(recbasso_val)} punti.")
+            for d in recbasso_list:
+                lines.append(f"  - {d}")
+                
+            max_strike = max(strikes.values()) if strikes else 0
+            if max_strike > 1:
+                best_strikers = [p for p, v in strikes.items() if v == max_strike]
+                lines.append(f"Striscia vincente più lunga: {max_strike} vittorie consecutive ({', '.join(best_strikers)})")
+
+            max_draws = max([stats[2] for stats in self.tourney.players.values()]) if self.tourney.players else 0
+            if max_draws > 0:
+                best_drawers = [p for p, stats in self.tourney.players.items() if stats[2] == max_draws]
+                lines.append(f"Re dei Pareggi: {max_draws} pareggi ({', '.join(best_drawers)})")
         
         self.txt_display.SetValue("\n".join(lines))
         self.current_standings = flat
