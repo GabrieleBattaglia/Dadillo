@@ -129,10 +129,14 @@ class PlayerDB:
             self.players[actual_name] = {"medals": {"oro": 0, "argento": 0, "bronzo": 0, "legno": 0}, "history": []}
 
         p = self.players[actual_name]
-        if is_oro: p["medals"]["oro"] += 1
-        if is_argento: p["medals"]["argento"] += 1
-        if is_bronzo: p["medals"]["bronzo"] += 1
-        if is_legno: p["medals"]["legno"] += 1
+        if is_oro:
+            p["medals"]["oro"] += 1
+        if is_argento:
+            p["medals"]["argento"] += 1
+        if is_bronzo:
+            p["medals"]["bronzo"] += 1
+        if is_legno:
+            p["medals"]["legno"] += 1
 
         # Es: 3° in Torneo di Natale - 25 dicembre 2026 - 15 gennaio 2027
         history_entry = f"{position}° in {tourney_title} - {start_date} - {end_date}"

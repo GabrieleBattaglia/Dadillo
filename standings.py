@@ -79,31 +79,33 @@ class StandingsPanel(wx.Panel):
         wins_b = 0
         
         for m_id, data in self.tourney.played_matches.items():
-            mn1, mn2, mres, mpts = data
+            if len(data) >= 6:
+                mn1, mn2, mres, mpts, pt1, pt2 = data[:6]
+            else:
+                mn1, mn2, mres, mpts = data[:4]
+                if mres == '1':
+                    pt1, pt2 = mpts, 0
+                elif mres == '2':
+                    pt1, pt2 = 0, mpts
+                else:
+                    pt1, pt2 = mpts / 2.0, mpts / 2.0
             
             if mn1 == p1_name and mn2 == p2_name:
-                if mres == '1': 
-                    score_a += mpts
+                score_a += pt1
+                score_b += pt2
+                if mres == '1':
                     wins_a += 1
-                elif mres == '2': 
-                    score_b += mpts
+                elif mres == '2':
                     wins_b += 1
-                elif mres == '3':
-                    score_a += mpts / 2.0
-                    score_b += mpts / 2.0
             elif mn1 == p2_name and mn2 == p1_name:
-                if mres == '1': 
-                    score_b += mpts
+                score_b += pt1
+                score_a += pt2
+                if mres == '1':
                     wins_b += 1
-                elif mres == '2': 
-                    score_a += mpts
+                elif mres == '2':
                     wins_a += 1
-                elif mres == '3':
-                    score_a += mpts / 2.0
-                    score_b += mpts / 2.0
                     
         return score_a, score_b, wins_a, wins_b
-
     def update_display(self):
         order_by = self.cb_order.GetStringSelection()
         reverse = (self.cb_dir.GetSelection() == 0)
@@ -114,9 +116,11 @@ class StandingsPanel(wx.Panel):
         # Calcola le partite da giocare per ogni giocatore (per la colonna Giocate/Totale)
         unplayed_counts = {name: 0 for name in self.tourney.players.keys()}
         for m_id, (p1, p2) in self.tourney.unplayed_matches.items():
-            if p1 in unplayed_counts: unplayed_counts[p1] += 1
-            if p2 in unplayed_counts: unplayed_counts[p2] += 1
-            
+            if p1 in unplayed_counts:
+                unplayed_counts[p1] += 1
+            if p2 in unplayed_counts:
+                unplayed_counts[p2] += 1
+
         flat = []
         for name, stats in self.tourney.players.items():
             played = stats[1] + stats[2] + stats[3]
@@ -148,7 +152,8 @@ class StandingsPanel(wx.Panel):
                 val_a, val_b = a['name'].lower(), b['name'].lower()
                 
             if val_a != val_b:
-                if isinstance(val_a, str): return (val_a > val_b) - (val_a < val_b)
+                if isinstance(val_a, str):
+                    return (val_a > val_b) - (val_a < val_b)
                 return (val_a > val_b) - (val_a < val_b)
                 
             # Se siamo qui, il criterio primario scelto a video è pari.
@@ -199,7 +204,8 @@ class StandingsPanel(wx.Panel):
             minutes, seconds = divmod(remainder, 60)
             days = diff.days
             dur_str = ""
-            if days > 0: dur_str += f"{days} giorni, "
+            if days > 0:
+                dur_str += f"{days} giorni, "
             dur_str += f"{hours} ore, {minutes} minuti."
             if not self.is_final:
                 dur_str += " (Provvisoria)"
@@ -248,12 +254,15 @@ class StandingsPanel(wx.Panel):
             current_strikes = {name: 0 for name in self.tourney.players.keys()}
             
             for m_id, data in self.tourney.played_matches.items():
-                mn1, mn2, mres, mpts = data
+                mn1, mn2, mres, mpts = data[:4]
                 
                 # Winner
-                if mres == '1': winner = mn1
-                elif mres == '2': winner = mn2
-                else: winner = f"{mn1} (Pareggio) {mn2}"
+                if mres == '1':
+                    winner = mn1
+                elif mres == '2':
+                    winner = mn2
+                else:
+                    winner = f"{mn1} (Pareggio) {mn2}"
                 desc = f"{winner} in ({m_id}) {mn1} vs {mn2}"
                 
                 if mpts > recalto_val:

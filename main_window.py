@@ -228,10 +228,13 @@ class MainFrame(wx.Frame):
         # Mostriamo le partite giocate in ordine inverso (l'ultima giocata in cima)
         # In Python 3.7+ i dizionari preservano l'ordine di inserimento.
         for m_id, data in reversed(list(self.tourney.played_matches.items())):
-            p1, p2, res, pts = data
-            if res == '1': winner = f"Vince {p1}"
-            elif res == '2': winner = f"Vince {p2}"
-            else: winner = "Pareggio"
+            p1, p2, res, pts = data[:4]
+            if res == '1':
+                winner = f"Vince {p1}"
+            elif res == '2':
+                winner = f"Vince {p2}"
+            else:
+                winner = "Pareggio"
             text = f"({m_id}) {p1} vs {p2} - {winner} (Punti base: {pts})"
             if match_filter(text, p1, p2, filt_p):
                 self.list_played.Append(text, m_id)
@@ -258,8 +261,9 @@ class MainFrame(wx.Frame):
 
     def process_selected_unplayed(self):
         sel = self.list_unplayed.GetSelection()
-        if sel == wx.NOT_FOUND: return
-        
+        if sel == wx.NOT_FOUND:
+            return
+
         m_id = self.list_unplayed.GetClientData(sel)
         p1, p2 = self.tourney.unplayed_matches[m_id]
         
@@ -318,8 +322,9 @@ class MainFrame(wx.Frame):
     def on_played_key(self, event):
         if event.GetKeyCode() == wx.WXK_DELETE:
             sel = self.list_played.GetSelection()
-            if sel == wx.NOT_FOUND: return
-            
+            if sel == wx.NOT_FOUND:
+                return
+
             m_id = self.list_played.GetClientData(sel)
             if wx.MessageBox("Mio padrone, sei sicuro di voler annullare questo risultato e riportare la partita tra le non giocate?", "Conferma annullamento", wx.YES_NO | wx.ICON_QUESTION) == wx.YES:
                 data = self.tourney.played_matches[m_id]
