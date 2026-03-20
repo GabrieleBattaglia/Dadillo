@@ -17,6 +17,12 @@ class TournamentData:
         self.records_high = ["Giocatore sconosciuto", "Partita sconosciuta", -99999]
         self.records_low = ["Giocatore sconosciuto", "Partita sconosciuta", 99999]
         
+        # v2.1.0 new fields
+        self.tourney_type = 0 # 0 = Andata e Ritorno, 1 = Solo Andata
+        self.pts_win = None
+        self.pts_draw = None
+        self.pts_loss = None
+        
     def save(self):
         data = {
             "title": self.title,
@@ -27,7 +33,11 @@ class TournamentData:
             "unplayed_matches": self.unplayed_matches,
             "played_matches": self.played_matches,
             "records_high": self.records_high,
-            "records_low": self.records_low
+            "records_low": self.records_low,
+            "tourney_type": self.tourney_type,
+            "pts_win": self.pts_win,
+            "pts_draw": self.pts_draw,
+            "pts_loss": self.pts_loss
         }
         with open(DATA_FILE, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=4)
@@ -47,6 +57,10 @@ class TournamentData:
             self.played_matches = {int(k): v for k, v in data.get("played_matches", {}).items()}
             self.records_high = data.get("records_high", ["", "", -99999])
             self.records_low = data.get("records_low", ["", "", 99999])
+            self.tourney_type = data.get("tourney_type", 0)
+            self.pts_win = data.get("pts_win", None)
+            self.pts_draw = data.get("pts_draw", None)
+            self.pts_loss = data.get("pts_loss", None)
             return True
         except Exception:
             return False

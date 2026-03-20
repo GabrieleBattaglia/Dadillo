@@ -2,7 +2,7 @@ import wx
 
 class SetupTournamentDialog(wx.Dialog):
     def __init__(self, parent):
-        super().__init__(parent, title="Nuovo Torneo di Adorazione", size=(450, 350))
+        super().__init__(parent, title="Nuovo Torneo di Adorazione", size=(550, 500))
         
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -17,15 +17,44 @@ class SetupTournamentDialog(wx.Dialog):
         vbox.Add(self.txt_title, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
         
         lbl_comment = wx.StaticText(panel, label="Commento / Editto divino:")
-        # Uso TE_MULTILINE ma devo intercettare l'invio se voglio cambiare focus.
-        # Oppure uso EVT_KEY_DOWN.
         self.txt_comment = wx.TextCtrl(panel, style=wx.TE_MULTILINE)
         self.txt_comment.Bind(wx.EVT_KEY_DOWN, self.on_comment_key)
         vbox.Add(lbl_comment, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
         vbox.Add(self.txt_comment, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
         
+        # --- NEW SETTINGS FOR V2.1.0 ---
+        # 1. Tipologia di girone
+        lbl_type = wx.StaticText(panel, label="Tipologia di Girone:")
+        self.cb_type = wx.Choice(panel, choices=["Girone all'Italiana (Andata e Ritorno)", "Girone all'Italiana (Solo Andata)"])
+        self.cb_type.SetSelection(0) # Default: Andata e Ritorno
+        vbox.Add(lbl_type, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
+        vbox.Add(self.cb_type, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+        
+        # 2. Punteggi Predefiniti
+        pts_box = wx.StaticBoxSizer(wx.StaticBox(panel, label="Punteggi Predefiniti (Lascia vuoto per chiedere ogni volta)"), wx.HORIZONTAL)
+        
+        lbl_win = wx.StaticText(panel, label=" Vittoria:")
+        self.txt_win = wx.TextCtrl(panel, size=(50, -1))
+        
+        lbl_draw = wx.StaticText(panel, label=" Pareggio:")
+        self.txt_draw = wx.TextCtrl(panel, size=(50, -1))
+        
+        lbl_loss = wx.StaticText(panel, label=" Sconfitta:")
+        self.txt_loss = wx.TextCtrl(panel, size=(50, -1))
+        
+        pts_box.Add(lbl_win, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        pts_box.Add(self.txt_win, 0, wx.ALL, 5)
+        pts_box.Add(lbl_draw, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        pts_box.Add(self.txt_draw, 0, wx.ALL, 5)
+        pts_box.Add(lbl_loss, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        pts_box.Add(self.txt_loss, 0, wx.ALL, 5)
+        
+        vbox.Add(pts_box, 0, wx.LEFT | wx.RIGHT | wx.EXPAND | wx.TOP, 10)
+        # -------------------------------
+        
         btn_box = wx.BoxSizer(wx.HORIZONTAL)
         self.btn_ok = wx.Button(panel, wx.ID_OK, "Sia fatta la tua volontà!")
+        self.btn_ok.Bind(wx.EVT_BUTTON, self.on_ok)
         btn_cancel = wx.Button(panel, wx.ID_CANCEL, "Pietà, ho cambiato idea!")
         btn_box.Add(self.btn_ok, 0, wx.ALL, 5)
         btn_box.Add(btn_cancel, 0, wx.ALL, 5)
@@ -39,13 +68,38 @@ class SetupTournamentDialog(wx.Dialog):
 
     def on_comment_key(self, event):
         if event.GetKeyCode() == wx.WXK_RETURN and not event.ShiftDown():
-            # Se premi invio senza shift nel multiline, salta al pulsante OK
-            self.btn_ok.SetFocus()
+            # Se premi invio senza shift nel multiline, salta al successivo
+            self.cb_type.SetFocus()
         else:
             event.Skip()
 
+    def on_ok(self, event):
+        # Valida i punteggi se non sono vuoti
+        for txt, nome in [(self.txt_win, "Vittoria"), (self.txt_draw, "Pareggio"), (self.txt_loss, "Sconfitta")]:
+            val = txt.GetValue().strip()
+            if val:
+                try:
+                    float(val)
+                except ValueError:
+                    wx.MessageBox(f"Oh fonte di inesauribile calcolo, il punteggio per la {nome} non sembra un numero valido. Puoi perdonare la mia stoltezza e correggerlo?", "Errore di conversione", wx.OK | wx.ICON_ERROR)
+                    txt.SetFocus()
+                    return
+        event.Skip()
+
     def get_data(self):
-        return self.txt_title.GetValue().strip(), self.txt_comment.GetValue().strip()
+        title = self.txt_title.GetValue().strip()
+        comment = self.txt_comment.GetValue().strip()
+        tourney_type = self.cb_type.GetSelection()
+        
+        def parse_pts(txt):
+            val = txt.GetValue().strip()
+            return float(val) if val else None
+            
+        pts_win = parse_pts(self.txt_win)
+        pts_draw = parse_pts(self.txt_draw)
+        pts_loss = parse_pts(self.txt_loss)
+        
+        return title, comment, tourney_type, pts_win, pts_draw, pts_loss
 
 
 class SetupPlayersDialog(wx.Dialog):
@@ -128,8 +182,9 @@ class SetupPlayersDialog(wx.Dialog):
         event.Skip()
 
 class MatchResultDialog(wx.Dialog):
-    def __init__(self, parent, match_id, p1, p2):
+    def __init__(self, parent, match_id, p1, p2, use_defaults=False):
         super().__init__(parent, title="Qual è il verdetto divino?", size=(380, 280))
+        self.use_defaults = use_defaults
         
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -140,12 +195,19 @@ class MatchResultDialog(wx.Dialog):
         self.rb_result = wx.RadioBox(panel, choices=[p1, p2, "Pareggio"], majorDimension=1, style=wx.RA_SPECIFY_COLS)
         vbox.Add(self.rb_result, 0, wx.ALL | wx.EXPAND, 10)
         
-        lbl_pts = wx.StaticText(panel, label="Punti realizzati (o punti per ciascuno in caso di pareggio):")
-        vbox.Add(lbl_pts, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
-        
-        self.txt_pts = wx.TextCtrl(panel, value="0", style=wx.TE_PROCESS_ENTER)
-        self.txt_pts.Bind(wx.EVT_TEXT_ENTER, self.on_pts_enter)
-        vbox.Add(self.txt_pts, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+        if not self.use_defaults:
+            lbl_pts = wx.StaticText(panel, label="Punti realizzati (o punti per ciascuno in caso di pareggio):")
+            vbox.Add(lbl_pts, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
+            
+            self.txt_pts = wx.TextCtrl(panel, value="0", style=wx.TE_PROCESS_ENTER)
+            self.txt_pts.Bind(wx.EVT_TEXT_ENTER, self.on_pts_enter)
+            vbox.Add(self.txt_pts, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+        else:
+            lbl_pts = wx.StaticText(panel, label="I punti verranno assegnati in base alle impostazioni del torneo.")
+            vbox.Add(lbl_pts, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
+            self.txt_pts = None
+            # riduciamo la dimensione della finestra se non serve il campo
+            self.SetSize((380, 230))
         
         btn_box = wx.BoxSizer(wx.HORIZONTAL)
         self.btn_ok = wx.Button(panel, wx.ID_OK, "Suggella il fato!")
@@ -158,7 +220,7 @@ class MatchResultDialog(wx.Dialog):
         panel.SetSizer(vbox)
         
     def on_pts_enter(self, event):
-        if self.txt_pts.GetValue().strip() != "":
+        if self.txt_pts and self.txt_pts.GetValue().strip() != "":
             # Simula la pressione del tasto OK per chiudere il dialogo
             event_ok = wx.CommandEvent(wx.wxEVT_BUTTON, wx.ID_OK)
             self.ProcessEvent(event_ok)
@@ -166,22 +228,31 @@ class MatchResultDialog(wx.Dialog):
             event.Skip()
 
     def on_ok(self, event):
-        val = self.txt_pts.GetValue().strip()
-        try:
-            int(val)
+        if self.txt_pts:
+            val = self.txt_pts.GetValue().strip()
+            try:
+                float(val)
+                event.Skip()
+            except ValueError:
+                wx.MessageBox("Oh creatura imperfetta, i punti devono essere un valore numerico valido!", "Valore Invalido", wx.OK | wx.ICON_WARNING)
+                self.txt_pts.SelectAll()
+                self.txt_pts.SetFocus()
+        else:
             event.Skip()
-        except ValueError:
-            wx.MessageBox("Oh creatura imperfetta, i punti devono essere un valore numerico valido!", "Valore Invalido", wx.OK | wx.ICON_WARNING)
-            self.txt_pts.SelectAll()
-            self.txt_pts.SetFocus()
             
     def get_result(self):
         sel = self.rb_result.GetSelection()
         res_str = str(sel + 1)
-        try:
-            pts = int(self.txt_pts.GetValue().strip())
-        except ValueError:
-            pts = 0
+        if self.txt_pts:
+            try:
+                pts = float(self.txt_pts.GetValue().strip())
+                # Mantieni come intero se non ci sono decimali, altrimenti float
+                if pts.is_integer():
+                    pts = int(pts)
+            except ValueError:
+                pts = 0
+        else:
+            pts = 0 # Non usato
         return res_str, pts
 
 class SettingsDialog(wx.Dialog):

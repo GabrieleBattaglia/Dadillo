@@ -25,11 +25,15 @@ class MainFrame(wx.Frame):
     def startup_sequence(self):
         dlg1 = SetupTournamentDialog(self)
         if dlg1.ShowModal() == wx.ID_OK:
-            title, comment = dlg1.get_data()
+            title, comment, t_type, p_win, p_draw, p_loss = dlg1.get_data()
             if not title:
                 title = "Torneo dell'Infinita Clemenza"
             self.tourney.title = title
             self.tourney.comment = comment
+            self.tourney.tourney_type = t_type
+            self.tourney.pts_win = p_win
+            self.tourney.pts_draw = p_draw
+            self.tourney.pts_loss = p_loss
             self.tourney.start_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             dlg1.Destroy()
             
@@ -38,11 +42,18 @@ class MainFrame(wx.Frame):
                 for p in dlg2.players:
                     self.tourney.players[p] = [0, 0, 0, 0] # points, wins, draws, losses
                 
-                # Generazione partite (tutte le permutazioni = andata e ritorno)
+                # Generazione partite
                 match_id = 1
-                for j in itertools.permutations(self.tourney.players.keys(), 2):
-                    self.tourney.unplayed_matches[match_id] = list(j)
-                    match_id += 1
+                if self.tourney.tourney_type == 1:
+                    # Solo andata (combinazioni semplici)
+                    for j in itertools.combinations(self.tourney.players.keys(), 2):
+                        self.tourney.unplayed_matches[match_id] = list(j)
+                        match_id += 1
+                else:
+                    # Andata e Ritorno (permutazioni)
+                    for j in itertools.permutations(self.tourney.players.keys(), 2):
+                        self.tourney.unplayed_matches[match_id] = list(j)
+                        match_id += 1
                 
                 self.tourney.save()
                 dlg2.Destroy()
@@ -252,32 +263,43 @@ class MainFrame(wx.Frame):
         m_id = self.list_unplayed.GetClientData(sel)
         p1, p2 = self.tourney.unplayed_matches[m_id]
         
-        dlg = MatchResultDialog(self, m_id, p1, p2)
+        use_def = (self.tourney.pts_win is not None or self.tourney.pts_draw is not None or self.tourney.pts_loss is not None)
+        
+        dlg = MatchResultDialog(self, m_id, p1, p2, use_defaults=use_def)
         if dlg.ShowModal() == wx.ID_OK:
             res, pts = dlg.get_result()
             
+            # Calcolo dei punti effettivi
+            pt1 = 0
+            pt2 = 0
+            
             if res == '1':
-                self.tourney.players[p1][0] += pts
+                pt1 = self.tourney.pts_win if self.tourney.pts_win is not None else pts
+                pt2 = self.tourney.pts_loss if self.tourney.pts_loss is not None else 0
                 self.tourney.players[p1][1] += 1
                 self.tourney.players[p2][3] += 1
             elif res == '2':
-                self.tourney.players[p2][0] += pts
+                pt2 = self.tourney.pts_win if self.tourney.pts_win is not None else pts
+                pt1 = self.tourney.pts_loss if self.tourney.pts_loss is not None else 0
                 self.tourney.players[p2][1] += 1
                 self.tourney.players[p1][3] += 1
             elif res == '3':
-                pt1, pt2 = self._get_draw_points(pts)
-                # Chiediamo punti separati se manuale? Per ora assegniamo uguali o in base alla regola.
-                if self.settings.draw_points_split == "Inserimento Manuale":
-                    # Potremmo chiedere quanto a p1 e quanto a p2, ma per non bloccare il flusso usiamo 'pts' per entrambi, 
-                    # che equivale a "Somma e Dividi" come inteso in precedenza (utente calcola a mente).
-                    pass
-
-                self.tourney.players[p1][0] += pt1
-                self.tourney.players[p2][0] += pt2
+                if self.tourney.pts_draw is not None:
+                    pt1 = pt2 = self.tourney.pts_draw
+                else:
+                    pt1, pt2 = self._get_draw_points(pts)
+                    
                 self.tourney.players[p1][2] += 1
                 self.tourney.players[p2][2] += 1
                 
-            self.tourney.played_matches[m_id] = [p1, p2, res, pts]
+            self.tourney.players[p1][0] += pt1
+            self.tourney.players[p2][0] += pt2
+                
+            # Salviamo nel DB il pts originale se c'era, oppure il max tra pt1 e pt2 come riferimento per i record
+            save_pts = pts if not use_def else max(pt1, pt2)
+            # Dalla 2.1.0 possiamo estendere il formato dei dati giocati aggiungendo pt1 e pt2 per non ricalcolarli,
+            # ma lo appendiamo alla fine per retrocompatibilità.
+            self.tourney.played_matches[m_id] = [p1, p2, res, save_pts, pt1, pt2]
             del self.tourney.unplayed_matches[m_id]
             
             self.tourney.save()
@@ -301,22 +323,32 @@ class MainFrame(wx.Frame):
             m_id = self.list_played.GetClientData(sel)
             if wx.MessageBox("Mio padrone, sei sicuro di voler annullare questo risultato e riportare la partita tra le non giocate?", "Conferma annullamento", wx.YES_NO | wx.ICON_QUESTION) == wx.YES:
                 data = self.tourney.played_matches[m_id]
-                p1, p2, res, pts = data
+                
+                # Retrocompatibilità: se la lista ha 4 elementi (vecchi tornei)
+                if len(data) == 4:
+                    p1, p2, res, pts = data
+                    if res == '1':
+                        pt1, pt2 = pts, 0
+                    elif res == '2':
+                        pt1, pt2 = 0, pts
+                    else:
+                        pt1, pt2 = self._get_draw_points(pts)
+                else:
+                    # Nuovi tornei (v2.1.0+): [p1, p2, res, save_pts, pt1, pt2]
+                    p1, p2, res, pts, pt1, pt2 = data
                 
                 if res == '1':
-                    self.tourney.players[p1][0] -= pts
                     self.tourney.players[p1][1] -= 1
                     self.tourney.players[p2][3] -= 1
                 elif res == '2':
-                    self.tourney.players[p2][0] -= pts
                     self.tourney.players[p2][1] -= 1
                     self.tourney.players[p1][3] -= 1
                 elif res == '3':
-                    pt1, pt2 = self._get_draw_points(pts)
-                    self.tourney.players[p1][0] -= pt1
-                    self.tourney.players[p2][0] -= pt2
                     self.tourney.players[p1][2] -= 1
                     self.tourney.players[p2][2] -= 1
+                    
+                self.tourney.players[p1][0] -= pt1
+                self.tourney.players[p2][0] -= pt2
                     
                 self.tourney.unplayed_matches[m_id] = [p1, p2]
                 del self.tourney.played_matches[m_id]
@@ -374,15 +406,22 @@ class MainFrame(wx.Frame):
             max_id = max(all_ids) if all_ids else 0
             
             for p in existing_players:
-                # Andata e ritorno
-                max_id += 1
-                self.tourney.unplayed_matches[max_id] = [name, p]
-                max_id += 1
-                self.tourney.unplayed_matches[max_id] = [p, name]
+                if self.tourney.tourney_type == 1:
+                    # Solo andata
+                    max_id += 1
+                    self.tourney.unplayed_matches[max_id] = [name, p]
+                else:
+                    # Andata e ritorno
+                    max_id += 1
+                    self.tourney.unplayed_matches[max_id] = [name, p]
+                    max_id += 1
+                    self.tourney.unplayed_matches[max_id] = [p, name]
                 
             self.tourney.save()
             self.update_lists()
-            wx.MessageBox(f"Il nuovo stolto {name} è stato gettato nell'arena. Sono state generate {len(existing_players)*2} nuove sfide.", "Vittima Aggiunta")
+            
+            num_matches = len(existing_players) if self.tourney.tourney_type == 1 else len(existing_players) * 2
+            wx.MessageBox(f"Il nuovo stolto {name} è stato gettato nell'arena. Sono state generate {num_matches} nuove sfide.", "Vittima Aggiunta")
         dlg.Destroy()
         
     def on_menu_retire_player(self, event):
