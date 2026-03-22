@@ -315,15 +315,37 @@ class StandingsPanel(wx.Panel):
 
             import statistics
             all_pts = []
+            win_pts = []
+            draw_pts = []
+            
             sorted_items = sorted(self.tourney.played_matches.items(), key=lambda x: int(x[0]))
             for m_id, data in sorted_items:
+                mres = data[2]
                 mpts = data[3]
-                all_pts.append(float(mpts))
+                val = float(mpts)
+                all_pts.append(val)
+                
+                if mres in ('1', '2'):
+                    win_pts.append(val)
+                elif mres == 'X':
+                    draw_pts.append(val)
             
             if all_pts:
                 lines.append("")
+                lines.append("ALTRE STATISTICHE SUI PUNTEGGI ASSEGNATI")
+                
+                somma_totale = sum(all_pts)
+                lines.append(f"Somma totale dei punti assegnati: {fmt_pts(somma_totale)}")
+                
                 mean_val = statistics.mean(all_pts)
-                lines.append(f"Media aritmetica dei valori: {mean_val:.2f}")
+                lines.append(f"Media aritmetica globale: {mean_val:.2f}")
+                
+                if win_pts:
+                    mean_win = statistics.mean(win_pts)
+                    lines.append(f"  - Media punti per partita vinta: {mean_win:.2f}")
+                if draw_pts:
+                    mean_draw = statistics.mean(draw_pts)
+                    lines.append(f"  - Media punti per pareggio: {mean_draw:.2f}")
                 
                 med_low = statistics.median_low(all_pts)
                 med = statistics.median(all_pts)
@@ -336,14 +358,70 @@ class StandingsPanel(wx.Panel):
                 except statistics.StatisticsError:
                     pass
                 
+                if len(all_pts) >= 4:
+                    try:
+                        sorted_pts = sorted(all_pts)
+                        min_val = sorted_pts[0]
+                        max_val = sorted_pts[-1]
+                        
+                        if max_val > min_val:
+                            # Suddivisione in 4 fasce in base all'escursione dei punteggi
+                            step = (max_val - min_val) / 4.0
+                            
+                            fasce_data = []
+                            for i in range(4):
+                                fascia_min = min_val + (i * step)
+                                # L'ultima fascia include anche il valore massimo esatto
+                                if i == 3:
+                                    fascia_max = max_val
+                                    pts_in_fascia = [p for p in sorted_pts if p >= fascia_min and p <= fascia_max]
+                                else:
+                                    fascia_max = min_val + ((i + 1) * step)
+                                    pts_in_fascia = [p for p in sorted_pts if p >= fascia_min and p < fascia_max]
+                                
+                                count = len(pts_in_fascia)
+                                q_mean = sum(pts_in_fascia) / count if count > 0 else 0
+                                
+                                fasce_data.append({
+                                    'name': f"Fascia {i+1}",
+                                    'count': count,
+                                    'min': fascia_min,
+                                    'max': fascia_max,
+                                    'mean': q_mean
+                                })
+
+                            if fasce_data:
+                                lines.append("")
+                                lines.append("SUDDIVISIONE PER FASCE DI PUNTEGGIO (Dal peggiore al migliore):")
+                                for q in fasce_data:
+                                    if q['count'] > 0:
+                                        lines.append(f"  {q['name']}: {q['count']} partite - Punteggi da {fmt_pts(q['min'])} a {fmt_pts(q['max'])} (Media: {q['mean']:.2f})")
+                                    else:
+                                        lines.append(f"  {q['name']}: 0 partite - Punteggi da {fmt_pts(q['min'])} a {fmt_pts(q['max'])}")
+                    except Exception:
+                        pass
+                elif len(all_pts) > 1:
+                    try:
+                        # Fallback alla visualizzazione base se ci sono meno di 4 partite (non si possono fare 4 gruppi reali)
+                        quartiles = statistics.quantiles(all_pts, n=4)
+                        q1 = quartiles[0]
+                        q3 = quartiles[2]
+                        lines.append(f"Quartili: il 25% dei punteggi registrati è inferiore a {q1:.2f} punti; il 25% è superiore a {q3:.2f} punti.")
+                    except (AttributeError, ValueError):
+                        pass
+                
                 if len(all_pts) > 1:
                     stdev_val = statistics.stdev(all_pts)
                     var_val = statistics.variance(all_pts)
                     lines.append(f"Deviazione standard: {stdev_val:+.2f}.")
                     lines.append(f"Varianza: {var_val:+.2f}.")
+                    
+                    if mean_val != 0:
+                        cv = (stdev_val / mean_val) * 100
+                        lines.append(f"Coefficiente di variazione: {cv:.2f}%")
                 
-                tot_var = all_pts[-1] - all_pts[0]
-                lines.append(f"Variazione totale dal primo all'ultimo record: {tot_var:+.2f}")
+                range_val = max(all_pts) - min(all_pts)
+                lines.append(f"Escursione (forbice tra il valore più alto e il più basso): {range_val:+.2f}")
                 
                 if len(all_pts) > 1 and self.tourney.start_date:
                     try:
