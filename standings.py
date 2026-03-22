@@ -312,6 +312,61 @@ class StandingsPanel(wx.Panel):
             if max_draws > 0:
                 best_drawers = [p for p, stats in self.tourney.players.items() if stats[2] == max_draws]
                 lines.append(f"Re dei Pareggi: {max_draws} pareggi ({', '.join(best_drawers)})")
+
+            import statistics
+            all_pts = []
+            sorted_items = sorted(self.tourney.played_matches.items(), key=lambda x: int(x[0]))
+            for m_id, data in sorted_items:
+                mpts = data[3]
+                all_pts.append(float(mpts))
+            
+            if all_pts:
+                lines.append("")
+                mean_val = statistics.mean(all_pts)
+                lines.append(f"Media aritmetica dei valori: {mean_val:.2f}")
+                
+                med_low = statistics.median_low(all_pts)
+                med = statistics.median(all_pts)
+                med_high = statistics.median_high(all_pts)
+                lines.append(f"Mediane: bassa {med_low:+.2f}, media {med:+.2f}, alta {med_high:+.2f}.")
+                
+                try:
+                    mode_val = statistics.mode(all_pts)
+                    lines.append(f"Moda: {mode_val:+.2f}.")
+                except statistics.StatisticsError:
+                    pass
+                
+                if len(all_pts) > 1:
+                    stdev_val = statistics.stdev(all_pts)
+                    var_val = statistics.variance(all_pts)
+                    lines.append(f"Deviazione standard: {stdev_val:+.2f}.")
+                    lines.append(f"Varianza: {var_val:+.2f}.")
+                
+                tot_var = all_pts[-1] - all_pts[0]
+                lines.append(f"Variazione totale dal primo all'ultimo record: {tot_var:+.2f}")
+                
+                if len(all_pts) > 1 and self.tourney.start_date:
+                    try:
+                        fmt = "%Y-%m-%d %H:%M:%S"
+                        dt_start = datetime.strptime(self.tourney.start_date, fmt)
+                        dt_end = datetime.strptime(self.tourney.end_date, fmt) if self.tourney.end_date else datetime.now()
+                        diff = dt_end - dt_start
+                        
+                        freq_seconds = diff.total_seconds() / len(all_pts)
+                        if freq_seconds > 0:
+                            f_days, remainder = divmod(int(freq_seconds), 86400)
+                            f_hours, remainder = divmod(remainder, 3600)
+                            f_mins, f_secs = divmod(remainder, 60)
+                            
+                            parts = []
+                            if f_days > 0: parts.append(f"{f_days} giorni")
+                            if f_hours > 0: parts.append(f"{f_hours} ore")
+                            if f_mins > 0: parts.append(f"{f_mins} minuti")
+                            if f_secs > 0 or not parts: parts.append(f"{f_secs} secondi")
+                            
+                            lines.append(f"Ritmo medio di gioco: una partita ogni {', '.join(parts)}.")
+                    except Exception:
+                        pass
         
         self.txt_display.SetValue("\n".join(lines))
         self.current_standings = flat
