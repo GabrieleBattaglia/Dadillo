@@ -221,24 +221,30 @@ class MatchResultDialog(wx.Dialog):
         
     def on_pts_enter(self, event):
         if self.txt_pts and self.txt_pts.GetValue().strip() != "":
-            # Simula la pressione del tasto OK per chiudere il dialogo
-            event_ok = wx.CommandEvent(wx.wxEVT_BUTTON, wx.ID_OK)
-            self.ProcessEvent(event_ok)
+            # Chiamiamo direttamente on_ok per fare la validazione.
+            # Se la validazione fallisce, on_ok mostra il messaggio di errore
+            # e non chiudiamo il dialogo.
+            if self._validate():
+                self.EndModal(wx.ID_OK)
         else:
             event.Skip()
 
     def on_ok(self, event):
+        if self._validate():
+            event.Skip()
+            
+    def _validate(self):
         if self.txt_pts:
             val = self.txt_pts.GetValue().strip()
             try:
                 float(val)
-                event.Skip()
+                return True
             except ValueError:
                 wx.MessageBox("Oh creatura imperfetta, i punti devono essere un valore numerico valido!", "Valore Invalido", wx.OK | wx.ICON_WARNING)
                 self.txt_pts.SelectAll()
                 self.txt_pts.SetFocus()
-        else:
-            event.Skip()
+                return False
+        return True
             
     def get_result(self):
         sel = self.rb_result.GetSelection()
