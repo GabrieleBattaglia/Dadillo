@@ -146,6 +146,9 @@ class MainFrame(wx.Frame):
         item_new = menu_file.Append(wx.ID_ANY, "Nuovo Torneo\tCtrl+N")
         item_save = menu_file.Append(wx.ID_ANY, "Salva\tCtrl+S")
         menu_file.AppendSeparator()
+        item_save_unplayed = menu_file.Append(wx.ID_ANY, "Salva lista non giocate")
+        item_save_played = menu_file.Append(wx.ID_ANY, "Salva lista giocate")
+        menu_file.AppendSeparator()
         item_exit = menu_file.Append(wx.ID_ANY, "Esci\tCtrl+Q")
         
         menu_view = wx.Menu()
@@ -167,6 +170,8 @@ class MainFrame(wx.Frame):
         
         self.Bind(wx.EVT_MENU, self.on_menu_new, item_new)
         self.Bind(wx.EVT_MENU, self.on_menu_save, item_save)
+        self.Bind(wx.EVT_MENU, self.on_menu_save_unplayed, item_save_unplayed)
+        self.Bind(wx.EVT_MENU, self.on_menu_save_played, item_save_played)
         self.Bind(wx.EVT_MENU, self.on_menu_exit, item_exit)
         self.Bind(wx.EVT_MENU, self.on_menu_standings, item_standings)
         self.Bind(wx.EVT_MENU, self.on_menu_add_player, item_add)
@@ -386,6 +391,69 @@ class MainFrame(wx.Frame):
         self.tourney.save()
         wx.MessageBox("La tua volontà è stata incisa nella pietra digitale.", "Salvato")
         
+    def on_menu_save_unplayed(self, event):
+        tot_unplayed = len(self.tourney.unplayed_matches)
+        tot_played = len(self.tourney.played_matches)
+        tot_matches = tot_unplayed + tot_played
+        
+        safe_title = "".join([c for c in self.tourney.title if c.isalpha() or c.isdigit() or c==' ']).rstrip()
+        filename = f"{safe_title}_non_giocate_{tot_unplayed}su{tot_matches}.txt"
+        
+        # Salviamo nella stessa cartella del programma
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        filepath = os.path.join(base_dir, filename)
+        
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(f"Torneo: {self.tourney.title}\n")
+                f.write(f"Data inizio: {self.tourney.start_date}\n")
+                if self.tourney.comment:
+                    f.write(f"Note: {self.tourney.comment}\n")
+                f.write("-" * 50 + "\n")
+                f.write(f"Lista partite NON GIOCATE ({tot_unplayed} su {tot_matches}):\n\n")
+                
+                for m_id, (p1, p2) in sorted(self.tourney.unplayed_matches.items()):
+                    f.write(f"({m_id}) {p1} vs {p2}\n")
+                    
+            wx.MessageBox(f"Lista partite non giocate salvata con successo in:\n{filepath}", "Salvataggio completato", wx.OK | wx.ICON_INFORMATION)
+        except Exception as e:
+            wx.MessageBox(f"Errore durante il salvataggio:\n{str(e)}", "Errore", wx.OK | wx.ICON_ERROR)
+
+    def on_menu_save_played(self, event):
+        tot_unplayed = len(self.tourney.unplayed_matches)
+        tot_played = len(self.tourney.played_matches)
+        tot_matches = tot_unplayed + tot_played
+        
+        safe_title = "".join([c for c in self.tourney.title if c.isalpha() or c.isdigit() or c==' ']).rstrip()
+        filename = f"{safe_title}_giocate_{tot_played}su{tot_matches}.txt"
+        
+        # Salviamo nella stessa cartella del programma
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        filepath = os.path.join(base_dir, filename)
+        
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(f"Torneo: {self.tourney.title}\n")
+                f.write(f"Data inizio: {self.tourney.start_date}\n")
+                if self.tourney.comment:
+                    f.write(f"Note: {self.tourney.comment}\n")
+                f.write("-" * 50 + "\n")
+                f.write(f"Lista partite GIOCATE ({tot_played} su {tot_matches}):\n\n")
+                
+                for m_id, data in reversed(list(self.tourney.played_matches.items())):
+                    p1, p2, res, pts = data[:4]
+                    if res == '1':
+                        winner = f"Vince {p1}"
+                    elif res == '2':
+                        winner = f"Vince {p2}"
+                    else:
+                        winner = "Pareggio"
+                    f.write(f"({m_id}) {p1} vs {p2} - {winner} (Punti base: {pts})\n")
+                    
+            wx.MessageBox(f"Lista partite giocate salvata con successo in:\n{filepath}", "Salvataggio completato", wx.OK | wx.ICON_INFORMATION)
+        except Exception as e:
+            wx.MessageBox(f"Errore durante il salvataggio:\n{str(e)}", "Errore", wx.OK | wx.ICON_ERROR)
+
     def on_menu_exit(self, event):
         self.tourney.save()
         from data import PlayerDB
