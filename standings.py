@@ -54,8 +54,12 @@ class StandingsPanel(wx.Panel):
             self.btn_db_all = wx.Button(self, label="Aggiorna tutti senza chiedere")
             self.btn_db_all.Bind(wx.EVT_BUTTON, self.on_update_db_all)
             
+            self.btn_close = wx.Button(self, label="Chiudi e torna all'inizio")
+            self.btn_close.Bind(wx.EVT_BUTTON, self.on_back_to_tourney)
+            
             btn_sizer.Add(self.btn_db, 0, wx.ALL, 5)
             btn_sizer.Add(self.btn_db_all, 0, wx.ALL, 5)
+            btn_sizer.Add(self.btn_close, 0, wx.ALL, 5)
         else:
             self.btn_back = wx.Button(self, label="Torna alle Partite")
             self.btn_back.Bind(wx.EVT_BUTTON, self.on_back_to_tourney)
@@ -450,7 +454,7 @@ class StandingsPanel(wx.Panel):
         self.current_standings = flat
 
     def on_back_to_tourney(self, event):
-        self.GetParent().check_state_and_show()
+        self.GetParent().init_main_ui()
 
     def on_update_db(self, event):
         self._process_db_update(ask_confirmation=True)
@@ -460,9 +464,11 @@ class StandingsPanel(wx.Panel):
 
     def _process_db_update(self, ask_confirmation):
         from data import PlayerDB
+        from dialogs import UpdatePlayerDialog
         db = PlayerDB()
         
         updates_done = 0
+        skipped_for_duplicate = 0
         
         for idx, row in enumerate(self.current_standings):
             name = row['name']
@@ -475,19 +481,37 @@ class StandingsPanel(wx.Panel):
             do_update = True
             
             if name in db.players and ask_confirmation:
-                ans = wx.MessageBox(f"Il formidabile {name} è già presente negli archivi sacri. Vuoi aggiornare il suo storico e il suo medagliere con il risultato di questo torneo (Posizione {pos})?", "Conferma Aggiornamento", wx.YES_NO | wx.ICON_QUESTION)
-                if ans != wx.YES:
+                dlg = UpdatePlayerDialog(self, name, pos)
+                ans = dlg.ShowModal()
+                dlg.Destroy()
+                if ans != wx.ID_YES:
                     do_update = False
                     
             if do_update:
                 start = self.tourney.start_date.split(" ")[0] if self.tourney.start_date else "Sconosciuta"
                 end = self.tourney.end_date.split(" ")[0] if self.tourney.end_date else "Sconosciuta"
                 
-                db.add_or_update_player(name, pos, is_oro, is_argento, is_bronzo, is_legno, self.tourney.title, start, end)
-                updates_done += 1
+                success = db.add_or_update_player(name, pos, is_oro, is_argento, is_bronzo, is_legno, self.tourney.title, start, end)
+                if success:
+                    updates_done += 1
+                else:
+                    skipped_for_duplicate += 1
                 
         if updates_done > 0:
             db.save()
-            wx.MessageBox(f"Gli archivi sono stati aggiornati con {updates_done} registrazioni. Gloria eterna!", "Aggiornamento Completato")
+            msg = f"Gli archivi sono stati aggiornati con {updates_done} nuove registrazioni."
+            if skipped_for_duplicate > 0:
+                msg += f"\n\n({skipped_for_duplicate} registrazioni sono state saltate perché già presenti nel database del giocatore)."
+            msg += "\nGloria eterna!"
+            wx.MessageBox(msg, "Aggiornamento Completato")
+            
+            # Disabilita i pulsanti per evitare doppi clic sbadati
+            if hasattr(self, 'btn_db'):
+                self.btn_db.Disable()
+            if hasattr(self, 'btn_db_all'):
+                self.btn_db_all.Disable()
         else:
-            wx.MessageBox("Nessuna modifica apportata agli archivi.", "Operazione Annullata")
+            msg = "Nessuna modifica apportata agli archivi."
+            if skipped_for_duplicate > 0:
+                msg += f"\nI tornei selezionati erano già presenti nello storico per questi giocatori."
+            wx.MessageBox(msg, "Nessun Aggiornamento")

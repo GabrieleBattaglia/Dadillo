@@ -386,4 +386,38 @@ class RetirePlayerDialog(wx.Dialog):
     def get_selected(self):
         return self.cb_players.GetStringSelection()
 
+class UpdatePlayerDialog(wx.Dialog):
+    def __init__(self, parent, player_name, position):
+        super().__init__(parent, title="Conferma Aggiornamento", size=(500, 300))
+        
+        panel = wx.Panel(self)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        
+        msg_text = f"Il formidabile {player_name} è già presente negli archivi sacri.\n\nVuoi aggiornare il suo storico e il suo medagliere con il risultato di questo torneo (Posizione {position})?"
+        
+        # Read-only TextCtrl that is navigable by NVDA
+        self.txt_msg = wx.TextCtrl(panel, value=msg_text, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        vbox.Add(self.txt_msg, 1, wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, 10)
+        
+        btn_box = wx.BoxSizer(wx.HORIZONTAL)
+        self.btn_yes = wx.Button(panel, wx.ID_YES, "Sì, Aggiorna!")
+        self.btn_no = wx.Button(panel, wx.ID_NO, "No, Salta")
+        
+        btn_box.Add(self.btn_yes, 0, wx.ALL, 5)
+        btn_box.Add(self.btn_no, 0, wx.ALL, 5)
+        
+        vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
+        panel.SetSizer(vbox)
+        
+        self.btn_yes.Bind(wx.EVT_BUTTON, self.on_yes)
+        self.btn_no.Bind(wx.EVT_BUTTON, self.on_no)
+        
+        wx.CallAfter(self.txt_msg.SetFocus)
+        
+    def on_yes(self, event):
+        self.EndModal(wx.ID_YES)
+        
+    def on_no(self, event):
+        self.EndModal(wx.ID_NO)
+
 

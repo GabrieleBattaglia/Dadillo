@@ -112,11 +112,19 @@ class MainFrame(wx.Frame):
         filter_box_u.Add(lbl_filter_u, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
         filter_box_u.Add(self.txt_filter_unplayed, 1, wx.ALL | wx.EXPAND, 5)
         left_vbox.Add(filter_box_u, 0, wx.EXPAND)
-        
-        left_vbox.Add(self.list_unplayed, 1, wx.ALL | wx.EXPAND, 5)
-        
-        main_sizer.Add(left_vbox, 1, wx.EXPAND | wx.ALL, 10)
-        
+
+        self.list_unplayed_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.list_unplayed_sizer.Add(self.list_unplayed, 1, wx.ALL | wx.EXPAND, 5)
+
+        self.btn_new_tourney = wx.Button(self.panel, label="Il Torneo è concluso!\nCrea un nuovo evento, oh mio sovrano.")
+        self.btn_new_tourney.Bind(wx.EVT_BUTTON, self.on_menu_new)
+        self.btn_new_tourney.Hide() # Nascosto di default
+
+        # Aggiungiamo sia la lista che il pulsante, li gestiremo dinamicamente in update_lists
+        left_vbox.Add(self.list_unplayed_sizer, 1, wx.EXPAND)
+        left_vbox.Add(self.btn_new_tourney, 1, wx.EXPAND | wx.ALL, 20)
+
+        main_sizer.Add(left_vbox, 1, wx.EXPAND | wx.ALL, 10)        
         # Pannello Destro: Giocate
         right_vbox = wx.BoxSizer(wx.VERTICAL)
         right_vbox.Add(self.lbl_played, 0, wx.ALL | wx.EXPAND, 5)
@@ -209,6 +217,21 @@ class MainFrame(wx.Frame):
         self.lbl_unplayed.SetLabel(f"Non giocate {tot_unplayed} su {tot_matches}: {perc_unplayed:.1f}%")
         self.lbl_played.SetLabel(f"Giocate {tot_played} su {tot_matches}: {perc_played:.1f}%")
         
+        if tot_unplayed == 0:
+            if hasattr(self, 'list_unplayed_sizer'):
+                self.list_unplayed_sizer.ShowItems(False)
+            if hasattr(self, 'btn_new_tourney'):
+                self.btn_new_tourney.Show()
+        else:
+            if hasattr(self, 'list_unplayed_sizer'):
+                self.list_unplayed_sizer.ShowItems(True)
+            if hasattr(self, 'btn_new_tourney'):
+                self.btn_new_tourney.Hide()
+                
+        # Forza un ricalcolo del layout
+        if self.panel:
+            self.panel.Layout()
+            
         filt_u = self.txt_filter_unplayed.GetValue().strip().lower()
         filt_p = self.txt_filter_played.GetValue().strip().lower()
         
