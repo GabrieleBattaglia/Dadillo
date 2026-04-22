@@ -513,5 +513,5 @@ class StandingsPanel(wx.Panel):
         else:
             msg = "Nessuna modifica apportata agli archivi."
             if skipped_for_duplicate > 0:
-                msg += f"\nI tornei selezionati erano già presenti nello storico per questi giocatori."
+                msg += "\nI tornei selezionati erano già presenti nello storico per questi giocatori."
             wx.MessageBox(msg, "Nessun Aggiornamento")

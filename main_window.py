@@ -37,37 +37,80 @@ class MainFrame(wx.Frame):
             self.tourney.start_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             dlg1.Destroy()
             
-            dlg2 = SetupPlayersDialog(self)
-            if dlg2.ShowModal() == wx.ID_OK:
-                for p in dlg2.players:
-                    self.tourney.players[p] = [0, 0, 0, 0] # points, wins, draws, losses
-                
-                # Generazione partite
-                match_id = 1
-                if self.tourney.tourney_type == 1:
-                    # Solo andata (combinazioni semplici)
-                    for j in itertools.combinations(self.tourney.players.keys(), 2):
-                        self.tourney.unplayed_matches[match_id] = list(j)
-                        match_id += 1
-                else:
-                    # Andata e Ritorno (permutazioni)
-                    for j in itertools.permutations(self.tourney.players.keys(), 2):
-                        self.tourney.unplayed_matches[match_id] = list(j)
-                        match_id += 1
-                
-                self.tourney.save()
-                dlg2.Destroy()
-                self.check_state_and_show()
-            else:
-                dlg2.Destroy()
-                self.Close()
+            wx.CallAfter(self.resume_setup_players)
         else:
             dlg1.Destroy()
+            self._show_empty_state()
+
+    def resume_setup_players(self):
+        existing_names = list(self.tourney.players.keys())
+        dlg2 = SetupPlayersDialog(self, existing_names)
+        res = dlg2.ShowModal()
+        
+        if res == wx.ID_OK:
+            self.tourney.players.clear()
+            for p in dlg2.players:
+                self.tourney.players[p] = [0, 0, 0, 0] # points, wins, draws, losses
+            
+            # Generazione partite
+            match_id = 1
+            if self.tourney.tourney_type == 1:
+                # Solo andata (combinazioni semplici)
+                for j in itertools.combinations(self.tourney.players.keys(), 2):
+                    self.tourney.unplayed_matches[match_id] = list(j)
+                    match_id += 1
+            else:
+                # Andata e Ritorno (permutazioni)
+                for j in itertools.permutations(self.tourney.players.keys(), 2):
+                    self.tourney.unplayed_matches[match_id] = list(j)
+                    match_id += 1
+            
+            self.tourney.save()
+            dlg2.Destroy()
+            self.check_state_and_show()
+            
+        elif res == wx.ID_APPLY:
+            self.tourney.players.clear()
+            for p in dlg2.players:
+                self.tourney.players[p] = [0, 0, 0, 0]
+            self.tourney.save()
+            dlg2.Destroy()
             self.Close()
+            
+        else: # CANCEL
+            dlg2.Destroy()
+            if wx.MessageBox("Mio insindacabile monarca, annullando ora distruggerai questo torneo in bozza. Sei sicuro?", "Conferma distruzione", wx.YES_NO | wx.ICON_WARNING) == wx.YES:
+                if os.path.exists(DATA_FILE):
+                    os.remove(DATA_FILE)
+                self.tourney = TournamentData()
+                self._show_empty_state()
+            else:
+                wx.CallAfter(self.resume_setup_players)
+
+    def _show_empty_state(self):
+        if self.panel:
+            self.panel.Destroy()
+            self.panel = None
+        self.panel = wx.Panel(self)
+        if not self.GetMenuBar():
+            self.create_menu()
+        self.SetTitle(f"Dadillo v{VERSION} - L'Altare del Sacrificio")
+        msg = wx.StaticText(self.panel, label="L'Altare è vuoto. Usa il menu File per creare un Nuovo Torneo.")
+        font = wx.Font(14, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
+        msg.SetFont(font)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.AddStretchSpacer()
+        sizer.Add(msg, 0, wx.ALIGN_CENTER)
+        sizer.AddStretchSpacer()
+        self.panel.SetSizer(sizer)
+        self.Layout()
+        self.Show()
 
     def check_state_and_show(self):
         if not self.tourney.unplayed_matches and self.tourney.played_matches:
             self.show_standings()
+        elif not self.tourney.unplayed_matches and not self.tourney.played_matches and self.tourney.title:
+            self.resume_setup_players()
         else:
             self.init_main_ui()
 

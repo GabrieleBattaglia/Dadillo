@@ -103,42 +103,49 @@ class SetupTournamentDialog(wx.Dialog):
 
 
 class SetupPlayersDialog(wx.Dialog):
-    def __init__(self, parent):
-        super().__init__(parent, title="Raduna i Tuoi Discepoli", size=(400, 500))
-        
-        self.players = []
-        
+    def __init__(self, parent, existing_players=None):
+        super().__init__(parent, title="Raduna i Tuoi Discepoli", size=(450, 500))
+
+        self.players = existing_players[:] if existing_players else []
+
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
-        
+
         msg = wx.StaticText(panel, label="Mia estremitudine immortale, inserisci i nomi dei tuoi seguaci.")
         vbox.Add(msg, 0, wx.ALL | wx.EXPAND, 10)
-        
-        self.lbl_player = wx.StaticText(panel, label="Giocatore 1:")
+
+        self.lbl_player = wx.StaticText(panel, label=f"Giocatore {len(self.players) + 1}:")
         self.txt_player = wx.TextCtrl(panel, style=wx.TE_PROCESS_ENTER)
         self.txt_player.Bind(wx.EVT_TEXT_ENTER, self.on_add_player)
-        
+
         vbox.Add(self.lbl_player, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
         vbox.Add(self.txt_player, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
-        
+
         lbl_list = wx.StaticText(panel, label="Lista Discepoli (Premi Canc per sopprimere l'eretico):")
         self.list_players = wx.ListBox(panel, style=wx.LB_SORT | wx.LB_SINGLE)
         self.list_players.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
-        
+
+        for p in self.players:
+            self.list_players.Append(p)
+
         vbox.Add(lbl_list, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
         vbox.Add(self.list_players, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
-        
+
         btn_box = wx.BoxSizer(wx.HORIZONTAL)
         btn_ok = wx.Button(panel, wx.ID_OK, "Tutti pronti al massacro!")
         btn_ok.Bind(wx.EVT_BUTTON, self.on_ok)
+        btn_wait = wx.Button(panel, wx.ID_APPLY, "Resta in attesa...")
+        btn_wait.Bind(wx.EVT_BUTTON, self.on_wait)
         btn_cancel = wx.Button(panel, wx.ID_CANCEL, "Annulla tutto, mio sole!")
+
         btn_box.Add(btn_ok, 0, wx.ALL, 5)
+        btn_box.Add(btn_wait, 0, wx.ALL, 5)
         btn_box.Add(btn_cancel, 0, wx.ALL, 5)
-        
+
         vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
-        
+
         panel.SetSizer(vbox)
-        
+
     def on_add_player(self, event):
         name = self.txt_player.GetValue().strip()
         if not name:
@@ -174,6 +181,9 @@ class SetupPlayersDialog(wx.Dialog):
                 wx.CallLater(600, self.txt_player.SetFocus)
         else:
             event.Skip()
+            
+    def on_wait(self, event):
+        self.EndModal(wx.ID_APPLY)
             
     def on_ok(self, event):
         if len(self.players) < 2:
