@@ -227,6 +227,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_menu_standings, item_standings)
         self.Bind(wx.EVT_MENU, self.on_menu_add_player, item_add)
         self.Bind(wx.EVT_MENU, self.on_menu_retire_player, item_retire)
+        self.Bind(wx.EVT_MENU, self.on_menu_merge_db, item_merge)
         self.Bind(wx.EVT_MENU, self.on_menu_rules, item_rules)
         self.Bind(wx.EVT_CLOSE, self.on_close)
 
@@ -528,6 +529,41 @@ class MainFrame(wx.Frame):
         self.Close()
 
         
+    def on_menu_merge_db(self, event):
+        with wx.FileDialog(self, "Seleziona il file Dadillo_players.json da fondere", wildcard="File JSON (*.json)|*.json", style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) as fileDialog:
+            if fileDialog.ShowModal() == wx.ID_CANCEL:
+                return
+            pathname = fileDialog.GetPath()
+            
+            from data import PlayerDB
+            db = PlayerDB()
+            success, log = db.merge_db(pathname)
+            
+            self.show_merge_summary("\n".join(log))
+
+    def show_merge_summary(self, log_text):
+        dlg = wx.Dialog(self, title="Resoconto Fusione Database", size=(600, 400), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        
+        lbl = wx.StaticText(dlg, label="Ecco il riepilogo delle operazioni eseguite:")
+        vbox.Add(lbl, 0, wx.ALL, 10)
+        
+        txt = wx.TextCtrl(dlg, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH)
+        txt.SetValue(log_text)
+        vbox.Add(txt, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        
+        btn_ok = wx.Button(dlg, wx.ID_OK, label="Chiudi")
+        vbox.Add(btn_ok, 0, wx.ALIGN_CENTER | wx.ALL, 10)
+        
+        dlg.SetSizer(vbox)
+        dlg.Layout()
+        
+        # Forza focus sul text ctrl per accessibilità
+        wx.CallAfter(txt.SetFocus)
+        
+        dlg.ShowModal()
+        dlg.Destroy()
+
     def on_menu_add_player(self, event):
         if not self.tourney.unplayed_matches and self.tourney.played_matches:
             wx.MessageBox("Oh possente, il torneo è già concluso. Inizia un nuovo torneo per aggiungere vittime.", "Troppo tardi", wx.OK | wx.ICON_INFORMATION)

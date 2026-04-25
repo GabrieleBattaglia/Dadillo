@@ -1,7 +1,7 @@
-# Dadillo - L'Altare del Sacrificio (Versione 2.1.2)
+# Dadillo - L'Altare del Sacrificio (Versione 2.4.0)
 
 **Dadillo** è un gestore di tornei scritto in Python. Gestisce giocatori, abbinamenti, classifiche e record con una personalità... *molto devota* al suo utilizzatore.
-La versione 2.1.2 introduce un'interfaccia grafica (GUI) completamente accessibile sviluppata in `wxPython`.
+La versione 2.4.0 introduce un'interfaccia grafica (GUI) completamente accessibile sviluppata in `wxPython` e nuove funzionalità avanzate per la Hall of Fame.
 
 ## Caratteristiche
 - **Interfaccia Grafica**: Liste interattive, finestre di dialogo chiare e complete di supporto screen reader (NVDA/Jaws).
@@ -9,6 +9,8 @@ La versione 2.1.2 introduce un'interfaccia grafica (GUI) completamente accessibi
 - **Classifiche Avanzate**: Ordinamento configurabile per Vittorie o Punti. Gestione intelligente degli spareggi tramite Scontri Diretti (Punti o Vittorie) integrando la Classifica Avulsa.
 - **Opzioni Personalizzabili**: Decidi tu come spartire i punti in caso di pareggio (Manuale, Metà ciascuno, Nessun punto, ecc.).
 - **Hall of Fame**: Un database storico testuale (`Giocatori.txt`) e strutturato (`Dadillo_players.json`) che tiene traccia per sempre del medagliere globale (Ori, Argenti, Bronzi e Legni) e di tutte le partecipazioni dei tuoi discepoli.
+- **Performance Score (Novità)**: Dadillo calcola una "Media Piazzamenti" per ogni giocatore (escludendo i podi) e premia l'assiduità, rendendo la Hall of Fame molto più accurata e meritocratica anche oltre la zona medaglie.
+- **Unione Database (Novità)**: Giocate a turno su PC diversi? Nessun problema! Puoi unire intelligentemente il database dei giocatori (`Dadillo_players.json`) di un amico al tuo dal menu "Giocatori -> Unisci Database Giocatori...", con resoconto dettagliato di tutte le medaglie e partecipazioni fuse.
 - **Recupero Errori**: Un match inserito per sbaglio? Basta premere `Canc` nella lista dei match giocati per ripristinare i punteggi e riportarlo tra le partite aperte.
 
 ## Requisiti e Installazione
