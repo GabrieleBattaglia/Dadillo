@@ -211,6 +211,7 @@ class MainFrame(wx.Frame):
         
         menu_options = wx.Menu()
         item_rules = menu_options.Append(wx.ID_ANY, "Regole Torneo")
+        item_merge = menu_options.Append(wx.ID_ANY, "Unisci Database Giocatori")
         
         menubar.Append(menu_file, "File")
         menubar.Append(menu_view, "Visualizza")
