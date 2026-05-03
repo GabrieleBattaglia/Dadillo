@@ -230,8 +230,12 @@ class StandingsPanel(wx.Panel):
         lines.append("-" * 85)
         
         for idx, row in enumerate(flat):
-            pos = idx + 1
-            med_str = medals[idx] if idx < len(medals) else ""
+            if reverse:
+                pos = idx + 1
+            else:
+                pos = len(flat) - idx
+                
+            med_str = medals[pos - 1] if (pos - 1) < len(medals) else ""
             
             # Formattazione punti senza .0 se intero
             p_val = row['points']
@@ -472,7 +476,12 @@ class StandingsPanel(wx.Panel):
         
         for idx, row in enumerate(self.current_standings):
             name = row['name']
-            pos = idx + 1
+            reverse = (self.cb_dir.GetSelection() == 0)
+            if reverse:
+                pos = idx + 1
+            else:
+                pos = len(self.current_standings) - idx
+                
             is_oro = (pos == 1)
             is_argento = (pos == 2)
             is_bronzo = (pos == 3)

@@ -34,7 +34,6 @@ class MainFrame(wx.Frame):
             self.tourney.pts_win = p_win
             self.tourney.pts_draw = p_draw
             self.tourney.pts_loss = p_loss
-            self.tourney.start_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             dlg1.Destroy()
             
             wx.CallAfter(self.resume_setup_players)
@@ -65,6 +64,7 @@ class MainFrame(wx.Frame):
                     self.tourney.unplayed_matches[match_id] = list(j)
                     match_id += 1
             
+            self.tourney.start_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             self.tourney.save()
             dlg2.Destroy()
             self.check_state_and_show()
