@@ -1,7 +1,7 @@
-# Dadillo - L'Altare del Sacrificio (Versione 2.4.0)
+# Dadillo - L'Altare del Sacrificio (Versione 2.5.0)
 
 **Dadillo** è un gestore di tornei scritto in Python. Gestisce giocatori, abbinamenti, classifiche e record con una personalità... *molto devota* al suo utilizzatore.
-La versione 2.4.0 introduce un'interfaccia grafica (GUI) completamente accessibile sviluppata in `wxPython` e nuove funzionalità avanzate per la Hall of Fame.
+La versione 2.5.0 introduce il pieno supporto ai nickname case-sensitive per DiceWorld, la selezione rapida dei partecipanti da database durante il setup, e un menu completo per la gestione del database storico dei giocatori, con classifica globale e filtri avanzati.
 
 ## Caratteristiche
 - **Interfaccia Grafica**: Liste interattive, finestre di dialogo chiare e complete di supporto screen reader (NVDA/Jaws).
@@ -9,8 +9,13 @@ La versione 2.4.0 introduce un'interfaccia grafica (GUI) completamente accessibi
 - **Classifiche Avanzate**: Ordinamento configurabile per Vittorie o Punti. Gestione intelligente degli spareggi tramite Scontri Diretti (Punti o Vittorie) integrando la Classifica Avulsa.
 - **Opzioni Personalizzabili**: Decidi tu come spartire i punti in caso di pareggio (Manuale, Metà ciascuno, Nessun punto, ecc.).
 - **Hall of Fame**: Un database storico testuale (`Giocatori.txt`) e strutturato (`Dadillo_players.json`) che tiene traccia per sempre del medagliere globale (Ori, Argenti, Bronzi e Legni) e di tutte le partecipazioni dei tuoi discepoli.
-- **Performance Score (Novità)**: Dadillo calcola una "Media Piazzamenti" per ogni giocatore (escludendo i podi) e premia l'assiduità, rendendo la Hall of Fame molto più accurata e meritocratica anche oltre la zona medaglie.
-- **Unione Database (Novità)**: Giocate a turno su PC diversi? Nessun problema! Puoi unire intelligentemente il database dei giocatori (`Dadillo_players.json`) di un amico al tuo dal menu "Giocatori -> Unisci Database Giocatori...", con resoconto dettagliato di tutte le medaglie e partecipazioni fuse.
+- **Gestione e Modifica Giocatori DB (Novità 2.5.0)**: Un menu "Giocatori" dedicato per visualizzare lo storico dettagliato di ogni discepolo, rinominarlo (con propagazione in cascata su classifiche e partite del torneo in corso) o eliminarlo definitivamente dal database.
+- **Classifica Generale della Hall of Fame (Novità 2.5.0)**: Visualizzazione e ordinamento flessibile della classifica globale dei giocatori ordinabile per Nome, Ori, Argenti, Bronzi, Legni o Numero Tornei.
+- **Inserimento Rapido da DB (Novità 2.5.0)**: Durante il setup del torneo, puoi selezionare velocemente i partecipanti dal database storico con lo Spazio o il doppio clic, mantenendo comunque l'editor di testo per i nuovi iscritti.
+- **Case-Sensitivity per i Nickname (Novità 2.5.0)**: Disabilitata ogni normalizzazione automatica dei caratteri per rispettare i nickname originali case-sensitive usati su DiceWorld.
+- **Formattazione Medagliere Condizionale (Novità 2.5.0)**: Esportazione in `Giocatori.txt` pulita ed elegante, che mostra solo le medaglie ottenute ($\ge 1$) o la dicitura "Ancora nessuna medaglia".
+- **Performance Score**: Dadillo calcola una "Media Piazzamenti" per ogni giocatore (escludendo i podi) e premia l'assiduità, rendendo la Hall of Fame molto più accurata e meritocratica anche oltre la zona medaglie.
+- **Unione Database**: Giocate a turno su PC diversi? Nessun problema! Puoi unire intelligentemente il database dei giocatori (`Dadillo_players.json`) di un amico al tuo dal menu "Opzioni -> Unisci Database Giocatori...", con resoconto dettagliato di tutte le medaglie e partecipazioni fuse.
 - **Recupero Errori**: Un match inserito per sbaglio? Basta premere `Canc` nella lista dei match giocati per ripristinare i punteggi e riportarlo tra le partite aperte.
 
 ## Requisiti e Installazione

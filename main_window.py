@@ -3,7 +3,7 @@ import os
 import itertools
 from datetime import datetime
 from data import TournamentData, DATA_FILE, SettingsData
-from dialogs import SetupTournamentDialog, SetupPlayersDialog, MatchResultDialog, SettingsDialog, AddPlayerDialog, RetirePlayerDialog
+from dialogs import SetupTournamentDialog, SetupPlayersDialog, MatchResultDialog, SettingsDialog, AddPlayerDialog, RetirePlayerDialog, ManagePlayersDialog, HallOfFameDialog
 from standings import StandingsPanel
 from version import VERSION
 
@@ -206,8 +206,12 @@ class MainFrame(wx.Frame):
         item_standings = menu_view.Append(wx.ID_ANY, "Classifica Parziale\tCtrl+L")
         
         menu_players = wx.Menu()
-        item_add = menu_players.Append(wx.ID_ANY, "Aggiungi Giocatore")
-        item_retire = menu_players.Append(wx.ID_ANY, "Ritira Giocatore")
+        item_add = menu_players.Append(wx.ID_ANY, "Aggiungi Giocatore al Torneo")
+        item_retire = menu_players.Append(wx.ID_ANY, "Ritira Giocatore dal Torneo")
+        menu_players.AppendSeparator()
+        item_manage_db = menu_players.Append(wx.ID_ANY, "Gestione Giocatori DB")
+        item_hof = menu_players.Append(wx.ID_ANY, "Classifica Generale (Hall of Fame)")
+        item_export_hof = menu_players.Append(wx.ID_ANY, "Esporta Hall of Fame (Giocatori.txt)")
         
         menu_options = wx.Menu()
         item_rules = menu_options.Append(wx.ID_ANY, "Regole Torneo")
@@ -228,6 +232,9 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_menu_standings, item_standings)
         self.Bind(wx.EVT_MENU, self.on_menu_add_player, item_add)
         self.Bind(wx.EVT_MENU, self.on_menu_retire_player, item_retire)
+        self.Bind(wx.EVT_MENU, self.on_menu_manage_db, item_manage_db)
+        self.Bind(wx.EVT_MENU, self.on_menu_hof, item_hof)
+        self.Bind(wx.EVT_MENU, self.on_menu_export_hof, item_export_hof)
         self.Bind(wx.EVT_MENU, self.on_menu_merge_db, item_merge)
         self.Bind(wx.EVT_MENU, self.on_menu_rules, item_rules)
         self.Bind(wx.EVT_CLOSE, self.on_close)
@@ -650,4 +657,21 @@ class MainFrame(wx.Frame):
             self.settings = dlg.get_settings()
             self.settings.save()
         dlg.Destroy()
+
+    def on_menu_manage_db(self, event):
+        dlg = ManagePlayersDialog(self)
+        dlg.ShowModal()
+        dlg.Destroy()
+
+    def on_menu_hof(self, event):
+        dlg = HallOfFameDialog(self)
+        dlg.ShowModal()
+        dlg.Destroy()
+
+    def on_menu_export_hof(self, event):
+        from data import PlayerDB
+        db = PlayerDB()
+        db.export_to_txt()
+        wx.MessageBox("File Giocatori.txt esportato con successo!", "Esportazione Completata", wx.OK | wx.ICON_INFORMATION)
+
 

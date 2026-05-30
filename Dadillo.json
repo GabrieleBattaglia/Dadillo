@@ -1,1540 +1,431 @@
 {
-    "title": "Yatzee con Bonus",
-    "comment": "Secondo torneo della nuova era dadilliana",
-    "start_date": "2026-05-01 00:00:00",
-    "end_date": "",
+    "title": "TestFintone",
+    "comment": "cagata di test",
+    "start_date": "2026-05-30 21:53:59",
+    "end_date": "2026-05-30 21:59:42",
     "players": {
-        "Anny.88": [
-            4800,
-            15,
-            0,
-            11
-        ],
-        "Peppe": [
-            4760,
-            15,
-            0,
-            11
-        ],
-        "Rinaldo": [
-            3827,
-            12,
-            0,
-            14
-        ],
-        "ninfa81": [
-            4443,
-            14,
-            0,
-            12
-        ],
-        "siddharta33": [
-            3346,
+        "testuccio testicoli": [
             11,
-            0,
-            15
+            2,
+            2,
+            5
         ],
-        "il difetto": [
-            3575,
+        "testina testori": [
+            14,
+            2,
+            4,
+            3
+        ],
+        "tristano testadicazzo": [
+            24,
+            5,
+            3,
+            1
+        ],
+        "testambro testosterone": [
+            21,
+            2,
+            4,
+            3
+        ],
+        "tesaurus testadimorto": [
+            15,
+            2,
+            3,
+            4
+        ],
+        "teseo testina": [
             12,
-            0,
-            14
+            4,
+            2,
+            3
         ],
-        "bazzy87": [
-            2993,
-            9,
-            0,
-            17
+        "teresio testamatta": [
+            11,
+            2,
+            4,
+            3
         ],
-        "selene157": [
-            4942,
-            17,
+        "tesorina rina": [
+            13,
+            4,
             0,
-            6
+            5
         ],
-        "dj dany": [
-            2535,
-            8,
-            0,
-            16
+        "tessuto tessile": [
+            13,
+            4,
+            2,
+            3
         ],
-        "manu1504": [
-            4866,
-            15,
-            0,
-            11
-        ],
-        "garruz88": [
-            4734,
-            15,
-            0,
-            10
-        ],
-        "Tasmania94!": [
-            2856,
-            9,
-            0,
-            17
-        ],
-        "Vero80": [
-            2424,
-            9,
-            0,
-            17
-        ],
-        "Gegg\u00e8": [
-            5444,
-            18,
-            0,
-            8
+        "timoteo tazzoni": [
+            19,
+            4,
+            4,
+            1
         ]
     },
-    "unplayed_matches": {
-        "99": [
-            "selene157",
-            "dj dany"
-        ],
-        "112": [
-            "dj dany",
-            "selene157"
-        ],
-        "138": [
-            "garruz88",
-            "selene157"
-        ]
-    },
+    "unplayed_matches": {},
     "played_matches": {
-        "68": [
-            "il difetto",
-            "Rinaldo",
+        "8": [
+            "testuccio testicoli",
+            "tessuto tessile",
             "2",
-            308,
+            5,
             0,
-            308
-        ],
-        "31": [
-            "Rinaldo",
-            "il difetto",
-            "1",
-            362,
-            362,
-            0
-        ],
-        "71": [
-            "il difetto",
-            "bazzy87",
-            "1",
-            273,
-            273,
-            0
-        ],
-        "84": [
-            "bazzy87",
-            "il difetto",
-            "2",
-            322,
-            0,
-            322
-        ],
-        "41": [
-            "ninfa81",
-            "Peppe",
-            "1",
-            419,
-            419,
-            0
-        ],
-        "16": [
-            "Peppe",
-            "ninfa81",
-            "1",
-            269,
-            269,
-            0
-        ],
-        "15": [
-            "Peppe",
-            "Rinaldo",
-            "1",
-            335,
-            335,
-            0
-        ],
-        "28": [
-            "Rinaldo",
-            "Peppe",
-            "1",
-            345,
-            345,
-            0
-        ],
-        "70": [
-            "il difetto",
-            "siddharta33",
-            "1",
-            377,
-            377,
-            0
-        ],
-        "57": [
-            "siddharta33",
-            "il difetto",
-            "2",
-            247,
-            0,
-            247
-        ],
-        "2": [
-            "Anny.88",
-            "Rinaldo",
-            "1",
-            327,
-            327,
-            0
-        ],
-        "27": [
-            "Rinaldo",
-            "Anny.88",
-            "1",
-            242,
-            242,
-            0
-        ],
-        "42": [
-            "ninfa81",
-            "Rinaldo",
-            "1",
-            284,
-            284,
-            0
-        ],
-        "29": [
-            "Rinaldo",
-            "ninfa81",
-            "2",
-            335,
-            0,
-            335
-        ],
-        "5": [
-            "Anny.88",
-            "il difetto",
-            "1",
-            306,
-            306,
-            0
-        ],
-        "66": [
-            "il difetto",
-            "Anny.88",
-            "2",
-            363,
-            0,
-            363
+            5
         ],
         "3": [
-            "Anny.88",
-            "ninfa81",
-            "1",
-            293,
-            293,
-            0
-        ],
-        "40": [
-            "ninfa81",
-            "Anny.88",
-            "2",
-            288,
-            0,
-            288
-        ],
-        "69": [
-            "il difetto",
-            "ninfa81",
-            "2",
-            327,
-            0,
-            327
-        ],
-        "19": [
-            "Peppe",
-            "bazzy87",
-            "1",
-            324,
-            324,
-            0
-        ],
-        "80": [
-            "bazzy87",
-            "Peppe",
-            "2",
-            269,
-            0,
-            269
-        ],
-        "32": [
-            "Rinaldo",
-            "bazzy87",
-            "1",
-            303,
-            303,
-            0
-        ],
-        "81": [
-            "bazzy87",
-            "Rinaldo",
-            "2",
-            344,
-            0,
-            344
-        ],
-        "44": [
-            "ninfa81",
-            "il difetto",
-            "2",
-            292,
-            0,
-            292
-        ],
-        "37": [
-            "Rinaldo",
-            "Tasmania94!",
-            "1",
-            411,
-            411,
-            0
-        ],
-        "30": [
-            "Rinaldo",
-            "siddharta33",
-            "1",
-            326,
-            326,
-            0
-        ],
-        "146": [
-            "Tasmania94!",
-            "Rinaldo",
-            "1",
-            326,
-            326,
-            0
-        ],
-        "24": [
-            "Peppe",
-            "Tasmania94!",
-            "1",
-            402,
-            402,
-            0
-        ],
-        "145": [
-            "Tasmania94!",
-            "Peppe",
-            "1",
-            287,
-            287,
-            0
-        ],
-        "1": [
-            "Anny.88",
-            "Peppe",
-            "1",
-            257,
-            257,
-            0
+            "testuccio testicoli",
+            "testambro testosterone",
+            "3",
+            3,
+            3,
+            3
         ],
         "14": [
-            "Peppe",
-            "Anny.88",
+            "testina testori",
+            "teresio testamatta",
             "1",
-            266,
-            266,
+            2,
+            2,
             0
         ],
-        "171": [
-            "Gegg\u00e8",
-            "Peppe",
-            "1",
-            302,
-            302,
-            0
-        ],
-        "26": [
-            "Peppe",
-            "Gegg\u00e8",
+        "45": [
+            "tessuto tessile",
+            "timoteo tazzoni",
             "2",
-            304,
+            1,
             0,
-            304
+            1
+        ],
+        "41": [
+            "teresio testamatta",
+            "tessuto tessile",
+            "3",
+            2,
+            2,
+            2
         ],
         "13": [
-            "Anny.88",
-            "Gegg\u00e8",
+            "testina testori",
+            "teseo testina",
             "1",
-            310,
-            310,
+            2,
+            2,
             0
         ],
-        "170": [
-            "Gegg\u00e8",
-            "Anny.88",
-            "1",
-            337,
-            337,
-            0
-        ],
-        "6": [
-            "Anny.88",
-            "bazzy87",
-            "1",
-            321,
-            321,
-            0
-        ],
-        "55": [
-            "siddharta33",
-            "Rinaldo",
-            "1",
-            299,
-            299,
-            0
-        ],
-        "53": [
-            "siddharta33",
-            "Anny.88",
-            "1",
-            328,
-            328,
-            0
-        ],
-        "18": [
-            "Peppe",
-            "il difetto",
-            "1",
-            324,
-            324,
-            0
-        ],
-        "67": [
-            "il difetto",
-            "Peppe",
+        "5": [
+            "testuccio testicoli",
+            "teseo testina",
             "2",
-            274,
+            3,
             0,
-            274
+            3
         ],
-        "17": [
-            "Peppe",
-            "siddharta33",
-            "1",
-            229,
-            229,
-            0
+        "7": [
+            "testuccio testicoli",
+            "tesorina rina",
+            "2",
+            4,
+            0,
+            4
         ],
-        "54": [
-            "siddharta33",
-            "Peppe",
+        "12": [
+            "testina testori",
+            "tesaurus testadimorto",
+            "3",
+            5,
+            5,
+            5
+        ],
+        "38": [
+            "teseo testina",
+            "tessuto tessile",
             "1",
-            267,
-            267,
+            3,
+            3,
             0
         ],
         "4": [
-            "Anny.88",
-            "siddharta33",
-            "1",
-            326,
-            326,
-            0
-        ],
-        "43": [
-            "ninfa81",
-            "siddharta33",
-            "1",
-            262,
-            262,
-            0
-        ],
-        "58": [
-            "siddharta33",
-            "bazzy87",
-            "1",
-            262,
-            262,
-            0
-        ],
-        "83": [
-            "bazzy87",
-            "siddharta33",
-            "2",
-            318,
-            0,
-            318
-        ],
-        "56": [
-            "siddharta33",
-            "ninfa81",
-            "2",
-            321,
-            0,
-            321
-        ],
-        "25": [
-            "Peppe",
-            "Vero80",
-            "1",
-            445,
-            445,
-            0
-        ],
-        "158": [
-            "Vero80",
-            "Peppe",
-            "2",
-            265,
-            0,
-            265
-        ],
-        "77": [
-            "il difetto",
-            "Vero80",
-            "1",
-            380,
-            380,
-            0
-        ],
-        "162": [
-            "Vero80",
-            "il difetto",
-            "2",
-            256,
-            0,
-            256
-        ],
-        "161": [
-            "Vero80",
-            "siddharta33",
-            "2",
-            215,
-            0,
-            215
-        ],
-        "64": [
-            "siddharta33",
-            "Vero80",
-            "2",
-            348,
-            0,
-            348
-        ],
-        "45": [
-            "ninfa81",
-            "bazzy87",
-            "1",
-            230,
-            230,
-            0
-        ],
-        "82": [
-            "bazzy87",
-            "ninfa81",
-            "1",
-            265,
-            265,
-            0
-        ],
-        "39": [
-            "Rinaldo",
-            "Gegg\u00e8",
-            "1",
-            262,
-            262,
-            0
-        ],
-        "172": [
-            "Gegg\u00e8",
-            "Rinaldo",
-            "1",
-            397,
-            397,
-            0
-        ],
-        "160": [
-            "Vero80",
-            "ninfa81",
-            "1",
-            197,
-            197,
-            0
-        ],
-        "38": [
-            "Rinaldo",
-            "Vero80",
-            "1",
-            205,
-            205,
-            0
-        ],
-        "159": [
-            "Vero80",
-            "Rinaldo",
-            "1",
-            302,
-            302,
-            0
-        ],
-        "10": [
-            "Anny.88",
-            "garruz88",
-            "2",
-            348,
-            0,
-            348
-        ],
-        "131": [
-            "garruz88",
-            "Anny.88",
-            "1",
-            320,
-            320,
-            0
-        ],
-        "118": [
-            "manu1504",
-            "Anny.88",
-            "1",
-            348,
-            348,
-            0
-        ],
-        "23": [
-            "Peppe",
-            "garruz88",
-            "1",
-            355,
-            355,
-            0
-        ],
-        "132": [
-            "garruz88",
-            "Peppe",
-            "1",
-            279,
-            279,
-            0
-        ],
-        "142": [
-            "garruz88",
-            "Vero80",
-            "1",
-            475,
-            475,
-            0
-        ],
-        "167": [
-            "Vero80",
-            "garruz88",
-            "2",
-            294,
-            0,
-            294
-        ],
-        "12": [
-            "Anny.88",
-            "Vero80",
-            "1",
-            374,
-            374,
-            0
-        ],
-        "9": [
-            "Anny.88",
-            "manu1504",
-            "1",
-            348,
-            348,
-            0
-        ],
-        "157": [
-            "Vero80",
-            "Anny.88",
-            "1",
-            328,
-            328,
-            0
-        ],
-        "163": [
-            "Vero80",
-            "bazzy87",
-            "1",
-            314,
-            314,
-            0
-        ],
-        "90": [
-            "bazzy87",
-            "Vero80",
-            "1",
-            437,
-            437,
-            0
-        ],
-        "62": [
-            "siddharta33",
-            "garruz88",
-            "1",
-            365,
-            365,
-            0
-        ],
-        "169": [
-            "Vero80",
-            "Gegg\u00e8",
-            "2",
-            205,
-            0,
-            205
-        ],
-        "173": [
-            "Gegg\u00e8",
-            "ninfa81",
-            "1",
-            346,
-            346,
-            0
-        ],
-        "182": [
-            "Gegg\u00e8",
-            "Vero80",
-            "1",
-            323,
-            323,
-            0
-        ],
-        "52": [
-            "ninfa81",
-            "Gegg\u00e8",
-            "2",
-            248,
-            0,
-            248
-        ],
-        "36": [
-            "Rinaldo",
-            "garruz88",
-            "1",
-            391,
-            391,
-            0
-        ],
-        "134": [
-            "garruz88",
-            "ninfa81",
-            "1",
-            318,
-            318,
-            0
-        ],
-        "120": [
-            "manu1504",
-            "Rinaldo",
-            "1",
-            317,
-            317,
-            0
-        ],
-        "35": [
-            "Rinaldo",
-            "manu1504",
-            "2",
-            311,
-            0,
-            311
-        ],
-        "124": [
-            "manu1504",
-            "bazzy87",
-            "1",
-            198,
-            198,
-            0
-        ],
-        "123": [
-            "manu1504",
-            "il difetto",
-            "1",
-            329,
-            329,
-            0
-        ],
-        "74": [
-            "il difetto",
-            "manu1504",
-            "1",
-            332,
-            332,
-            0
-        ],
-        "78": [
-            "il difetto",
-            "Gegg\u00e8",
-            "2",
-            220,
-            0,
-            220
-        ],
-        "49": [
-            "ninfa81",
-            "garruz88",
-            "1",
-            297,
-            297,
-            0
-        ],
-        "135": [
-            "garruz88",
-            "siddharta33",
-            "1",
-            328,
-            328,
-            0
-        ],
-        "166": [
-            "Vero80",
-            "manu1504",
-            "1",
-            247,
-            247,
-            0
-        ],
-        "175": [
-            "Gegg\u00e8",
-            "il difetto",
-            "1",
-            311,
-            311,
-            0
-        ],
-        "75": [
-            "il difetto",
-            "garruz88",
-            "2",
-            248,
-            0,
-            248
-        ],
-        "133": [
-            "garruz88",
-            "Rinaldo",
-            "1",
-            269,
-            269,
-            0
-        ],
-        "136": [
-            "garruz88",
-            "il difetto",
-            "1",
-            321,
-            321,
-            0
-        ],
-        "176": [
-            "Gegg\u00e8",
-            "bazzy87",
-            "1",
-            329,
-            329,
-            0
-        ],
-        "87": [
-            "bazzy87",
-            "manu1504",
-            "1",
-            270,
-            270,
-            0
-        ],
-        "180": [
-            "Gegg\u00e8",
-            "garruz88",
-            "2",
-            335,
-            0,
-            335
-        ],
-        "143": [
-            "garruz88",
-            "Gegg\u00e8",
-            "2",
-            302,
-            0,
-            302
-        ],
-        "88": [
-            "bazzy87",
-            "garruz88",
-            "1",
-            367,
-            367,
-            0
-        ],
-        "137": [
-            "garruz88",
-            "bazzy87",
-            "1",
-            284,
-            284,
-            0
-        ],
-        "91": [
-            "bazzy87",
-            "Gegg\u00e8",
-            "1",
-            316,
-            316,
-            0
-        ],
-        "119": [
-            "manu1504",
-            "Peppe",
-            "1",
-            267,
-            267,
-            0
-        ],
-        "129": [
-            "manu1504",
-            "Vero80",
-            "1",
-            355,
-            355,
-            0
-        ],
-        "22": [
-            "Peppe",
-            "manu1504",
-            "1",
-            228,
-            228,
-            0
-        ],
-        "150": [
-            "Tasmania94!",
-            "bazzy87",
-            "1",
-            294,
-            294,
-            0
-        ],
-        "89": [
-            "bazzy87",
-            "Tasmania94!",
-            "1",
-            428,
-            428,
-            0
-        ],
-        "50": [
-            "ninfa81",
-            "Tasmania94!",
-            "1",
-            387,
-            387,
-            0
-        ],
-        "155": [
-            "Tasmania94!",
-            "Vero80",
-            "1",
-            344,
-            344,
-            0
-        ],
-        "147": [
-            "Tasmania94!",
-            "ninfa81",
-            "2",
-            341,
-            0,
-            341
-        ],
-        "168": [
-            "Vero80",
-            "Tasmania94!",
-            "1",
-            264,
-            264,
-            0
+            "testuccio testicoli",
+            "tesaurus testadimorto",
+            "3",
+            3,
+            3,
+            3
         ],
         "11": [
-            "Anny.88",
-            "Tasmania94!",
-            "1",
-            356,
-            356,
-            0
-        ],
-        "48": [
-            "ninfa81",
-            "manu1504",
-            "1",
-            308,
-            308,
-            0
-        ],
-        "121": [
-            "manu1504",
-            "ninfa81",
-            "1",
-            261,
-            261,
-            0
-        ],
-        "144": [
-            "Tasmania94!",
-            "Anny.88",
+            "testina testori",
+            "testambro testosterone",
             "2",
-            352,
+            6,
             0,
-            352
+            6
         ],
-        "122": [
-            "manu1504",
-            "siddharta33",
-            "1",
-            472,
-            472,
-            0
+        "16": [
+            "testina testori",
+            "tessuto tessile",
+            "3",
+            2,
+            2,
+            2
         ],
-        "140": [
-            "garruz88",
-            "manu1504",
-            "1",
-            281,
-            281,
-            0
-        ],
-        "61": [
-            "siddharta33",
-            "manu1504",
-            "1",
-            345,
-            345,
-            0
-        ],
-        "141": [
-            "garruz88",
-            "Tasmania94!",
-            "1",
-            356,
-            356,
-            0
-        ],
-        "154": [
-            "Tasmania94!",
-            "garruz88",
-            "1",
-            299,
-            299,
-            0
-        ],
-        "174": [
-            "Gegg\u00e8",
-            "siddharta33",
-            "1",
-            282,
-            282,
-            0
-        ],
-        "130": [
-            "manu1504",
-            "Gegg\u00e8",
-            "1",
-            373,
-            373,
-            0
-        ],
-        "179": [
-            "Gegg\u00e8",
-            "manu1504",
-            "1",
-            328,
-            328,
-            0
-        ],
-        "127": [
-            "manu1504",
-            "garruz88",
-            "1",
-            323,
-            323,
-            0
-        ],
-        "65": [
-            "siddharta33",
-            "Gegg\u00e8",
+        "15": [
+            "testina testori",
+            "tesorina rina",
             "2",
-            326,
+            4,
             0,
-            326
+            4
         ],
-        "153": [
-            "Tasmania94!",
-            "manu1504",
+        "9": [
+            "testuccio testicoli",
+            "timoteo tazzoni",
             "2",
-            261,
+            6,
             0,
-            261
+            6
         ],
-        "128": [
-            "manu1504",
-            "Tasmania94!",
+        "10": [
+            "testina testori",
+            "tristano testadicazzo",
+            "3",
+            1,
+            1,
+            1
+        ],
+        "6": [
+            "testuccio testicoli",
+            "teresio testamatta",
             "1",
-            325,
-            325,
+            3,
+            3,
             0
         ],
-        "76": [
-            "il difetto",
-            "Tasmania94!",
-            "1",
-            238,
-            238,
-            0
+        "17": [
+            "testina testori",
+            "timoteo tazzoni",
+            "3",
+            2,
+            2,
+            2
         ],
-        "94": [
-            "selene157",
-            "Rinaldo",
-            "1",
-            317,
-            317,
-            0
-        ],
-        "156": [
-            "Tasmania94!",
-            "Gegg\u00e8",
-            "1",
-            315,
-            315,
-            0
-        ],
-        "149": [
-            "Tasmania94!",
-            "il difetto",
+        "2": [
+            "testuccio testicoli",
+            "tristano testadicazzo",
             "2",
-            356,
+            7,
             0,
-            356
+            7
         ],
-        "93": [
-            "selene157",
-            "Peppe",
+        "18": [
+            "tristano testadicazzo",
+            "testambro testosterone",
+            "3",
+            3,
+            3,
+            3
+        ],
+        "19": [
+            "tristano testadicazzo",
+            "tesaurus testadimorto",
             "1",
-            291,
-            291,
+            4,
+            4,
             0
         ],
-        "95": [
-            "selene157",
-            "ninfa81",
+        "1": [
+            "testuccio testicoli",
+            "testina testori",
             "1",
-            263,
-            263,
-            0
-        ],
-        "7": [
-            "Anny.88",
-            "selene157",
-            "1",
-            271,
-            271,
-            0
-        ],
-        "103": [
-            "selene157",
-            "Vero80",
-            "1",
-            269,
-            269,
-            0
-        ],
-        "33": [
-            "Rinaldo",
-            "selene157",
-            "2",
-            306,
-            0,
-            306
-        ],
-        "148": [
-            "Tasmania94!",
-            "siddharta33",
-            "1",
-            321,
-            321,
-            0
-        ],
-        "181": [
-            "Gegg\u00e8",
-            "Tasmania94!",
-            "1",
-            274,
-            274,
+            2,
+            2,
             0
         ],
         "21": [
-            "Peppe",
-            "dj dany",
-            "1",
-            452,
-            452,
-            0
+            "tristano testadicazzo",
+            "teresio testamatta",
+            "2",
+            1,
+            0,
+            1
         ],
-        "63": [
-            "siddharta33",
-            "Tasmania94!",
+        "22": [
+            "tristano testadicazzo",
+            "tesorina rina",
             "1",
-            262,
-            262,
+            3,
+            3,
             0
         ],
         "20": [
-            "Peppe",
-            "selene157",
+            "tristano testadicazzo",
+            "teseo testina",
+            "1",
+            3,
+            3,
+            0
+        ],
+        "23": [
+            "tristano testadicazzo",
+            "tessuto tessile",
+            "1",
+            1,
+            1,
+            0
+        ],
+        "25": [
+            "testambro testosterone",
+            "tesaurus testadimorto",
             "2",
-            382,
+            3,
             0,
-            382
+            3
         ],
-        "97": [
-            "selene157",
-            "il difetto",
-            "1",
-            265,
-            265,
-            0
+        "24": [
+            "tristano testadicazzo",
+            "timoteo tazzoni",
+            "3",
+            2,
+            2,
+            2
         ],
-        "164": [
-            "Vero80",
-            "selene157",
+        "26": [
+            "testambro testosterone",
+            "teseo testina",
+            "3",
+            2,
+            2,
+            2
+        ],
+        "28": [
+            "testambro testosterone",
+            "tesorina rina",
             "2",
-            249,
+            3,
             0,
-            249
+            3
         ],
-        "96": [
-            "selene157",
-            "siddharta33",
-            "1",
-            342,
-            342,
-            0
-        ],
-        "106": [
-            "dj dany",
-            "Peppe",
+        "29": [
+            "testambro testosterone",
+            "tessuto tessile",
             "2",
-            323,
+            1,
             0,
-            323
+            1
         ],
-        "8": [
-            "Anny.88",
-            "dj dany",
+        "30": [
+            "testambro testosterone",
+            "timoteo tazzoni",
+            "3",
+            1,
+            1,
+            1
+        ],
+        "27": [
+            "testambro testosterone",
+            "teresio testamatta",
             "1",
-            308,
-            308,
+            6,
+            6,
             0
         ],
-        "105": [
-            "dj dany",
-            "Anny.88",
-            "1",
-            391,
-            391,
-            0
-        ],
-        "111": [
-            "dj dany",
-            "bazzy87",
-            "1",
-            305,
-            305,
-            0
-        ],
-        "109": [
-            "dj dany",
-            "siddharta33",
-            "1",
-            348,
-            348,
-            0
-        ],
-        "60": [
-            "siddharta33",
-            "dj dany",
-            "1",
-            366,
-            366,
-            0
-        ],
-        "107": [
-            "dj dany",
-            "Rinaldo",
-            "1",
-            262,
-            262,
-            0
-        ],
-        "114": [
-            "dj dany",
-            "garruz88",
-            "1",
-            308,
-            308,
-            0
-        ],
-        "165": [
-            "Vero80",
-            "dj dany",
-            "1",
-            200,
-            200,
-            0
-        ],
-        "116": [
-            "dj dany",
-            "Vero80",
+        "31": [
+            "tesaurus testadimorto",
+            "teseo testina",
             "2",
-            224,
+            2,
             0,
-            224
+            2
         ],
-        "113": [
-            "dj dany",
-            "manu1504",
-            "2",
-            468,
-            0,
-            468
+        "32": [
+            "tesaurus testadimorto",
+            "teresio testamatta",
+            "3",
+            2,
+            2,
+            2
         ],
-        "126": [
-            "manu1504",
-            "dj dany",
+        "33": [
+            "tesaurus testadimorto",
+            "tesorina rina",
             "1",
-            258,
-            258,
+            2,
+            2,
             0
-        ],
-        "108": [
-            "dj dany",
-            "ninfa81",
-            "2",
-            269,
-            0,
-            269
         ],
         "34": [
-            "Rinaldo",
-            "dj dany",
-            "1",
-            328,
-            328,
-            0
-        ],
-        "139": [
-            "garruz88",
-            "dj dany",
-            "1",
-            278,
-            278,
-            0
-        ],
-        "47": [
-            "ninfa81",
-            "dj dany",
+            "tesaurus testadimorto",
+            "tessuto tessile",
             "2",
-            381,
+            1,
             0,
-            381
+            1
         ],
-        "110": [
-            "dj dany",
-            "il difetto",
+        "35": [
+            "tesaurus testadimorto",
+            "timoteo tazzoni",
             "2",
-            222,
+            3,
             0,
-            222
+            3
         ],
-        "73": [
-            "il difetto",
-            "dj dany",
-            "1",
-            280,
-            280,
-            0
+        "36": [
+            "teseo testina",
+            "teresio testamatta",
+            "3",
+            1,
+            1,
+            1
         ],
-        "72": [
-            "il difetto",
-            "selene157",
+        "37": [
+            "teseo testina",
+            "tesorina rina",
             "2",
-            316,
+            2,
             0,
-            316
+            2
         ],
-        "46": [
-            "ninfa81",
-            "selene157",
+        "40": [
+            "teresio testamatta",
+            "tesorina rina",
             "1",
-            318,
-            318,
+            3,
+            3,
             0
         ],
-        "92": [
-            "selene157",
-            "Anny.88",
+        "39": [
+            "teseo testina",
+            "timoteo tazzoni",
             "1",
-            329,
-            329,
+            1,
+            1,
             0
         ],
-        "98": [
-            "selene157",
-            "bazzy87",
+        "42": [
+            "teresio testamatta",
+            "timoteo tazzoni",
+            "3",
+            2,
+            2,
+            2
+        ],
+        "43": [
+            "tesorina rina",
+            "tessuto tessile",
             "2",
-            361,
+            2,
             0,
-            361
+            2
         ],
-        "86": [
-            "bazzy87",
-            "dj dany",
-            "1",
-            314,
-            314,
-            0
-        ],
-        "51": [
-            "ninfa81",
-            "Vero80",
-            "1",
-            345,
-            345,
-            0
-        ],
-        "100": [
-            "selene157",
-            "manu1504",
-            "1",
-            236,
-            236,
-            0
-        ],
-        "177": [
-            "Gegg\u00e8",
-            "selene157",
-            "1",
-            271,
-            271,
-            0
-        ],
-        "59": [
-            "siddharta33",
-            "selene157",
-            "1",
-            319,
-            319,
-            0
-        ],
-        "101": [
-            "selene157",
-            "garruz88",
-            "1",
-            322,
-            322,
-            0
-        ],
-        "104": [
-            "selene157",
-            "Gegg\u00e8",
+        "44": [
+            "tesorina rina",
+            "timoteo tazzoni",
             "2",
-            339,
+            2,
             0,
-            339
-        ],
-        "117": [
-            "dj dany",
-            "Gegg\u00e8",
-            "1",
-            257,
-            257,
-            0
-        ],
-        "178": [
-            "Gegg\u00e8",
-            "dj dany",
-            "2",
-            283,
-            0,
-            283
-        ],
-        "79": [
-            "bazzy87",
-            "Anny.88",
-            "1",
-            235,
-            235,
-            0
-        ],
-        "85": [
-            "bazzy87",
-            "selene157",
-            "2",
-            228,
-            0,
-            228
-        ],
-        "102": [
-            "selene157",
-            "Tasmania94!",
-            "1",
-            276,
-            276,
-            0
-        ],
-        "125": [
-            "manu1504",
-            "selene157",
-            "2",
-            327,
-            0,
-            327
-        ],
-        "152": [
-            "Tasmania94!",
-            "dj dany",
-            "1",
-            318,
-            318,
-            0
-        ],
-        "115": [
-            "dj dany",
-            "Tasmania94!",
-            "2",
-            352,
-            0,
-            352
-        ],
-        "151": [
-            "Tasmania94!",
-            "selene157",
-            "2",
-            224,
-            0,
-            224
+            2
         ]
     },
     "records_high": [
@@ -1547,7 +438,7 @@
         "Partita sconosciuta",
         99999
     ],
-    "tourney_type": 0,
+    "tourney_type": 1,
     "pts_win": null,
     "pts_draw": null,
     "pts_loss": null

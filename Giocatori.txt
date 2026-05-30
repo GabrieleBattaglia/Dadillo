@@ -1,103 +1,127 @@
 Hall of Fame di Dadillo
 
-Peppe
-  Medagliere: Oro 1, Argento 0, Bronzo 0, Legno 0
-  Media Piazzamenti: 0.00 (Tornei giocati: 1)
-  Storico Tornei:
-    1° in Farkle Bonus - 2026-03-17 - 2026-04-20
-
 Selene157
-  Medagliere: Oro 0, Argento 1, Bronzo 0, Legno 0
-  Media Piazzamenti: 0.00 (Tornei giocati: 1)
+  Medagliere: Oro 1, Argento 1
+  Media Piazzamenti: 0.00 (Tornei giocati: 2)
   Storico Tornei:
     2° in Farkle Bonus - 2026-03-17 - 2026-04-20
+    1° in Yatzee con Bonus - 2026-05-01 - 2026-05-30
+
+Peppe
+  Medagliere: Oro 1
+  Media Piazzamenti: 3.00 (Tornei giocati: 2)
+  Storico Tornei:
+    1° in Farkle Bonus - 2026-03-17 - 2026-04-20
+    6° in Yatzee con Bonus - 2026-05-01 - 2026-05-30
+
+Geggè
+  Medagliere: Argento 1
+  Media Piazzamenti: 7.50 (Tornei giocati: 2)
+  Storico Tornei:
+    15° in Farkle Bonus - 2026-03-17 - 2026-04-20
+    2° in Yatzee con Bonus - 2026-05-01 - 2026-05-30
+
+Manu1504
+  Medagliere: Bronzo 1
+  Media Piazzamenti: 2.50 (Tornei giocati: 2)
+  Storico Tornei:
+    5° in Farkle Bonus - 2026-03-17 - 2026-04-20
+    3° in Yatzee con Bonus - 2026-05-01 - 2026-05-30
 
 Siddharta33
-  Medagliere: Oro 0, Argento 0, Bronzo 1, Legno 0
-  Media Piazzamenti: 0.00 (Tornei giocati: 1)
+  Medagliere: Bronzo 1
+  Media Piazzamenti: 5.00 (Tornei giocati: 2)
   Storico Tornei:
     3° in Farkle Bonus - 2026-03-17 - 2026-04-20
+    10° in Yatzee con Bonus - 2026-05-01 - 2026-05-30
 
 Geypi
-  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 1
+  Medagliere: Legno 1
   Media Piazzamenti: 0.00 (Tornei giocati: 1)
   Storico Tornei:
     4° in Farkle Bonus - 2026-03-17 - 2026-04-20
 
-Manu1504
-  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 0
-  Media Piazzamenti: 5.00 (Tornei giocati: 1)
+garruz88
+  Medagliere: Legno 1
+  Media Piazzamenti: 0.00 (Tornei giocati: 1)
   Storico Tornei:
-    5° in Farkle Bonus - 2026-03-17 - 2026-04-20
+    4° in Yatzee con Bonus - 2026-05-01 - 2026-05-30
 
 Gas
-  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 0
+  Medagliere: Ancora nessuna medaglia
   Media Piazzamenti: 6.00 (Tornei giocati: 1)
   Storico Tornei:
     6° in Farkle Bonus - 2026-03-17 - 2026-04-20
 
 Rinaldo
-  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 0
-  Media Piazzamenti: 7.00 (Tornei giocati: 1)
+  Medagliere: Ancora nessuna medaglia
+  Media Piazzamenti: 7.50 (Tornei giocati: 2)
   Storico Tornei:
     7° in Farkle Bonus - 2026-03-17 - 2026-04-20
+    8° in Yatzee con Bonus - 2026-05-01 - 2026-05-30
+
+Anny.88
+  Medagliere: Ancora nessuna medaglia
+  Media Piazzamenti: 8.00 (Tornei giocati: 2)
+  Storico Tornei:
+    11° in Farkle Bonus - 2026-03-17 - 2026-04-20
+    5° in Yatzee con Bonus - 2026-05-01 - 2026-05-30
 
 Princi
-  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 0
+  Medagliere: Ancora nessuna medaglia
   Media Piazzamenti: 8.00 (Tornei giocati: 1)
   Storico Tornei:
     8° in Farkle Bonus - 2026-03-17 - 2026-04-20
 
-Bazzi87
-  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 0
-  Media Piazzamenti: 9.00 (Tornei giocati: 1)
-  Storico Tornei:
-    9° in Farkle Bonus - 2026-03-17 - 2026-04-20
-
 Ninfa81
-  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 0
-  Media Piazzamenti: 10.00 (Tornei giocati: 1)
+  Medagliere: Ancora nessuna medaglia
+  Media Piazzamenti: 8.50 (Tornei giocati: 2)
   Storico Tornei:
     10° in Farkle Bonus - 2026-03-17 - 2026-04-20
+    7° in Yatzee con Bonus - 2026-05-01 - 2026-05-30
 
-Anny.88
-  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 0
-  Media Piazzamenti: 11.00 (Tornei giocati: 1)
+Bazzi87
+  Medagliere: Ancora nessuna medaglia
+  Media Piazzamenti: 10.00 (Tornei giocati: 2)
   Storico Tornei:
-    11° in Farkle Bonus - 2026-03-17 - 2026-04-20
-
-Dj Dany
-  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 0
-  Media Piazzamenti: 12.00 (Tornei giocati: 1)
-  Storico Tornei:
-    12° in Farkle Bonus - 2026-03-17 - 2026-04-20
-
-Vero80
-  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 0
-  Media Piazzamenti: 13.00 (Tornei giocati: 1)
-  Storico Tornei:
-    13° in Farkle Bonus - 2026-03-17 - 2026-04-20
+    9° in Farkle Bonus - 2026-03-17 - 2026-04-20
+    11° in Yatzee con Bonus - 2026-05-01 - 2026-05-30
 
 Il Difetto88
-  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 0
-  Media Piazzamenti: 14.00 (Tornei giocati: 1)
+  Medagliere: Ancora nessuna medaglia
+  Media Piazzamenti: 11.50 (Tornei giocati: 2)
   Storico Tornei:
     14° in Farkle Bonus - 2026-03-17 - 2026-04-20
+    9° in Yatzee con Bonus - 2026-05-01 - 2026-05-30
 
-Geggè
-  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 0
-  Media Piazzamenti: 15.00 (Tornei giocati: 1)
+Tasmania94!
+  Medagliere: Ancora nessuna medaglia
+  Media Piazzamenti: 12.00 (Tornei giocati: 1)
   Storico Tornei:
-    15° in Farkle Bonus - 2026-03-17 - 2026-04-20
+    12° in Yatzee con Bonus - 2026-05-01 - 2026-05-30
+
+Dj Dany
+  Medagliere: Ancora nessuna medaglia
+  Media Piazzamenti: 13.00 (Tornei giocati: 2)
+  Storico Tornei:
+    12° in Farkle Bonus - 2026-03-17 - 2026-04-20
+    14° in Yatzee con Bonus - 2026-05-01 - 2026-05-30
+
+Vero80
+  Medagliere: Ancora nessuna medaglia
+  Media Piazzamenti: 13.00 (Tornei giocati: 2)
+  Storico Tornei:
+    13° in Farkle Bonus - 2026-03-17 - 2026-04-20
+    13° in Yatzee con Bonus - 2026-05-01 - 2026-05-30
 
 Piellino88
-  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 0
+  Medagliere: Ancora nessuna medaglia
   Media Piazzamenti: 16.00 (Tornei giocati: 1)
   Storico Tornei:
     16° in Farkle Bonus - 2026-03-17 - 2026-04-20
 
 Isotta2604
-  Medagliere: Oro 0, Argento 0, Bronzo 0, Legno 0
+  Medagliere: Ancora nessuna medaglia
   Media Piazzamenti: 17.00 (Tornei giocati: 1)
   Storico Tornei:
     17° in Farkle Bonus - 2026-03-17 - 2026-04-20

@@ -132,10 +132,6 @@ class PlayerDB:
 
     def add_or_update_player(self, name, position, is_oro, is_argento, is_bronzo, is_legno, tourney_title, start_date, end_date):
         actual_name = name
-        for existing_name in self.players.keys():
-            if existing_name.lower() == name.lower():
-                actual_name = existing_name
-                break
 
         if actual_name not in self.players:
             self.players[actual_name] = {"medals": {"oro": 0, "argento": 0, "bronzo": 0, "legno": 0}, "history": [], "placements_sum": 0}
@@ -185,10 +181,6 @@ class PlayerDB:
 
             # Check for existing player (case insensitive)
             actual_name = ext_name
-            for existing_name in self.players.keys():
-                if existing_name.lower() == ext_name.lower():
-                    actual_name = existing_name
-                    break
 
             if actual_name not in self.players:
                 self.players[actual_name] = {"medals": {"oro": 0, "argento": 0, "bronzo": 0, "legno": 0}, "history": [], "placements_sum": 0}
@@ -275,7 +267,21 @@ class PlayerDB:
                 f.write(f"{name}\n")
                 
                 # Livello 1: Medagliere e Intestazione Storico
-                f.write(f"  Medagliere: Oro {m['oro']}, Argento {m['argento']}, Bronzo {m['bronzo']}, Legno {m['legno']}\n")
+                medals_str_parts = []
+                if m['oro'] >= 1:
+                    medals_str_parts.append(f"Oro {m['oro']}")
+                if m['argento'] >= 1:
+                    medals_str_parts.append(f"Argento {m['argento']}")
+                if m['bronzo'] >= 1:
+                    medals_str_parts.append(f"Bronzo {m['bronzo']}")
+                if m['legno'] >= 1:
+                    medals_str_parts.append(f"Legno {m['legno']}")
+                
+                if medals_str_parts:
+                    medals_line = "  Medagliere: " + ", ".join(medals_str_parts) + "\n"
+                else:
+                    medals_line = "  Medagliere: Ancora nessuna medaglia\n"
+                f.write(medals_line)
                 
                 num_tornei = len(p['history'])
                 media = p.get('placements_sum', 0) / num_tornei if num_tornei > 0 else 0
