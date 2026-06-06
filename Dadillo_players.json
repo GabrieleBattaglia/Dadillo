@@ -152,19 +152,6 @@
         ],
         "placements_sum": 26
     },
-    "Vero80": {
-        "medals": {
-            "oro": 0,
-            "argento": 0,
-            "bronzo": 0,
-            "legno": 0
-        },
-        "history": [
-            "13\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20",
-            "13\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
-        ],
-        "placements_sum": 26
-    },
     "Il Difetto88": {
         "medals": {
             "oro": 0,
@@ -238,5 +225,18 @@
             "4\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
         ],
         "placements_sum": 0
+    },
+    "vero80": {
+        "medals": {
+            "oro": 0,
+            "argento": 0,
+            "bronzo": 0,
+            "legno": 0
+        },
+        "history": [
+            "13\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20",
+            "13\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
+        ],
+        "placements_sum": 26
     }
 }
