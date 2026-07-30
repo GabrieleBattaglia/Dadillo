@@ -1,4 +1,4 @@
-VERSION = "2.5.0"
-DATE = "30 maggio 2026"
-AUTHORS = "Gabriele Battaglia, Stella Gemini 3.5 Flash"
+VERSION = "2.6.1"
+DATE = "30 luglio 2026"
+AUTHORS = "Gabriele Battaglia, Stella Gemini"
 APP_NAME = "Dadillo"

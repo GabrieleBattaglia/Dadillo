@@ -1,5 +1,6 @@
 import wx
 
+
 class MyDialog(wx.Dialog):
     def __init__(self):
         super().__init__(None, title="Test")
@@ -7,22 +8,23 @@ class MyDialog(wx.Dialog):
         self.txt.Bind(wx.EVT_TEXT_ENTER, self.on_enter)
         self.btn = wx.Button(self, wx.ID_OK, "OK")
         self.btn.Bind(wx.EVT_BUTTON, self.on_ok)
-        
+
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.txt)
         sizer.Add(self.btn)
         self.SetSizer(sizer)
-        
+
     def on_enter(self, event):
         print("Enter pressed, simulating OK")
         event_ok = wx.CommandEvent(wx.wxEVT_BUTTON, wx.ID_OK)
         self.ProcessEvent(event_ok)
-        
+
     def on_ok(self, event):
         print("Validation ran!")
         # Non chiamiamo event.Skip(), dovrebbe rimanere aperto
         # Invece stamperemo un messaggio
         print("Validation failed, but skipping skip.")
+
 
 app = wx.App(False)
 d = MyDialog()
