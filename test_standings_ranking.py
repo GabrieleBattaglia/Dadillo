@@ -15,6 +15,9 @@ class MockChoice:
         return self._idx
 
 
+from standings import rank_tournament_players
+
+
 class DummyStandingsHelper:
     def __init__(
         self,
@@ -26,144 +29,24 @@ class DummyStandingsHelper:
         reverse=True,
     ):
         self.tourney = tourney
-        self.cb_order = MockChoice(order_by)
-        self.cb_score_dir = MockChoice(
-            "Punteggio più alto"
-            if score_direction == "Alto"
-            else "Punteggio più basso",
-            0 if score_direction == "Alto" else 1,
-        )
-        self.cb_tie1 = MockChoice(tie1)
-        self.cb_tie2 = MockChoice(tie2)
-        self.cb_dir = MockChoice("Discendente", 0 if reverse else 1)
-
-    def _calculate_head_to_head(self, p1_name, p2_name):
-        score_a = 0
-        score_b = 0
-        wins_a = 0
-        wins_b = 0
-
-        for m_id, data in self.tourney.played_matches.items():
-            if len(data) >= 6:
-                mn1, mn2, mres, mpts, pt1, pt2 = data[:6]
-            else:
-                mn1, mn2, mres, mpts = data[:4]
-                if mres == "1":
-                    pt1, pt2 = mpts, 0
-                elif mres == "2":
-                    pt1, pt2 = 0, mpts
-                else:
-                    pt1, pt2 = mpts / 2.0, mpts / 2.0
-
-            if mn1 == p1_name and mn2 == p2_name:
-                score_a += pt1
-                score_b += pt2
-                if mres == "1":
-                    wins_a += 1
-                elif mres == "2":
-                    wins_b += 1
-            elif mn1 == p2_name and mn2 == p1_name:
-                score_b += pt1
-                score_a += pt2
-                if mres == "1":
-                    wins_b += 1
-                elif mres == "2":
-                    wins_a += 1
-
-        return score_a, score_b, wins_a, wins_b
+        self.order_by = order_by
+        self.score_direction = score_direction
+        self.tie1 = tie1
+        self.tie2 = tie2
+        self.reverse = reverse
 
     def sort_players(self):
-        order_by = self.cb_order.GetStringSelection()
-        score_direction = "Alto" if self.cb_score_dir.GetSelection() == 0 else "Basso"
-        tiebreaker_1 = self.cb_tie1.GetStringSelection()
-        tiebreaker_2 = self.cb_tie2.GetStringSelection()
-        reverse = self.cb_dir.GetSelection() == 0
-
-        unplayed_counts = {name: 0 for name in self.tourney.players.keys()}
-        for m_id, (p1, p2) in self.tourney.unplayed_matches.items():
-            if p1 in unplayed_counts:
-                unplayed_counts[p1] += 1
-            if p2 in unplayed_counts:
-                unplayed_counts[p2] += 1
-
-        flat = []
-        for name, stats in self.tourney.players.items():
-            played = stats[1] + stats[2] + stats[3]
-            total = played + unplayed_counts[name]
-            played_str = f"{played}/{total}"
-
-            flat.append(
-                {
-                    "name": name,
-                    "points": stats[0],
-                    "wins": stats[1],
-                    "draws": stats[2],
-                    "losses": stats[3],
-                    "played_str": played_str,
-                }
-            )
-
-        import functools
-
-        def compare_players(a, b):
-            if order_by == "Vittorie":
-                if a["wins"] != b["wins"]:
-                    return (a["wins"] > b["wins"]) - (a["wins"] < b["wins"])
-            elif order_by == "Punti":
-                if a["points"] != b["points"]:
-                    if score_direction == "Basso":
-                        return (b["points"] > a["points"]) - (b["points"] < a["points"])
-                    else:
-                        return (a["points"] > b["points"]) - (a["points"] < b["points"])
-            elif order_by == "Sconfitte":
-                if a["losses"] != b["losses"]:
-                    return (b["losses"] > a["losses"]) - (b["losses"] < a["losses"])
-            elif order_by == "Pareggi":
-                if a["draws"] != b["draws"]:
-                    return (a["draws"] > b["draws"]) - (a["draws"] < b["draws"])
-            elif order_by == "Nome Giocatore":
-                if a["name"].lower() != b["name"].lower():
-                    return (b["name"].lower() > a["name"].lower()) - (
-                        b["name"].lower() < a["name"].lower()
-                    )
-
-            if order_by != "Nome Giocatore" and tiebreaker_1 != "Nessuno":
-                pts_a, pts_b, w_a, w_b = self._calculate_head_to_head(
-                    a["name"], b["name"]
-                )
-
-                if "Punti" in tiebreaker_1:
-                    if pts_a != pts_b:
-                        if score_direction == "Basso":
-                            return (pts_b > pts_a) - (pts_b < pts_a)
-                        else:
-                            return (pts_a > pts_b) - (pts_a < pts_b)
-                elif "Vittorie" in tiebreaker_1:
-                    if w_a != w_b:
-                        return (w_a > w_b) - (w_a < w_b)
-
-            if tiebreaker_2 != "Nessuno":
-                if tiebreaker_2 == "Punti Totali" and order_by != "Punti":
-                    if a["points"] != b["points"]:
-                        if score_direction == "Basso":
-                            return (b["points"] > a["points"]) - (
-                                b["points"] < a["points"]
-                            )
-                        else:
-                            return (a["points"] > b["points"]) - (
-                                a["points"] < b["points"]
-                            )
-                elif tiebreaker_2 == "Vittorie Totali" and order_by != "Vittorie":
-                    if a["wins"] != b["wins"]:
-                        return (a["wins"] > b["wins"]) - (a["wins"] < b["wins"])
-
-            name_cmp = (a["name"] > b["name"]) - (a["name"] < b["name"])
-            if reverse:
-                return -name_cmp
-            return name_cmp
-
-        flat.sort(key=functools.cmp_to_key(compare_players), reverse=reverse)
-        return [item["name"] for item in flat]
+        ranked = rank_tournament_players(
+            self.tourney.players,
+            self.tourney.played_matches,
+            order_by=self.order_by,
+            score_direction=self.score_direction,
+            tiebreaker_1=self.tie1,
+            tiebreaker_2=self.tie2,
+            unplayed_matches=self.tourney.unplayed_matches,
+            reverse=self.reverse,
+        )
+        return [item["name"] for item in ranked]
 
 
 def test_tournament_json_persistence(tmp_path):
@@ -288,3 +171,173 @@ def test_setup_players_db_selection_behavior():
 
     dlg.Destroy()
     app.Destroy()
+
+
+def test_ranking_3_way_tie_head_to_head_wins():
+    t = TournamentData()
+    # 3 players tied on primary criterion: 2 wins each
+    t.players = {
+        "Alice": [20, 2, 0, 1],
+        "Bob": [20, 2, 0, 1],
+        "Charlie": [20, 2, 0, 1],
+        "David": [0, 0, 0, 3],
+    }
+    # Matches between Alice, Bob, Charlie:
+    # Alice beat Bob (res '1')
+    # Alice beat Charlie (res '1')
+    # Bob beat Charlie (res '1')
+    # Everyone beat David
+    t.played_matches = {
+        1: ["Alice", "Bob", "1", 10, 10, 0],
+        2: ["Alice", "Charlie", "1", 10, 10, 0],
+        3: ["Bob", "Charlie", "1", 10, 10, 0],
+        4: ["David", "Alice", "2", 0, 0, 0],
+        5: ["David", "Bob", "2", 0, 0, 0],
+        6: ["David", "Charlie", "2", 0, 0, 0],
+    }
+    # In the mini-league of {Alice, Bob, Charlie}:
+    # Alice has 2 wins, Bob has 1 win, Charlie has 0 wins.
+    helper = DummyStandingsHelper(
+        t,
+        order_by="Vittorie",
+        tie1="Scontro Diretto (Vittorie)",
+        tie2="Punti Totali",
+    )
+    ranked = helper.sort_players()
+    assert ranked == ["Alice", "Bob", "Charlie", "David"]
+
+
+def test_ranking_3_way_cyclic_tie_resolves_to_tiebreaker2():
+    t = TournamentData()
+    # 3 players tied on 2 wins each: Alice, Bob, Charlie
+    # Cyclic head to head: Alice beats Bob, Bob beats Charlie, Charlie beats Alice.
+    # Mini-league wins: Alice (1), Bob (1), Charlie (1) -> perfectly tied!
+    # Tiebreaker 2: Punti Totali (Alice 50 pts, Bob 40 pts, Charlie 30 pts)
+    t.players = {
+        "Alice": [50, 2, 0, 1],
+        "Bob": [40, 2, 0, 1],
+        "Charlie": [30, 2, 0, 1],
+    }
+    t.played_matches = {
+        1: ["Alice", "Bob", "1", 10, 10, 0],
+        2: ["Bob", "Charlie", "1", 10, 10, 0],
+        3: ["Charlie", "Alice", "1", 10, 10, 0],
+    }
+    helper = DummyStandingsHelper(
+        t,
+        order_by="Vittorie",
+        tie1="Scontro Diretto (Vittorie)",
+        tie2="Punti Totali",
+    )
+    ranked = helper.sort_players()
+    assert ranked == ["Alice", "Bob", "Charlie"]
+
+
+def test_ranking_4_way_tie_partial_recursive_resolution():
+    t = TournamentData()
+    # 4 players tied on primary criterion: 3 wins each
+    t.players = {
+        "A": [30, 3, 0, 1],
+        "B": [30, 3, 0, 1],
+        "C": [25, 3, 0, 1],  # C has more total points than D
+        "D": [15, 3, 0, 1],
+    }
+    # Matches between A, B, C, D:
+    # A beat B, C, D (3 mini wins)
+    # B beat C, D (2 mini wins)
+    # C and D drew with each other (0 mini wins, 1 draw each)
+    t.played_matches = {
+        1: ["A", "B", "1", 10, 10, 0],
+        2: ["A", "C", "1", 10, 10, 0],
+        3: ["A", "D", "1", 10, 10, 0],
+        4: ["B", "C", "1", 10, 10, 0],
+        5: ["B", "D", "1", 10, 10, 0],
+        6: ["C", "D", "3", 10, 5, 5],
+    }
+    # 1. Mini-league {A, B, C, D} -> A (3 wins) = 1st, B (2 wins) = 2nd, {C, D} (0 wins) = tied.
+    # 2. Subgroup {C, D} is re-evaluated:
+    #    - H2H {C, D}: match 6 was a draw (0 wins each) -> tied on tiebreaker 1.
+    #    - tiebreaker 2 (Punti Totali): C has 25 pts, D has 15 pts -> C beats D.
+    helper = DummyStandingsHelper(
+        t,
+        order_by="Vittorie",
+        tie1="Scontro Diretto (Vittorie)",
+        tie2="Punti Totali",
+    )
+    ranked = helper.sort_players()
+    assert ranked == ["A", "B", "C", "D"]
+
+
+def test_ranking_3_way_tie_score_basso_mini_league():
+    t = TournamentData()
+    # 3 players tied with 1 win each
+    t.players = {
+        "Alice": [20, 1, 0, 1],
+        "Bob": [20, 1, 0, 1],
+        "Charlie": [20, 1, 0, 1],
+    }
+    # Matches between them with points:
+    # Match 1: Alice vs Bob -> Alice scores 2 pts, Bob scores 8 pts (res '1')
+    # Match 2: Bob vs Charlie -> Bob scores 3 pts, Charlie scores 9 pts (res '1')
+    # Match 3: Charlie vs Alice -> Charlie scores 4 pts, Alice scores 7 pts (res '1')
+    # Sum of mini-league points:
+    # Alice: 2 + 7 = 9 pts
+    # Bob: 8 + 3 = 11 pts
+    # Charlie: 9 + 4 = 13 pts
+    # With score_direction = "Basso", lowest points wins: Alice (9) < Bob (11) < Charlie (13)
+    t.played_matches = {
+        1: ["Alice", "Bob", "1", 2, 2, 8],
+        2: ["Bob", "Charlie", "1", 3, 3, 9],
+        3: ["Charlie", "Alice", "1", 4, 4, 7],
+    }
+    helper = DummyStandingsHelper(
+        t,
+        order_by="Vittorie",
+        score_direction="Basso",
+        tie1="Scontro Diretto (Punti)",
+        tie2="Nessuno",
+    )
+    ranked = helper.sort_players()
+    assert ranked == ["Alice", "Bob", "Charlie"]
+
+
+def test_ranking_total_tie_alphabetical_fallback():
+    t = TournamentData()
+    # Alice, Bob, Charlie have identical stats and drew with each other
+    t.players = {
+        "Charlie": [10, 0, 2, 0],
+        "Alice": [10, 0, 2, 0],
+        "Bob": [10, 0, 2, 0],
+    }
+    t.played_matches = {
+        1: ["Alice", "Bob", "3", 10, 5, 5],
+        2: ["Bob", "Charlie", "3", 10, 5, 5],
+        3: ["Charlie", "Alice", "3", 10, 5, 5],
+    }
+    helper = DummyStandingsHelper(
+        t,
+        order_by="Punti",
+        tie1="Scontro Diretto (Punti)",
+        tie2="Vittorie Totali",
+    )
+    ranked = helper.sort_players()
+    assert ranked == ["Alice", "Bob", "Charlie"]
+
+
+if __name__ == "__main__":
+    import pathlib
+    import tempfile
+
+    print("Esecuzione test_standings_ranking...")
+    test_ranking_primary_points_score_basso()
+    test_ranking_primary_points_score_alto()
+    test_ranking_vittorie_primary_score_basso_tiebreak()
+    test_head_to_head_tiebreak_score_basso()
+    test_ranking_3_way_tie_head_to_head_wins()
+    test_ranking_3_way_cyclic_tie_resolves_to_tiebreaker2()
+    test_ranking_4_way_tie_partial_recursive_resolution()
+    test_ranking_3_way_tie_score_basso_mini_league()
+    test_ranking_total_tie_alphabetical_fallback()
+    test_tournament_json_persistence(pathlib.Path(tempfile.mkdtemp()))
+    test_setup_players_db_selection_behavior()
+    print("Tutti i test sono stati superati con successo!")

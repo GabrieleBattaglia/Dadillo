@@ -1,7 +1,8 @@
-# Dadillo - L'Altare del Sacrificio (Versione 2.6.1)
+# Dadillo - L'Altare del Sacrificio (Versione 2.6.2)
 
 **Dadillo** è un gestore di tornei scritto in Python. Gestisce giocatori, abbinamenti, classifiche e record con una personalità... *molto devota* al suo utilizzatore.
-La versione 2.6.1 introduce miglioramenti di accessibilità (NVDA/JAWS) nel flusso di aggiunta dei giocatori dal DB locale, criteri di classifica e di spareggio salvati direttamente nel file di ciascun torneo (con supporto sia a priorità punteggio alto che basso), l'unione asincrona dei database giocatori tra dispositivi diversi e il salvataggio istantaneo delle regole di classifica.
+La versione 2.6.2 introduce l'algoritmo di ordinamento universale a gruppi e sottogruppi ricorsivi (classifica avulsa), risolvendo in modo matematicamente rigoroso le parità con 3 o più giocatori, triangolari ciclici e mini-gironi.
+
 
 ## Caratteristiche
 - **Interfaccia Grafica**: Liste interattive, finestre di dialogo chiare e complete di supporto screen reader (NVDA/Jaws).

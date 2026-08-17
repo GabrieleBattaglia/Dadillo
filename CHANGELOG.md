@@ -2,6 +2,17 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.6.2] - 2026-08-17
+
+### Modificato
+- **Ordinamento Classifiche con Metodo a Gruppi e Sottogruppi Ricorsivi (Classifica Avulsa Universale)**:
+  - Sostituito il vecchio algoritmo comparativo a coppie con una funzione universale gerarchica a partizionamento di gruppo ([`rank_tournament_players`](file:///e:/git/Mine/Dadillo/standings.py#L39)).
+  - Risolti i casi di parità con 3 o più giocatori (es. triangolari ciclici e mini-gironi) calcolando le statistiche dei soli scontri diretti interni al gruppo a pari merito.
+  - Introdotta la risoluzione ricorsiva per sottogruppi parzialmente discriminati e la transizione automatica allo spareggio secondario o alfabetico in caso di parità globale.
+  - Estesa la suite di test ([`test_standings_ranking.py`](file:///e:/git/Mine/Dadillo/test_standings_ranking.py)) con test specifici per parità a 3 e 4 giocatori, pareggi ciclici e priorità punteggio alto/basso.
+
+---
+
 ## [2.6.1] - 2026-07-30
 
 ### Modificato

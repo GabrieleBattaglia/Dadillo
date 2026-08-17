@@ -3,6 +3,218 @@ from datetime import datetime
 import wx
 
 
+def _extract_match_details(data):
+    """Estrae (p1, p2, res, pt1, pt2) da un record partita, gestendo sia 4 che 6+ elementi."""
+    if len(data) >= 6:
+        mn1, mn2, mres, _, pt1, pt2 = data[:6]
+    else:
+        mn1, mn2, mres, mpts = data[:4]
+        if mres == "1":
+            pt1, pt2 = mpts, 0
+        elif mres == "2":
+            pt1, pt2 = 0, mpts
+        else:
+            pt1, pt2 = mpts / 2.0, mpts / 2.0
+    return mn1, mn2, mres, pt1, pt2
+
+
+def _calculate_mini_league_stats(group_names, played_matches):
+    """Calcola punti e vittorie nel mini-girone per i soli giocatori del gruppo specificato."""
+    mini_pts = {name: 0.0 for name in group_names}
+    mini_wins = {name: 0 for name in group_names}
+
+    for data in played_matches.values():
+        mn1, mn2, mres, pt1, pt2 = _extract_match_details(data)
+        if mn1 in group_names and mn2 in group_names:
+            mini_pts[mn1] += pt1
+            mini_pts[mn2] += pt2
+            if mres == "1":
+                mini_wins[mn1] += 1
+            elif mres == "2":
+                mini_wins[mn2] += 1
+
+    return mini_pts, mini_wins
+
+
+def rank_tournament_players(
+    players_dict,
+    played_matches,
+    order_by="Vittorie",
+    score_direction="Alto",
+    tiebreaker_1="Scontro Diretto (Punti)",
+    tiebreaker_2="Punti Totali",
+    unplayed_matches=None,
+    reverse=True,
+):
+    """
+    Ordina i giocatori di un torneo con il metodo a gruppi e sottogruppi ricorsivi (classifica avulsa).
+    Risolve correttamente le parità a 2, 3 o più giocatori secondo le regole impostate.
+    """
+    unplayed_counts = {name: 0 for name in players_dict}
+    if unplayed_matches:
+        for p1, p2 in unplayed_matches.values():
+            if p1 in unplayed_counts:
+                unplayed_counts[p1] += 1
+            if p2 in unplayed_counts:
+                unplayed_counts[p2] += 1
+
+    all_players = []
+    for name, stats in players_dict.items():
+        played = stats[1] + stats[2] + stats[3]
+        total = played + unplayed_counts.get(name, 0)
+        played_str = f"{played}/{total}"
+        all_players.append(
+            {
+                "name": name,
+                "points": stats[0],
+                "wins": stats[1],
+                "draws": stats[2],
+                "losses": stats[3],
+                "played_str": played_str,
+            }
+        )
+
+    if not all_players:
+        return []
+
+    is_points_order = order_by.startswith("Punti")
+
+    def _resolve_subgroup(sub, current_tie_stage):
+        if len(sub) <= 1:
+            return sub
+
+        if current_tie_stage == "tie1":
+            if tiebreaker_1 != "Nessuno":
+                sub_names = {p["name"] for p in sub}
+                mini_pts, mini_wins = _calculate_mini_league_stats(
+                    sub_names, played_matches
+                )
+
+                mini_subgroups = {}
+                for p in sub:
+                    name = p["name"]
+                    if "Punti" in tiebreaker_1:
+                        sc = mini_pts[name]
+                    elif "Vittorie" in tiebreaker_1:
+                        sc = mini_wins[name]
+                    else:
+                        sc = 0
+                    mini_subgroups.setdefault(sc, []).append(p)
+
+                if "Punti" in tiebreaker_1 and score_direction == "Basso":
+                    sorted_scores = sorted(mini_subgroups.keys())
+                else:
+                    sorted_scores = sorted(mini_subgroups.keys(), reverse=True)
+
+                if len(sorted_scores) > 1:
+                    res = []
+                    for sc in sorted_scores:
+                        smaller_group = mini_subgroups[sc]
+                        if len(smaller_group) == 1:
+                            res.extend(smaller_group)
+                        else:
+                            res.extend(
+                                _resolve_subgroup(
+                                    smaller_group, current_tie_stage="tie1"
+                                )
+                            )
+                    return res
+                else:
+                    return _resolve_subgroup(sub, current_tie_stage="tie2")
+            else:
+                return _resolve_subgroup(sub, current_tie_stage="tie2")
+
+        elif current_tie_stage == "tie2":
+            if tiebreaker_2 != "Nessuno":
+                tie2_scores = {}
+                for p in sub:
+                    if tiebreaker_2 == "Punti Totali" and not is_points_order:
+                        tie2_scores[p["name"]] = p["points"]
+                    elif tiebreaker_2 == "Vittorie Totali" and order_by != "Vittorie":
+                        tie2_scores[p["name"]] = p["wins"]
+                    else:
+                        tie2_scores[p["name"]] = 0
+
+                tie2_subgroups = {}
+                for p in sub:
+                    sc = tie2_scores[p["name"]]
+                    tie2_subgroups.setdefault(sc, []).append(p)
+
+                if (
+                    tiebreaker_2 == "Punti Totali"
+                    and not is_points_order
+                    and score_direction == "Basso"
+                ):
+                    sorted_scores = sorted(tie2_subgroups.keys())
+                else:
+                    sorted_scores = sorted(tie2_subgroups.keys(), reverse=True)
+
+                if len(sorted_scores) > 1:
+                    res = []
+                    for sc in sorted_scores:
+                        smaller_group = tie2_subgroups[sc]
+                        if len(smaller_group) == 1:
+                            res.extend(smaller_group)
+                        else:
+                            res.extend(
+                                _resolve_subgroup(
+                                    smaller_group, current_tie_stage="tie1"
+                                )
+                            )
+                    return res
+                else:
+                    return _resolve_subgroup(sub, current_tie_stage="fallback")
+            else:
+                return _resolve_subgroup(sub, current_tie_stage="fallback")
+
+        else:
+            return sorted(sub, key=lambda p: p["name"].lower())
+
+    # Raggruppamento per Criterio Principale
+    main_subgroups = {}
+    for p in all_players:
+        if order_by == "Vittorie":
+            key = p["wins"]
+        elif is_points_order:
+            key = p["points"]
+        elif order_by == "Sconfitte":
+            key = p["losses"]
+        elif order_by == "Pareggi":
+            key = p["draws"]
+        elif order_by.startswith("Nome"):
+            key = p["name"].lower()
+        else:
+            key = p["wins"]
+        main_subgroups.setdefault(key, []).append(p)
+
+    if order_by == "Vittorie" or order_by == "Pareggi":
+        sorted_main_keys = sorted(main_subgroups.keys(), reverse=True)
+    elif is_points_order:
+        sorted_main_keys = (
+            sorted(main_subgroups.keys())
+            if score_direction == "Basso"
+            else sorted(main_subgroups.keys(), reverse=True)
+        )
+    elif order_by == "Sconfitte" or order_by.startswith("Nome"):
+        sorted_main_keys = sorted(main_subgroups.keys())
+    else:
+        sorted_main_keys = sorted(main_subgroups.keys(), reverse=True)
+
+    ranked_best_to_worst = []
+    for key in sorted_main_keys:
+        sub = main_subgroups[key]
+        if len(sub) == 1 or order_by.startswith("Nome"):
+            ranked_best_to_worst.extend(sub)
+        else:
+            ranked_best_to_worst.extend(
+                _resolve_subgroup(sub, current_tie_stage="tie1")
+            )
+
+    if not reverse:
+        return list(reversed(ranked_best_to_worst))
+    return ranked_best_to_worst
+
+
 class StandingsPanel(wx.Panel):
     def __init__(self, parent, tourney, settings, is_final=True):
         super().__init__(parent)
@@ -160,41 +372,6 @@ class StandingsPanel(wx.Panel):
         self.tourney.save()
         self.update_display()
 
-    def _calculate_head_to_head(self, p1_name, p2_name):
-        score_a = 0
-        score_b = 0
-        wins_a = 0
-        wins_b = 0
-
-        for m_id, data in self.tourney.played_matches.items():
-            if len(data) >= 6:
-                mn1, mn2, mres, mpts, pt1, pt2 = data[:6]
-            else:
-                mn1, mn2, mres, mpts = data[:4]
-                if mres == "1":
-                    pt1, pt2 = mpts, 0
-                elif mres == "2":
-                    pt1, pt2 = 0, mpts
-                else:
-                    pt1, pt2 = mpts / 2.0, mpts / 2.0
-
-            if mn1 == p1_name and mn2 == p2_name:
-                score_a += pt1
-                score_b += pt2
-                if mres == "1":
-                    wins_a += 1
-                elif mres == "2":
-                    wins_b += 1
-            elif mn1 == p2_name and mn2 == p1_name:
-                score_b += pt1
-                score_a += pt2
-                if mres == "1":
-                    wins_b += 1
-                elif mres == "2":
-                    wins_a += 1
-
-        return score_a, score_b, wins_a, wins_b
-
     def update_display(self):
         order_by = self.cb_order.GetStringSelection()
         score_direction = "Alto" if self.cb_score_dir.GetSelection() == 0 else "Basso"
@@ -202,100 +379,16 @@ class StandingsPanel(wx.Panel):
         tiebreaker_2 = self.cb_tie2.GetStringSelection()
         reverse = self.cb_dir.GetSelection() == 0
 
-        # Prep player data
-        # players: name -> [points, wins, draws, losses]
-
-        # Calcola le partite da giocare per ogni giocatore (per la colonna Giocate/Totale)
-        unplayed_counts = {name: 0 for name in self.tourney.players.keys()}
-        for m_id, (p1, p2) in self.tourney.unplayed_matches.items():
-            if p1 in unplayed_counts:
-                unplayed_counts[p1] += 1
-            if p2 in unplayed_counts:
-                unplayed_counts[p2] += 1
-
-        flat = []
-        for name, stats in self.tourney.players.items():
-            played = stats[1] + stats[2] + stats[3]
-            total = played + unplayed_counts[name]
-            played_str = f"{played}/{total}"
-
-            flat.append(
-                {
-                    "name": name,
-                    "points": stats[0],
-                    "wins": stats[1],
-                    "draws": stats[2],
-                    "losses": stats[3],
-                    "played_str": played_str,
-                }
-            )
-
-        import functools
-
-        def compare_players(a, b):
-            # 1. Criterio selezionato dall'utente sulla UI
-            if order_by == "Vittorie":
-                if a["wins"] != b["wins"]:
-                    return (a["wins"] > b["wins"]) - (a["wins"] < b["wins"])
-            elif order_by == "Punti":
-                if a["points"] != b["points"]:
-                    if score_direction == "Basso":
-                        return (b["points"] > a["points"]) - (b["points"] < a["points"])
-                    else:
-                        return (a["points"] > b["points"]) - (a["points"] < b["points"])
-            elif order_by == "Sconfitte":
-                if a["losses"] != b["losses"]:
-                    return (b["losses"] > a["losses"]) - (b["losses"] < a["losses"])
-            elif order_by == "Pareggi":
-                if a["draws"] != b["draws"]:
-                    return (a["draws"] > b["draws"]) - (a["draws"] < b["draws"])
-            elif order_by == "Nome Giocatore":
-                if a["name"].lower() != b["name"].lower():
-                    return (b["name"].lower() > a["name"].lower()) - (
-                        b["name"].lower() < a["name"].lower()
-                    )
-
-            # 2. Tiebreaker 1: Scontro Diretto
-            if order_by != "Nome Giocatore" and tiebreaker_1 != "Nessuno":
-                pts_a, pts_b, w_a, w_b = self._calculate_head_to_head(
-                    a["name"], b["name"]
-                )
-
-                if "Punti" in tiebreaker_1:
-                    if pts_a != pts_b:
-                        if score_direction == "Basso":
-                            return (pts_b > pts_a) - (pts_b < pts_a)
-                        else:
-                            return (pts_a > pts_b) - (pts_a < pts_b)
-                elif "Vittorie" in tiebreaker_1:
-                    if w_a != w_b:
-                        return (w_a > w_b) - (w_a < w_b)
-
-            # 3. Tiebreaker 2: Globale
-            if tiebreaker_2 != "Nessuno":
-                if tiebreaker_2 == "Punti Totali" and order_by != "Punti":
-                    if a["points"] != b["points"]:
-                        if score_direction == "Basso":
-                            return (b["points"] > a["points"]) - (
-                                b["points"] < a["points"]
-                            )
-                        else:
-                            return (a["points"] > b["points"]) - (
-                                a["points"] < b["points"]
-                            )
-                elif tiebreaker_2 == "Vittorie Totali" and order_by != "Vittorie":
-                    if a["wins"] != b["wins"]:
-                        return (a["wins"] > b["wins"]) - (a["wins"] < b["wins"])
-
-            # 4. Fallback: Ordine Alfabetico
-            name_cmp = (a["name"] > b["name"]) - (a["name"] < b["name"])
-            if reverse:
-                return -name_cmp
-            return name_cmp
-
-        flat.sort(key=functools.cmp_to_key(compare_players), reverse=reverse)
-
-        # Costruzione del testo
+        flat = rank_tournament_players(
+            self.tourney.players,
+            self.tourney.played_matches,
+            order_by=order_by,
+            score_direction=score_direction,
+            tiebreaker_1=tiebreaker_1,
+            tiebreaker_2=tiebreaker_2,
+            unplayed_matches=self.tourney.unplayed_matches,
+            reverse=reverse,
+        )
         lines = []
         lines.append(f"Torneo: {self.tourney.title}")
         lines.append(f"Editto Divino: {self.tourney.comment}")
@@ -316,7 +409,7 @@ class StandingsPanel(wx.Panel):
             )
             diff = dt_end - dt_start
             hours, remainder = divmod(diff.seconds, 3600)
-            minutes, seconds = divmod(remainder, 60)
+            minutes, _ = divmod(remainder, 60)
             days = diff.days
             dur_str = ""
             if days > 0:
@@ -373,8 +466,8 @@ class StandingsPanel(wx.Panel):
             recalto_list = []
             recbasso_list = []
 
-            strikes = {name: 0 for name in self.tourney.players.keys()}
-            current_strikes = {name: 0 for name in self.tourney.players.keys()}
+            strikes = {name: 0 for name in self.tourney.players}
+            current_strikes = {name: 0 for name in self.tourney.players}
 
             for m_id, data in self.tourney.played_matches.items():
                 mn1, mn2, mres, mpts = data[:4]
