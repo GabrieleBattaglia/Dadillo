@@ -657,9 +657,19 @@ class MainFrame(wx.Frame):
             pathname = fileDialog.GetPath()
 
             from data import PlayerDB
+            from dialogs import MergeSimilarPlayerDialog
+
+            def interactive_resolver(ext_name, candidate_name):
+                dlg = MergeSimilarPlayerDialog(self, ext_name, candidate_name)
+                dlg.ShowModal()
+                is_same, chosen = dlg.get_result()
+                dlg.Destroy()
+                return is_same, chosen
 
             db = PlayerDB()
-            success, log = db.merge_db(pathname)
+            success, log = db.merge_db(
+                pathname, interactive_resolver=interactive_resolver
+            )
 
             self.show_merge_summary("\n".join(log))
 
@@ -705,11 +715,11 @@ class MainFrame(wx.Frame):
             name = dlg.new_name
             self.tourney.players[name] = [0, 0, 0, 0]
 
-            existing_players = [p for p in self.tourney.players.keys() if p != name]
+            existing_players = [p for p in self.tourney.players if p != name]
 
             # Trova l'id massimo attuale
-            all_ids = list(self.tourney.unplayed_matches.keys()) + list(
-                self.tourney.played_matches.keys()
+            all_ids = list(self.tourney.unplayed_matches) + list(
+                self.tourney.played_matches
             )
             max_id = max(all_ids) if all_ids else 0
 

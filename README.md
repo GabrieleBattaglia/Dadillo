@@ -1,7 +1,7 @@
-# Dadillo - L'Altare del Sacrificio (Versione 2.6.2)
+# Dadillo - L'Altare del Sacrificio (Versione 2.7.0)
 
 **Dadillo** è un gestore di tornei scritto in Python. Gestisce giocatori, abbinamenti, classifiche e record con una personalità... *molto devota* al suo utilizzatore.
-La versione 2.6.2 introduce l'algoritmo di ordinamento universale a gruppi e sottogruppi ricorsivi (classifica avulsa), risolvendo in modo matematicamente rigoroso le parità con 3 o più giocatori, triangolari ciclici e mini-gironi.
+La versione 2.7.0 introduce il nuovo wizard di fine torneo per la conferma dei criteri e l'assegnazione guidata delle medaglie ("Uno per uno" o "Tutti in massa") con salvataggio ed esportazione automatica di `Giocatori.txt`, oltre all'unione intelligente dei database con fuzzy matching dei nickname simili (`difflib`) e prevenzione assoluta di medaglie duplicate.
 
 
 ## Caratteristiche
@@ -42,10 +42,19 @@ pyinstaller --name Dadillo --windowed Dadillo.py
 ```
 
 ## Funzionamento
+
 - **Fase 1: Creazione**: Fornisci il nome del torneo, l'Editto, la tipologia di girone, i punteggi predefiniti e imposta i criteri di classifica e di spareggio (Vittorie/Punti, priorità punteggio alto/basso, 1° e 2° spareggio).
 - **Fase 2: Le Battaglie**: La finestra principale si divide in due. A sinistra le partite da giocare, a destra quelle completate. Fai doppio clic (o premi Invio) su una partita non giocata per decretarne l'esito. Usa la barra di ricerca per filtrare velocemente le sfide di un particolare giocatore.
-- **Fase 3: Classifica**: Una volta concluse tutte le partite, Dadillo elaborerà la classifica finale mostrando tempi, medaglie e record di punteggio. Da qui potrai aggiornare la "Hall of Fame" ed esportare i dati.
-- **Menu dell'App**: Dal menu in alto potrai iniziare un Nuovo Torneo, Salvare, Aggiungere nuovi giocatori in corsa, Ritirare (sopprimere) un giocatore, modificare le Regole del Torneo e unire database esterni.
+- **Fase 3: Conclusione del Torneo e Premiazioni (Novità 2.7.0)**:
+  1. **Apertura Classifica Finale**: Non appena l'ultima partita viene disputata (o se l'app viene avviata con un torneo già completato), Dadillo registra l'orario di fine e apre la schermata della Classifica Finale.
+  2. **Verifica dei Criteri**: Nella parte superiore puoi verificare o regolare i criteri ufficiali del torneo (*Ordina per*, *Priorità Punteggio Alto/Basso*, *1° e 2° Spareggio*).
+  3. **Pulsante "Avanti"**: Quando i criteri sono quelli desiderati, clicca sul pulsante **"Avanti: Conferma Criteri e Assegna Medaglie"** in basso.
+  4. **Scelta della Modalità di Revisione**: Si aprirà la finestra *"Destino della Hall of Fame"* in cui potrai scegliere tra:
+     - **Uno per uno**: ti mostra una finestra di dialogo accessibile per ciascun discepolo con la posizione ufficiale conquistata (1° Oro, 2° Argento, 3° Bronzo, 4° Legno, ecc.). Per ogni giocatore puoi premere **"Sì, Aggiorna Discepolo!"** per registrarlo o **"Salta Discepolo"** per escluderlo.
+     - **Tutti in massa**: registra e assegna all'istante le medaglie e i piazzamenti di tutti i partecipanti senza ulteriori passaggi.
+  5. **Salvataggio ed Esportazione Automatica**: Al termine della procedura, i risultati vengono salvati nel database storico (`Dadillo_players.json`) e viene immediatamente rigenerato ed esportato il file testuale **`Giocatori.txt`**.
+  6. **Consultazione Continua**: Il torneo concluso rimane attivo a video e liberamente consultabile per statistiche e filtri fino alla creazione di un nuovo torneo dal menu `File -> Nuovo Torneo`.
+- **Menu dell'App**: Dal menu in alto potrai iniziare un Nuovo Torneo, Salvare, Aggiungere nuovi giocatori in corsa, Ritirare (sopprimere) un giocatore, modificare le Regole del Torneo e unire database esterni con riconoscimento intelligente dei nickname simili.
 
 ## Autori e Riconoscimenti
 

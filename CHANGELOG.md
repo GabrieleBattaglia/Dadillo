@@ -2,6 +2,21 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.7.0] - 2026-08-19
+
+### Aggiunto
+- **Nuovo Flusso di Fine Torneo con Wizard di Premiazione Ufficiale**:
+  - Quando si conclude l'ultima partita, nella classifica finale l'utente può verificare/modificare i criteri definitivi e premere il pulsante *"Avanti: Conferma Criteri e Assegna Medaglie"*.
+  - Dialogo accessibile di scelta per revisionare i discepoli *"Uno per uno"* (con pulsanti *Aggiorna* e *Salta discepolo*) oppure registrarli *"Tutti in massa"*.
+  - Calcolo ufficiale e irrevocabile delle medaglie basato rigidamente sulle regole e sui criteri del torneo.
+  - Salvataggio immediato in `Dadillo_players.json` ed esportazione automatica di `Giocatori.txt`.
+- **Unione Intelligente dei Database Giocatori con Riconoscimento Similarità (`difflib`)**:
+  - Algoritmo di fuzzy matching per individuare discepoli con nomi simili (es. `Siddharta` vs `Siddharta33`, maiuscole/minuscole).
+  - Dialogo interattivo accessibile per chiedere se si tratti dello stesso giocatore e consentire la scelta del nickname da mantenere.
+  - Deduplicazione atomica dei singoli tornei nello storico: le medaglie e la somma dei piazzamenti vengono ricalcolati unicamente dai tornei effettivamente registrati, impedendo qualsiasi duplicazione di medaglie in caso di fusioni multiple.
+
+---
+
 ## [2.6.2] - 2026-08-17
 
 ### Modificato

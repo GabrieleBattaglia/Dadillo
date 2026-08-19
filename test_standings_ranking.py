@@ -324,6 +324,110 @@ def test_ranking_total_tie_alphabetical_fallback():
     assert ranked == ["Alice", "Bob", "Charlie"]
 
 
+def test_merge_db_no_duplicate_medals(tmp_path):
+    import json
+
+    from data import PlayerDB
+
+    orig_dir = os.getcwd()
+    os.chdir(tmp_path)
+    try:
+        db = PlayerDB()
+        db.add_or_update_player(
+            "Peppe",
+            1,
+            True,
+            False,
+            False,
+            False,
+            "Torneo Alfa",
+            "2026-01-01",
+            "2026-01-10",
+        )
+        db.add_or_update_player(
+            "Selene",
+            2,
+            False,
+            True,
+            False,
+            False,
+            "Torneo Alfa",
+            "2026-01-01",
+            "2026-01-10",
+        )
+        db.save()
+
+        # Verifica stato iniziale
+        assert db.players["Peppe"]["medals"]["oro"] == 1
+        assert db.players["Selene"]["medals"]["argento"] == 1
+
+        # File esterno con gli stessi dati
+        ext_path = "external_players.json"
+        with open(ext_path, "w", encoding="utf-8") as f:
+            json.dump(db.players, f, indent=4)
+
+        # Fonde lo stesso file
+        success, _log = db.merge_db(ext_path)
+        assert success is True
+        # I contatori NON devono raddoppiare!
+        assert db.players["Peppe"]["medals"]["oro"] == 1
+        assert db.players["Selene"]["medals"]["argento"] == 1
+        assert len(db.players["Peppe"]["history"]) == 1
+    finally:
+        os.chdir(orig_dir)
+
+
+def test_merge_db_fuzzy_matching_and_resolution(tmp_path):
+    import json
+
+    from data import PlayerDB
+
+    orig_dir = os.getcwd()
+    os.chdir(tmp_path)
+    try:
+        db = PlayerDB()
+        db.players["Siddharta"] = {
+            "medals": {"oro": 0, "argento": 0, "bronzo": 1, "legno": 0},
+            "history": ["3° in Farkle Bonus - 2026-03-17 - 2026-04-20"],
+            "placements_sum": 0,
+        }
+        db.save()
+
+        # File esterno con nome simile 'Siddharta33' e un nuovo torneo
+        ext_data = {
+            "Siddharta33": {
+                "medals": {"oro": 0, "argento": 0, "bronzo": 0, "legno": 0},
+                "history": ["10° in Yatzee con Bonus - 2026-05-01 - 2026-05-30"],
+                "placements_sum": 10,
+            }
+        }
+        ext_path = "ext_siddharta.json"
+        with open(ext_path, "w", encoding="utf-8") as f:
+            json.dump(ext_data, f, indent=4)
+
+        # Simula il resolver che conferma che sono la stessa persona e sceglie 'Siddharta33'
+        resolved = []
+
+        def mock_resolver(ext_name, candidate_name):
+            resolved.append((ext_name, candidate_name))
+            return True, "Siddharta33"
+
+        success, _log = db.merge_db(ext_path, interactive_resolver=mock_resolver)
+        assert success is True
+        assert len(resolved) == 1
+        assert resolved[0] == ("Siddharta33", "Siddharta")
+
+        # Verifica che il giocatore sia stato unificato sotto 'Siddharta33'
+        assert "Siddharta33" in db.players
+        assert "Siddharta" not in db.players
+        p = db.players["Siddharta33"]
+        assert len(p["history"]) == 2
+        assert p["medals"]["bronzo"] == 1
+        assert p["placements_sum"] == 10
+    finally:
+        os.chdir(orig_dir)
+
+
 if __name__ == "__main__":
     import pathlib
     import tempfile
@@ -340,4 +444,6 @@ if __name__ == "__main__":
     test_ranking_total_tie_alphabetical_fallback()
     test_tournament_json_persistence(pathlib.Path(tempfile.mkdtemp()))
     test_setup_players_db_selection_behavior()
+    test_merge_db_no_duplicate_medals(pathlib.Path(tempfile.mkdtemp()))
+    test_merge_db_fuzzy_matching_and_resolution(pathlib.Path(tempfile.mkdtemp()))
     print("Tutti i test sono stati superati con successo!")

@@ -333,18 +333,11 @@ class StandingsPanel(wx.Panel):
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         if self.is_final:
-            self.btn_db = wx.Button(self, label="Aggiorna DB giocatori")
-            self.btn_db.Bind(wx.EVT_BUTTON, self.on_update_db)
-
-            self.btn_db_all = wx.Button(self, label="Aggiorna tutti senza chiedere")
-            self.btn_db_all.Bind(wx.EVT_BUTTON, self.on_update_db_all)
-
-            self.btn_close = wx.Button(self, label="Chiudi e torna all'inizio")
-            self.btn_close.Bind(wx.EVT_BUTTON, self.on_back_to_tourney)
-
-            btn_sizer.Add(self.btn_db, 0, wx.ALL, 5)
-            btn_sizer.Add(self.btn_db_all, 0, wx.ALL, 5)
-            btn_sizer.Add(self.btn_close, 0, wx.ALL, 5)
+            self.btn_proceed = wx.Button(
+                self, label="Avanti: Conferma Criteri e Assegna Medaglie"
+            )
+            self.btn_proceed.Bind(wx.EVT_BUTTON, self.on_proceed)
+            btn_sizer.Add(self.btn_proceed, 0, wx.ALL, 5)
         else:
             self.btn_back = wx.Button(self, label="Torna alle Partite")
             self.btn_back.Bind(wx.EVT_BUTTON, self.on_back_to_tourney)
@@ -719,55 +712,87 @@ class StandingsPanel(wx.Panel):
     def on_back_to_tourney(self, event):
         self.GetParent().init_main_ui()
 
-    def on_update_db(self, event):
-        self._process_db_update(ask_confirmation=True)
-
-    def on_update_db_all(self, event):
-        self._process_db_update(ask_confirmation=False)
-
-    def _process_db_update(self, ask_confirmation):
+    def on_proceed(self, event):
         from data import PlayerDB
-        from dialogs import UpdatePlayerDialog
+        from dialogs import (
+            SinglePlayerReviewDialog,
+            TournamentFinalReviewChoiceDialog,
+        )
+
+        order_by = self.cb_order.GetStringSelection()
+        score_direction = "Alto" if self.cb_score_dir.GetSelection() == 0 else "Basso"
+        tiebreaker_1 = self.cb_tie1.GetStringSelection()
+        tiebreaker_2 = self.cb_tie2.GetStringSelection()
+
+        # Salva le scelte definitive nel file del torneo
+        if order_by in ["Vittorie", "Punti"]:
+            self.tourney.main_criterion = order_by
+        self.tourney.score_direction = score_direction
+        self.tourney.tiebreaker_1 = tiebreaker_1
+        self.tourney.tiebreaker_2 = tiebreaker_2
+        self.tourney.save()
+
+        # Calcola la classifica ufficiale (sempre 1° posto al migliore, indipendentemente dalla vista temporanea)
+        official_standings = rank_tournament_players(
+            self.tourney.players,
+            self.tourney.played_matches,
+            order_by=order_by,
+            score_direction=score_direction,
+            tiebreaker_1=tiebreaker_1,
+            tiebreaker_2=tiebreaker_2,
+            unplayed_matches=self.tourney.unplayed_matches,
+            reverse=True,
+        )
+
+        choice_dlg = TournamentFinalReviewChoiceDialog(self)
+        choice_dlg.ShowModal()
+        choice = choice_dlg.choice
+        choice_dlg.Destroy()
 
         db = PlayerDB()
-
         updates_done = 0
-        skipped_for_duplicate = 0
+        skipped_count = 0
 
-        for idx, row in enumerate(self.current_standings):
+        medals_map = {1: "🥇 ORO", 2: "🥈 ARGENTO", 3: "🥉 BRONZO", 4: "🪵 LEGNO"}
+
+        start = (
+            self.tourney.start_date.split(" ")[0]
+            if self.tourney.start_date
+            else "Sconosciuta"
+        )
+        end = (
+            self.tourney.end_date.split(" ")[0]
+            if self.tourney.end_date
+            else "Sconosciuta"
+        )
+
+        for idx, row in enumerate(official_standings):
             name = row["name"]
-            reverse = self.cb_dir.GetSelection() == 0
-            if reverse:
-                pos = idx + 1
-            else:
-                pos = len(self.current_standings) - idx
-
+            pos = idx + 1
             is_oro = pos == 1
             is_argento = pos == 2
             is_bronzo = pos == 3
             is_legno = pos == 4
+            med_str = medals_map.get(pos, "")
 
             do_update = True
-
-            if name in db.players and ask_confirmation:
-                dlg = UpdatePlayerDialog(self, name, pos)
-                ans = dlg.ShowModal()
-                dlg.Destroy()
-                if ans != wx.ID_YES:
+            if choice == "individual":
+                rev_dlg = SinglePlayerReviewDialog(
+                    self,
+                    player_name=name,
+                    position=pos,
+                    medal_str=med_str,
+                    tourney_title=self.tourney.title,
+                    start_date=start,
+                    end_date=end,
+                )
+                res = rev_dlg.ShowModal()
+                rev_dlg.Destroy()
+                if res != wx.ID_OK:
                     do_update = False
+                    skipped_count += 1
 
             if do_update:
-                start = (
-                    self.tourney.start_date.split(" ")[0]
-                    if self.tourney.start_date
-                    else "Sconosciuta"
-                )
-                end = (
-                    self.tourney.end_date.split(" ")[0]
-                    if self.tourney.end_date
-                    else "Sconosciuta"
-                )
-
                 success = db.add_or_update_player(
                     name,
                     pos,
@@ -782,23 +807,27 @@ class StandingsPanel(wx.Panel):
                 if success:
                     updates_done += 1
                 else:
-                    skipped_for_duplicate += 1
+                    skipped_count += 1
 
-        if updates_done > 0:
-            db.save()
-            msg = f"Gli archivi sono stati aggiornati con {updates_done} nuove registrazioni."
-            if skipped_for_duplicate > 0:
-                msg += f"\n\n({skipped_for_duplicate} registrazioni sono state saltate perché già presenti nel database del giocatore)."
-            msg += "\nGloria eterna!"
-            wx.MessageBox(msg, "Aggiornamento Completato")
+        db.save()
 
-            # Disabilita i pulsanti per evitare doppi clic sbadati
-            if hasattr(self, "btn_db"):
-                self.btn_db.Disable()
-            if hasattr(self, "btn_db_all"):
-                self.btn_db_all.Disable()
-        else:
-            msg = "Nessuna modifica apportata agli archivi."
-            if skipped_for_duplicate > 0:
-                msg += "\nI tornei selezionati erano già presenti nello storico per questi giocatori."
-            wx.MessageBox(msg, "Nessun Aggiornamento")
+        msg = (
+            "Oh mio insuperabile e implacabile dominatore!\n\n"
+            "I verdetti ufficiali sono stati incisi nella pietra digitale della Hall of Fame:\n"
+            f"• Discepoli aggiornati con successo: {updates_done}\n"
+        )
+        if skipped_count > 0:
+            msg += f"• Discepoli saltati o tornei già registrati: {skipped_count}\n"
+
+        msg += (
+            "\nIl file testuale 'Giocatori.txt' è stato aggiornato all'istante.\n"
+            "Gloria eterna!"
+        )
+
+        wx.MessageBox(
+            msg, "Premiazione e Registrazione Conclusa", wx.OK | wx.ICON_INFORMATION
+        )
+
+        if hasattr(self, "btn_proceed"):
+            self.btn_proceed.Disable()
+            self.btn_proceed.SetLabel("Medaglie e Storico già Assegnati")

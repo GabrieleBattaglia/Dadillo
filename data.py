@@ -165,6 +165,31 @@ class PlayerDB:
             json.dump(self.players, f, indent=4)
         self.export_to_txt()
 
+    def recalculate_player_stats(self, name):
+        """Ricalcola in modo deterministico medaglie e somma piazzamenti a partire dallo storico effettivo."""
+        if name not in self.players:
+            return
+        p = self.players[name]
+        p["medals"] = {"oro": 0, "argento": 0, "bronzo": 0, "legno": 0}
+        p["placements_sum"] = 0
+
+        import re
+
+        for entry in p.get("history", []):
+            match = re.match(r"^(\d+)°", entry)
+            if match:
+                pos = int(match.group(1))
+                if pos == 1:
+                    p["medals"]["oro"] += 1
+                elif pos == 2:
+                    p["medals"]["argento"] += 1
+                elif pos == 3:
+                    p["medals"]["bronzo"] += 1
+                elif pos == 4:
+                    p["medals"]["legno"] += 1
+                elif pos >= 5:
+                    p["placements_sum"] += pos
+
     def add_or_update_player(
         self,
         name,
@@ -193,27 +218,16 @@ class PlayerDB:
 
         # Controllo duplicati: se il torneo è già presente nella storia, non aggiungerlo.
         for existing_entry in p["history"]:
-            if tourney_title in existing_entry and start_date in existing_entry:
+            if existing_entry == history_entry or (
+                tourney_title in existing_entry and start_date in existing_entry
+            ):
                 return False  # Già aggiunto in precedenza
 
-        if is_oro:
-            p["medals"]["oro"] += 1
-        if is_argento:
-            p["medals"]["argento"] += 1
-        if is_bronzo:
-            p["medals"]["bronzo"] += 1
-        if is_legno:
-            p["medals"]["legno"] += 1
-
-        if position >= 5:
-            if "placements_sum" not in p:
-                p["placements_sum"] = 0
-            p["placements_sum"] += position
-
         p["history"].append(history_entry)
+        self.recalculate_player_stats(actual_name)
         return True
 
-    def merge_db(self, external_filepath):
+    def merge_db(self, external_filepath, interactive_resolver=None):
         log = []
         try:
             with open(external_filepath, "r", encoding="utf-8") as f:
@@ -224,60 +238,83 @@ class PlayerDB:
         if not isinstance(ext_data, dict):
             return False, ["Il file non e' nel formato corretto."]
 
-        import re
+        import difflib
 
         for ext_name, ext_p in ext_data.items():
-            if (
-                not isinstance(ext_p, dict)
-                or "medals" not in ext_p
-                or "history" not in ext_p
-            ):
+            if not isinstance(ext_p, dict) or "history" not in ext_p:
                 continue
 
-            # Check for existing player (case insensitive)
-            actual_name = ext_name
+            target_name = ext_name
 
-            if actual_name not in self.players:
-                self.players[actual_name] = {
+            if target_name not in self.players:
+                # Ricerca candidati simili nel DB locale con difflib
+                candidates = []
+                for local_name in list(self.players.keys()):
+                    ratio = difflib.SequenceMatcher(
+                        None, ext_name.lower(), local_name.lower()
+                    ).ratio()
+                    if (
+                        ext_name.lower() in local_name.lower()
+                        or local_name.lower() in ext_name.lower()
+                        or ratio >= 0.6
+                    ):
+                        candidates.append((local_name, ratio))
+
+                candidates.sort(key=lambda x: x[1], reverse=True)
+
+                if candidates and interactive_resolver:
+                    best_candidate = candidates[0][0]
+                    is_same, chosen_name = interactive_resolver(
+                        ext_name, best_candidate
+                    )
+                    if is_same and chosen_name:
+                        if (
+                            chosen_name != best_candidate
+                            and best_candidate in self.players
+                        ):
+                            self.players[chosen_name] = self.players.pop(best_candidate)
+                            log.append(
+                                f"Discepolo '{best_candidate}' rinominato in '{chosen_name}' per unione."
+                            )
+                        target_name = chosen_name
+
+            if target_name not in self.players:
+                self.players[target_name] = {
                     "medals": {"oro": 0, "argento": 0, "bronzo": 0, "legno": 0},
                     "history": [],
                     "placements_sum": 0,
                 }
-                log.append(f"Nuovo giocatore aggiunto: {actual_name}")
+                log.append(f"Nuovo discepolo immolato negli archivi: {target_name}")
 
-            p = self.players[actual_name]
-
-            # Merge medals
-            for medal_type in ["oro", "argento", "bronzo", "legno"]:
-                added = ext_p["medals"].get(medal_type, 0)
-                if added > 0:
-                    p["medals"][medal_type] += added
-                    log.append(
-                        f"  + Aggiunte {added} medaglie {medal_type.capitalize()} a {actual_name}"
-                    )
-
-            # Merge history
+            # Fusione intelligente e atomica dello storico tornei (senza duplicare medaglie)
             ext_history = ext_p.get("history", [])
             for entry in ext_history:
-                # Check for duplicates based on exact string match
-                if entry not in p["history"]:
-                    p["history"].append(entry)
-                    log.append(f"  + Aggiunto torneo a {actual_name}: {entry}")
+                already_present = False
+                for local_entry in self.players[target_name]["history"]:
+                    if entry == local_entry:
+                        already_present = True
+                        break
+                    if " in " in entry and " in " in local_entry:
+                        t_part_ext = entry.split(" in ", 1)[1]
+                        t_part_loc = local_entry.split(" in ", 1)[1]
+                        if t_part_ext == t_part_loc:
+                            already_present = True
+                            break
 
-                    # Update placements_sum
-                    match = re.match(r"^(\d+)°", entry)
-                    if match:
-                        pos = int(match.group(1))
-                        if pos >= 5:
-                            p["placements_sum"] = p.get("placements_sum", 0) + pos
+                if not already_present:
+                    self.players[target_name]["history"].append(entry)
+                    log.append(f"  + Aggiunto torneo a {target_name}: {entry}")
+
+            # Ricalcolo rigoroso dei contatori medaglie dal nuovo storico
+            self.recalculate_player_stats(target_name)
 
         self.save()
         if not log:
             log.append(
-                "Nessuna novita' trovata nel file importato. I database erano gia' allineati."
+                "Nessuna novità trovata nel file importato. I discepoli e i tornei erano già allineati."
             )
         else:
-            log.append("\nFusione completata e file aggiornati con successo!")
+            log.append("\nFusione sacra completata e archivi aggiornati con successo!")
         return True, log
 
     def export_to_txt(self):

@@ -659,6 +659,155 @@ class RetirePlayerDialog(wx.Dialog):
         return self.cb_players.GetStringSelection()
 
 
+class TournamentFinalReviewChoiceDialog(wx.Dialog):
+    def __init__(self, parent):
+        super().__init__(parent, title="Destino della Hall of Fame", size=(540, 360))
+
+        panel = wx.Panel(self)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+
+        msg_text = (
+            "Oh mio insigne monarca!\n\n"
+            "L'ultimo dado è stato tratto e tutte le sfide sono concluse. "
+            "Prima di incidere definitivamente le medaglie e i piazzamenti nella Hall of Fame, "
+            "come desideri procedere?\n\n"
+            "• 'Uno per uno': revisiona ogni discepolo singolarmente, potendo decidere se aggiornarlo o saltarlo.\n"
+            "• 'Tutti in massa': immortala tutti i partecipanti all'istante senza ulteriori indugi."
+        )
+
+        self.txt_msg = wx.TextCtrl(
+            panel, value=msg_text, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH
+        )
+        vbox.Add(self.txt_msg, 1, wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, 10)
+
+        btn_box = wx.BoxSizer(wx.HORIZONTAL)
+        self.btn_individual = wx.Button(
+            panel, label="Uno per uno (Revisiona discepoli)"
+        )
+        self.btn_mass = wx.Button(panel, label="Tutti in massa (Aggiorna tutto subito)")
+
+        btn_box.Add(self.btn_individual, 0, wx.ALL, 5)
+        btn_box.Add(self.btn_mass, 0, wx.ALL, 5)
+
+        vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
+        panel.SetSizer(vbox)
+
+        self.btn_individual.Bind(wx.EVT_BUTTON, self.on_individual)
+        self.btn_mass.Bind(wx.EVT_BUTTON, self.on_mass)
+
+        self.choice = "mass"
+        wx.CallAfter(self.txt_msg.SetFocus)
+
+    def on_individual(self, event):
+        self.choice = "individual"
+        self.EndModal(wx.ID_OK)
+
+    def on_mass(self, event):
+        self.choice = "mass"
+        self.EndModal(wx.ID_OK)
+
+
+class SinglePlayerReviewDialog(wx.Dialog):
+    def __init__(
+        self,
+        parent,
+        player_name,
+        position,
+        medal_str,
+        tourney_title,
+        start_date,
+        end_date,
+    ):
+        super().__init__(
+            parent, title=f"Aggiornamento Discepolo: {player_name}", size=(500, 320)
+        )
+
+        panel = wx.Panel(self)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+
+        med_text = f" ({medal_str})" if medal_str else ""
+        msg_text = (
+            f"Discepolo: {player_name}\n"
+            f"Posizione ufficiale: {position}° posto{med_text}\n"
+            f"Torneo: {tourney_title}\n"
+            f"Date: {start_date} - {end_date}\n\n"
+            "Confermi l'immolazione di questo piazzamento nella sacra Hall of Fame?"
+        )
+
+        self.txt_msg = wx.TextCtrl(
+            panel, value=msg_text, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH
+        )
+        vbox.Add(self.txt_msg, 1, wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, 10)
+
+        btn_box = wx.BoxSizer(wx.HORIZONTAL)
+        self.btn_ok = wx.Button(panel, wx.ID_OK, "Sì, Aggiorna Discepolo!")
+        self.btn_skip = wx.Button(panel, wx.ID_CANCEL, "Salta Discepolo")
+
+        btn_box.Add(self.btn_ok, 0, wx.ALL, 5)
+        btn_box.Add(self.btn_skip, 0, wx.ALL, 5)
+
+        vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
+        panel.SetSizer(vbox)
+
+        wx.CallAfter(self.txt_msg.SetFocus)
+
+
+class MergeSimilarPlayerDialog(wx.Dialog):
+    def __init__(self, parent, ext_name, local_name):
+        super().__init__(
+            parent, title="Risoluzione Similarità Discepoli", size=(560, 380)
+        )
+        self.ext_name = ext_name
+        self.local_name = local_name
+
+        panel = wx.Panel(self)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+
+        msg_text = (
+            "Mio onnisciente sovrano!\n\n"
+            f"Nel file importato ho scovato il discepolo '{ext_name}', che somiglia "
+            f"sospettosamente al seguace già registrato '{local_name}'.\n\n"
+            "Si tratta della stessa persona in carne, ossa e dadi?"
+        )
+
+        self.txt_msg = wx.TextCtrl(
+            panel, value=msg_text, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH
+        )
+        vbox.Add(self.txt_msg, 0, wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, 10)
+
+        choices = [
+            f"Sì, è la stessa persona! Mantieni nickname locale '{local_name}'",
+            f"Sì, è la stessa persona! Usa nickname importato '{ext_name}'",
+            "No, sono due eretici distinti! Crea un nuovo discepolo.",
+        ]
+        self.rb_choices = wx.RadioBox(
+            panel,
+            label="Come desideri procedere?",
+            choices=choices,
+            majorDimension=1,
+            style=wx.RA_SPECIFY_COLS,
+        )
+        vbox.Add(self.rb_choices, 1, wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, 10)
+
+        btn_box = wx.BoxSizer(wx.HORIZONTAL)
+        self.btn_ok = wx.Button(panel, wx.ID_OK, "Conferma Verdetto Divino")
+        btn_box.Add(self.btn_ok, 0, wx.ALL, 5)
+
+        vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
+        panel.SetSizer(vbox)
+
+        wx.CallAfter(self.txt_msg.SetFocus)
+
+    def get_result(self):
+        sel = self.rb_choices.GetSelection()
+        if sel == 0:
+            return True, self.local_name
+        elif sel == 1:
+            return True, self.ext_name
+        else:
+            return False, self.ext_name
+
+
 class UpdatePlayerDialog(wx.Dialog):
     def __init__(self, parent, player_name, position):
         super().__init__(parent, title="Conferma Aggiornamento", size=(500, 300))
@@ -666,7 +815,10 @@ class UpdatePlayerDialog(wx.Dialog):
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        msg_text = f"Il formidabile {player_name} è già presente negli archivi sacri.\n\nVuoi aggiornare il suo storico e il suo medagliere con il risultato di questo torneo (Posizione {position})?"
+        msg_text = (
+            f"Il formidabile {player_name} è già presente negli archivi sacri.\n\n"
+            f"Vuoi aggiornare il suo storico e il suo medagliere con il risultato di questo torneo (Posizione {position})?"
+        )
 
         # Read-only TextCtrl that is navigable by NVDA
         self.txt_msg = wx.TextCtrl(
