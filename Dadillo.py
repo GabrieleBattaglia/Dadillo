@@ -41,7 +41,9 @@ def check_updates_gui():
             )
             if dlg.ShowModal() == wx.ID_YES:
                 if perform_update(dl_url, "Dadillo"):
-                    wx.Exit()
+                    dlg.Destroy()
+                    wx.GetApp().ExitMainLoop()
+                    sys.exit(0)
                 else:
                     wx.MessageBox(
                         "Si è verificato un errore durante la preparazione dell'aggiornamento.",

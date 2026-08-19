@@ -2,6 +2,15 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.7.1] - 2026-08-19
+
+### Risolto
+- **Hotfix Auto-Updater e Dipendenze Compilazione**:
+  - Inclusi esplicitamente `requests`, `urllib3`, `certifi`, `charset_normalizer` e `chardet` tra gli `hiddenimports` nel file di build ([`Dadillo.spec`](file:///E:/git/Mine/Dadillo/Dadillo.spec)).
+  - Ottimizzata la chiusura immediata del processo al momento dell'aggiornamento in [Dadillo.py](file:///E:/git/Mine/Dadillo/Dadillo.py) per prevenire conflitti di file bloccati durante la sovrascrittura di `xcopy`.
+
+---
+
 ## [2.7.0] - 2026-08-19
 
 ### Aggiunto
