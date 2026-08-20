@@ -1,8 +1,91 @@
+import contextlib
 import json
 import os
+import re
 
 DATA_FILE = "Dadillo.json"
 SETTINGS_FILE = "Dadillo_settings.json"
+
+ITALIAN_WEEKDAYS = [
+    "lunedì",
+    "martedì",
+    "mercoledì",
+    "giovedì",
+    "venerdì",
+    "sabato",
+    "domenica",
+]
+
+ITALIAN_MONTHS = [
+    "gennaio",
+    "febbraio",
+    "marzo",
+    "aprile",
+    "maggio",
+    "giugno",
+    "luglio",
+    "agosto",
+    "settembre",
+    "ottobre",
+    "novembre",
+    "dicembre",
+]
+
+
+def format_date_extended(date_val):
+    """
+    Formatta una data in formato esteso italiano, es: 'giovedì 20 agosto 2026'.
+    Supporta oggetti datetime/date, stringhe ISO ('2026-08-20', '2026-08-20 15:30:00')
+    e stringhe già parzialmente o totalmente formattate.
+    """
+    import datetime
+
+    if not date_val:
+        return ""
+
+    if isinstance(date_val, (datetime.date, datetime.datetime)):
+        w = ITALIAN_WEEKDAYS[date_val.weekday()]
+        m = ITALIAN_MONTHS[date_val.month - 1]
+        return f"{w} {date_val.day} {m} {date_val.year}"
+
+    if isinstance(date_val, str):
+        val = date_val.strip()
+        if not val:
+            return ""
+
+        # Controllo se è già una data estesa (inizia con giorno della settimana)
+        for w in ITALIAN_WEEKDAYS:
+            if val.lower().startswith(w):
+                return val
+
+        # Prova parsing formato ISO standard: YYYY-MM-DD o YYYY-MM-DD HH:MM:SS
+        iso_match = re.match(r"^(\d{4})-(\d{1,2})-(\d{1,2})", val)
+        if iso_match:
+            with contextlib.suppress(ValueError, TypeError, IndexError, AttributeError):
+                y = int(iso_match.group(1))
+                m = int(iso_match.group(2))
+                d = int(iso_match.group(3))
+                dt = datetime.date(y, m, d)
+                w = ITALIAN_WEEKDAYS[dt.weekday()]
+                m_str = ITALIAN_MONTHS[dt.month - 1]
+                return f"{w} {d} {m_str} {y}"
+
+        # Prova parsing formato '1 agosto 2026' o '01 agosto 2026'
+        ita_match = re.match(r"^(\d{1,2})\s+([a-zA-Zàèéìòù]+)\s+(\d{4})", val)
+        if ita_match:
+            with contextlib.suppress(ValueError, TypeError, IndexError, AttributeError):
+                d = int(ita_match.group(1))
+                m_name = ita_match.group(2).lower()
+                y = int(ita_match.group(3))
+                if m_name in ITALIAN_MONTHS:
+                    m_idx = ITALIAN_MONTHS.index(m_name) + 1
+                    dt = datetime.date(y, m_idx, d)
+                    w = ITALIAN_WEEKDAYS[dt.weekday()]
+                    return f"{w} {d} {m_name} {y}"
+
+        return val
+
+    return str(date_val)
 
 
 class TournamentData:
@@ -88,7 +171,7 @@ class TournamentData:
                 "draw_points_split", "Inserimento Manuale"
             )
             return True
-        except Exception:
+        except (json.JSONDecodeError, OSError, ValueError, KeyError):
             return False
 
 
@@ -128,7 +211,7 @@ class SettingsData:
                 "draw_points_split", "Inserimento Manuale"
             )
             return True
-        except Exception:
+        except (json.JSONDecodeError, OSError, ValueError, KeyError):
             return False
 
 
@@ -144,13 +227,26 @@ class PlayerDB:
             try:
                 with open(self.filename, "r", encoding="utf-8") as f:
                     self.players = json.load(f)
-            except Exception:
+            except (json.JSONDecodeError, OSError, ValueError, KeyError):
                 self.players = {}
 
-        # Migrazione DB: aggiunge placements_sum ai giocatori esistenti se manca
+        # Migrazione DB: aggiunge placements_sum e normalizza date in formato esteso
         import re
 
-        for name, data in self.players.items():
+        for data in self.players.values():
+            if "history" in data:
+                new_hist = []
+                for entry in data["history"]:
+                    parts = entry.split(" - ")
+                    if len(parts) == 3:
+                        pos_title, s_date, e_date = parts
+                        new_hist.append(
+                            f"{pos_title} - {format_date_extended(s_date)} - {format_date_extended(e_date)}"
+                        )
+                    else:
+                        new_hist.append(entry)
+                data["history"] = new_hist
+
             if "placements_sum" not in data:
                 data["placements_sum"] = 0
                 for entry in data.get("history", []):
@@ -213,13 +309,16 @@ class PlayerDB:
 
         p = self.players[actual_name]
 
-        # Es: 3° in Torneo di Natale - 25 dicembre 2026 - 15 gennaio 2027
-        history_entry = f"{position}° in {tourney_title} - {start_date} - {end_date}"
+        s_fmt = format_date_extended(start_date)
+        e_fmt = format_date_extended(end_date)
+        # Es: 3° in Torneo di Natale - giovedì 25 dicembre 2026 - venerdì 15 gennaio 2027
+        history_entry = f"{position}° in {tourney_title} - {s_fmt} - {e_fmt}"
 
         # Controllo duplicati: se il torneo è già presente nella storia, non aggiungerlo.
         for existing_entry in p["history"]:
             if existing_entry == history_entry or (
-                tourney_title in existing_entry and start_date in existing_entry
+                tourney_title in existing_entry
+                and (start_date in existing_entry or s_fmt in existing_entry)
             ):
                 return False  # Già aggiunto in precedenza
 
@@ -232,7 +331,7 @@ class PlayerDB:
         try:
             with open(external_filepath, "r", encoding="utf-8") as f:
                 ext_data = json.load(f)
-        except Exception as e:
+        except (json.JSONDecodeError, OSError, ValueError, KeyError) as e:
             return False, [f"Errore nella lettura del file: {e}"]
 
         if not isinstance(ext_data, dict):
@@ -289,21 +388,30 @@ class PlayerDB:
             # Fusione intelligente e atomica dello storico tornei (senza duplicare medaglie)
             ext_history = ext_p.get("history", [])
             for entry in ext_history:
+                parts = entry.split(" - ")
+                if len(parts) == 3:
+                    pos_title, s_date, e_date = parts
+                    formatted_entry = f"{pos_title} - {format_date_extended(s_date)} - {format_date_extended(e_date)}"
+                else:
+                    formatted_entry = entry
+
                 already_present = False
                 for local_entry in self.players[target_name]["history"]:
-                    if entry == local_entry:
+                    if formatted_entry == local_entry or entry == local_entry:
                         already_present = True
                         break
-                    if " in " in entry and " in " in local_entry:
-                        t_part_ext = entry.split(" in ", 1)[1]
+                    if " in " in formatted_entry and " in " in local_entry:
+                        t_part_ext = formatted_entry.split(" in ", 1)[1]
                         t_part_loc = local_entry.split(" in ", 1)[1]
                         if t_part_ext == t_part_loc:
                             already_present = True
                             break
 
                 if not already_present:
-                    self.players[target_name]["history"].append(entry)
-                    log.append(f"  + Aggiunto torneo a {target_name}: {entry}")
+                    self.players[target_name]["history"].append(formatted_entry)
+                    log.append(
+                        f"  + Aggiunto torneo a {target_name}: {formatted_entry}"
+                    )
 
             # Ricalcolo rigoroso dei contatori medaglie dal nuovo storico
             self.recalculate_player_stats(target_name)

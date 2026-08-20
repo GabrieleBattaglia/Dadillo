@@ -1,4 +1,5 @@
 import wx
+from data import format_date_extended
 
 
 class SetupTournamentDialog(wx.Dialog):
@@ -206,7 +207,7 @@ class SetupPlayersDialog(wx.Dialog):
         from data import PlayerDB
 
         self.db = PlayerDB()
-        self.all_db_players = sorted(list(self.db.players.keys()))
+        self.all_db_players = sorted(self.db.players.keys())
         db_players = [p for p in self.all_db_players if p not in self.players]
 
         self.lbl_db = wx.StaticText(panel, label="")
@@ -726,11 +727,13 @@ class SinglePlayerReviewDialog(wx.Dialog):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         med_text = f" ({medal_str})" if medal_str else ""
+        s_fmt = format_date_extended(start_date)
+        e_fmt = format_date_extended(end_date)
         msg_text = (
             f"Discepolo: {player_name}\n"
             f"Posizione ufficiale: {position}° posto{med_text}\n"
             f"Torneo: {tourney_title}\n"
-            f"Date: {start_date} - {end_date}\n\n"
+            f"Date: {s_fmt} - {e_fmt}\n\n"
             "Confermi l'immolazione di questo piazzamento nella sacra Hall of Fame?"
         )
 
@@ -988,7 +991,7 @@ class ManagePlayersDialog(wx.Dialog):
                     tourney_changed = True
 
                 # Rename in played matches
-                for m_id, m_data in main_frame.tourney.played_matches.items():
+                for m_data in main_frame.tourney.played_matches.values():
                     if m_data[0] == old_name:
                         m_data[0] = new_name
                         tourney_changed = True
@@ -997,7 +1000,7 @@ class ManagePlayersDialog(wx.Dialog):
                         tourney_changed = True
 
                 # Rename in unplayed matches
-                for m_id, m_data in main_frame.tourney.unplayed_matches.items():
+                for m_data in main_frame.tourney.unplayed_matches.values():
                     if m_data[0] == old_name:
                         m_data[0] = new_name
                         tourney_changed = True

@@ -2,6 +2,17 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.8.0] - 2026-08-20
+
+### Aggiunto
+- **Formattazione Estesa delle Date in Tutta l'Applicazione**:
+  - Implementata la funzione universale `format_date_extended` con localizzazione italiana deterministica per giorni e mesi (es. `giovedì 20 agosto 2026`).
+  - Formattazione estesa applicata nello storico tornei, nella Hall of Fame (`Dadillo_players.json` e `Giocatori.txt`), nelle schermate di dettaglio giocatore, nel wizard di premiazione, nella visualizzazione della classifica e nei file di salvataggio delle partite.
+- **Integrazione Dati Torneo "Agostino1-4-24-Bonus"**:
+  - Integrati i risultati del torneo con aggiornamento di medagliere, storico e somma piazzamenti per i 12 discepoli partecipanti nella Hall of Fame.
+
+---
+
 ## [2.7.1] - 2026-08-19
 
 ### Risolto

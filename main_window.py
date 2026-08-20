@@ -1,9 +1,9 @@
 import itertools
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 import wx
-from data import DATA_FILE, SettingsData, TournamentData
+from data import DATA_FILE, SettingsData, TournamentData, format_date_extended
 from dialogs import (
     AddPlayerDialog,
     HallOfFameDialog,
@@ -92,7 +92,9 @@ class MainFrame(wx.Frame):
                     self.tourney.unplayed_matches[match_id] = list(j)
                     match_id += 1
 
-            self.tourney.start_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            self.tourney.start_date = (
+                datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M:%S")
+            )
             self.tourney.save()
             dlg2.Destroy()
             self.check_state_and_show()
@@ -457,7 +459,11 @@ class MainFrame(wx.Frame):
             self.list_unplayed.SetFocus()
 
             if len(self.tourney.unplayed_matches) == 0:
-                self.tourney.end_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                self.tourney.end_date = (
+                    datetime.now(timezone.utc)
+                    .astimezone()
+                    .strftime("%Y-%m-%d %H:%M:%S")
+                )
                 self.tourney.save()
                 wx.MessageBox(
                     "Oh insuperabile divinità, tutte le battaglie sono concluse! Ti accompagno alla sala delle classifiche.",
@@ -567,7 +573,9 @@ class MainFrame(wx.Frame):
         try:
             with open(filepath, "w", encoding="utf-8") as f:
                 f.write(f"Torneo: {self.tourney.title}\n")
-                f.write(f"Data inizio: {self.tourney.start_date}\n")
+                f.write(
+                    f"Data inizio: {format_date_extended(self.tourney.start_date)}\n"
+                )
                 if self.tourney.comment:
                     f.write(f"Note: {self.tourney.comment}\n")
                 f.write("-" * 50 + "\n")
@@ -585,7 +593,7 @@ class MainFrame(wx.Frame):
                 "Salvataggio completato",
                 wx.OK | wx.ICON_INFORMATION,
             )
-        except Exception as e:
+        except (OSError, UnicodeError) as e:
             wx.MessageBox(
                 f"Errore durante il salvataggio:\n{e!s}",
                 "Errore",
@@ -609,7 +617,9 @@ class MainFrame(wx.Frame):
         try:
             with open(filepath, "w", encoding="utf-8") as f:
                 f.write(f"Torneo: {self.tourney.title}\n")
-                f.write(f"Data inizio: {self.tourney.start_date}\n")
+                f.write(
+                    f"Data inizio: {format_date_extended(self.tourney.start_date)}\n"
+                )
                 if self.tourney.comment:
                     f.write(f"Note: {self.tourney.comment}\n")
                 f.write("-" * 50 + "\n")
@@ -630,7 +640,7 @@ class MainFrame(wx.Frame):
                 "Salvataggio completato",
                 wx.OK | wx.ICON_INFORMATION,
             )
-        except Exception as e:
+        except (OSError, UnicodeError) as e:
             wx.MessageBox(
                 f"Errore durante il salvataggio:\n{e!s}",
                 "Errore",
@@ -667,7 +677,7 @@ class MainFrame(wx.Frame):
                 return is_same, chosen
 
             db = PlayerDB()
-            success, log = db.merge_db(
+            _success, log = db.merge_db(
                 pathname, interactive_resolver=interactive_resolver
             )
 
@@ -805,7 +815,11 @@ class MainFrame(wx.Frame):
                 )
 
                 if len(self.tourney.unplayed_matches) == 0:
-                    self.tourney.end_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    self.tourney.end_date = (
+                        datetime.now(timezone.utc)
+                        .astimezone()
+                        .strftime("%Y-%m-%d %H:%M:%S")
+                    )
                     self.tourney.save()
                     wx.MessageBox(
                         "Questa esecuzione ha concluso le battaglie! Ti accompagno alla sala delle classifiche.",

@@ -428,11 +428,35 @@ def test_merge_db_fuzzy_matching_and_resolution(tmp_path):
         os.chdir(orig_dir)
 
 
+def test_format_date_extended():
+    import datetime
+
+    from data import format_date_extended
+
+    # Stringhe ISO
+    assert format_date_extended("2026-08-20") == "giovedì 20 agosto 2026"
+    assert format_date_extended("2026-08-20 17:40:05") == "giovedì 20 agosto 2026"
+    assert format_date_extended("2026-03-17") == "martedì 17 marzo 2026"
+    assert format_date_extended("2026-04-20") == "lunedì 20 aprile 2026"
+    assert format_date_extended("2026-05-01") == "venerdì 1 maggio 2026"
+    assert format_date_extended("2026-08-01") == "sabato 1 agosto 2026"
+    assert format_date_extended("2026-08-15") == "sabato 15 agosto 2026"
+
+    # Datetime objects
+    dt = datetime.date(2026, 8, 20)
+    assert format_date_extended(dt) == "giovedì 20 agosto 2026"
+
+    # Stringhe già in formato esteso o con nome mese
+    assert format_date_extended("giovedì 20 agosto 2026") == "giovedì 20 agosto 2026"
+    assert format_date_extended("1 agosto 2026") == "sabato 1 agosto 2026"
+
+
 if __name__ == "__main__":
     import pathlib
     import tempfile
 
     print("Esecuzione test_standings_ranking...")
+    test_format_date_extended()
     test_ranking_primary_points_score_basso()
     test_ranking_primary_points_score_alto()
     test_ranking_vittorie_primary_score_basso_tiebreak()

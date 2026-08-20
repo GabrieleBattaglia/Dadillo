@@ -4,11 +4,12 @@
             "oro": 1,
             "argento": 0,
             "bronzo": 0,
-            "legno": 0
+            "legno": 1
         },
         "history": [
-            "1\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20",
-            "6\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
+            "1\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
+            "6\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
+            "4\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026"
         ],
         "placements_sum": 6
     },
@@ -20,21 +21,23 @@
             "legno": 0
         },
         "history": [
-            "2\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20",
-            "1\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
+            "2\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
+            "1\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
+            "10\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026"
         ],
-        "placements_sum": 0
+        "placements_sum": 10
     },
     "Siddharta33": {
         "medals": {
             "oro": 0,
-            "argento": 0,
+            "argento": 1,
             "bronzo": 1,
             "legno": 0
         },
         "history": [
-            "3\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20",
-            "10\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
+            "3\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
+            "10\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
+            "2\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026"
         ],
         "placements_sum": 10
     },
@@ -46,7 +49,7 @@
             "legno": 1
         },
         "history": [
-            "4\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20"
+            "4\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026"
         ],
         "placements_sum": 0
     },
@@ -58,10 +61,11 @@
             "legno": 0
         },
         "history": [
-            "5\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20",
-            "3\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
+            "5\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
+            "3\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
+            "8\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026"
         ],
-        "placements_sum": 5
+        "placements_sum": 13
     },
     "Gas": {
         "medals": {
@@ -71,7 +75,7 @@
             "legno": 0
         },
         "history": [
-            "6\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20"
+            "6\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026"
         ],
         "placements_sum": 6
     },
@@ -83,10 +87,11 @@
             "legno": 0
         },
         "history": [
-            "7\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20",
-            "8\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
+            "7\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
+            "8\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
+            "9\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026"
         ],
-        "placements_sum": 15
+        "placements_sum": 24
     },
     "Princi": {
         "medals": {
@@ -96,9 +101,10 @@
             "legno": 0
         },
         "history": [
-            "8\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20"
+            "8\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
+            "7\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026"
         ],
-        "placements_sum": 8
+        "placements_sum": 15
     },
     "Bazzi87": {
         "medals": {
@@ -108,21 +114,23 @@
             "legno": 0
         },
         "history": [
-            "9\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20",
-            "11\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
+            "9\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
+            "11\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
+            "11\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026"
         ],
-        "placements_sum": 20
+        "placements_sum": 31
     },
     "Ninfa81": {
         "medals": {
-            "oro": 0,
+            "oro": 1,
             "argento": 0,
             "bronzo": 0,
             "legno": 0
         },
         "history": [
-            "10\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20",
-            "7\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
+            "10\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
+            "7\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
+            "1\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026"
         ],
         "placements_sum": 17
     },
@@ -134,10 +142,11 @@
             "legno": 0
         },
         "history": [
-            "11\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20",
-            "5\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
+            "11\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
+            "5\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
+            "5\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026"
         ],
-        "placements_sum": 16
+        "placements_sum": 21
     },
     "Dj Dany": {
         "medals": {
@@ -147,8 +156,8 @@
             "legno": 0
         },
         "history": [
-            "12\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20",
-            "14\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
+            "12\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
+            "14\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026"
         ],
         "placements_sum": 26
     },
@@ -156,12 +165,13 @@
         "medals": {
             "oro": 0,
             "argento": 0,
-            "bronzo": 0,
+            "bronzo": 1,
             "legno": 0
         },
         "history": [
-            "14\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20",
-            "9\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
+            "14\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
+            "9\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
+            "3\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026"
         ],
         "placements_sum": 23
     },
@@ -173,8 +183,8 @@
             "legno": 0
         },
         "history": [
-            "15\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20",
-            "2\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
+            "15\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
+            "2\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026"
         ],
         "placements_sum": 15
     },
@@ -186,7 +196,7 @@
             "legno": 0
         },
         "history": [
-            "16\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20"
+            "16\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026"
         ],
         "placements_sum": 16
     },
@@ -198,7 +208,7 @@
             "legno": 0
         },
         "history": [
-            "17\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20"
+            "17\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026"
         ],
         "placements_sum": 17
     },
@@ -210,9 +220,10 @@
             "legno": 0
         },
         "history": [
-            "12\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
+            "12\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
+            "6\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026"
         ],
-        "placements_sum": 12
+        "placements_sum": 18
     },
     "garruz88": {
         "medals": {
@@ -222,7 +233,7 @@
             "legno": 1
         },
         "history": [
-            "4\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
+            "4\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026"
         ],
         "placements_sum": 0
     },
@@ -234,9 +245,10 @@
             "legno": 0
         },
         "history": [
-            "13\u00b0 in Farkle Bonus - 2026-03-17 - 2026-04-20",
-            "13\u00b0 in Yatzee con Bonus - 2026-05-01 - 2026-05-30"
+            "13\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
+            "13\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
+            "12\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026"
         ],
-        "placements_sum": 26
+        "placements_sum": 38
     }
 }

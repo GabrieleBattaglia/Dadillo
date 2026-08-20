@@ -1,0 +1,30 @@
+Ciao Stella.
+Una mia amica ha tenuto questo torneo usando dadillo in mine\.
+Vorrei integrare i dati cioè medagliere, storico eccetera, nel mio db giocatori, ma purtroppo lei li ha persi e non pu
+ inviarmi il suo file .json da fondere con mio.
+Per questo ti chiedo aiuto, puoi fonderli tu?
+Qui sotto trovi tutti i dati del torneo, se te ne mancano, chiedili a me e te li fornirò per completare il lavoro.
+Importante: i giocatori dovrebbero già essere tutti presenti nel mio db, verifica l'esatta corrispondenza del nome, in caso di nomi molto simili, quello giusto è quello già presente nel mio DB.
+Aggiorna gli storici tornei , aggiungi le medaglie, e i piazzamenti per le statistiche. Grazie mille.
+
+
+Nome torneo: Agostino1-4-24-Bonus
+Inizio: 1 agosto 2026
+Fine: 15 agosto 2026
+Classifica dall'ultimo al primo posto:
+12 vero80
+11 bazzy87
+10 selene157
+9 rinaldo
+8 manu1504
+7 princi
+6 tasmania94
+5 anny.88
+4 peppe
+3 il difetto88
+2 siddharta33
+1 ninfa81
+
+Concluso questo lavoro di fusione, ne approfitto per chiederti una piccola miglioria in tutta l'app.
+Vorrei che le date, ovunque siano, apparissero in formato esteso: giovedì 20 agosto 2026.
+Grazie.

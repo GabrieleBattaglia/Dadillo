@@ -29,7 +29,7 @@ def check_updates_gui():
         api_url = (
             "https://api.github.com/repos/GabrieleBattaglia/dadillo/releases/latest"
         )
-        has_update, new_ver, dl_url, changelog = update_checker(VERSION, api_url)
+        has_update, new_ver, dl_url, _changelog = update_checker(VERSION, api_url)
         if has_update:
             wx.CallAfter(_show_prompt, new_ver, dl_url)
 

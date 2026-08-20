@@ -1,6 +1,8 @@
-from datetime import datetime
+import contextlib
+from datetime import datetime, timezone
 
 import wx
+from data import format_date_extended
 
 
 def _extract_match_details(data):
@@ -389,16 +391,22 @@ class StandingsPanel(wx.Panel):
 
         start = self.tourney.start_date
         end = self.tourney.end_date if self.tourney.end_date else "In corso"
-        lines.append(f"Data inizio: {start}")
-        lines.append(f"Data fine: {end}")
+        formatted_start = format_date_extended(start) if start else "Sconosciuta"
+        formatted_end = (
+            format_date_extended(end) if self.tourney.end_date else "In corso"
+        )
+        lines.append(f"Data inizio: {formatted_start}")
+        lines.append(f"Data fine: {formatted_end}")
 
         try:
             fmt = "%Y-%m-%d %H:%M:%S"
-            dt_start = datetime.strptime(start, fmt)
+            dt_start = datetime.strptime(start, fmt).replace(tzinfo=timezone.utc)
             dt_end = (
-                datetime.strptime(self.tourney.end_date, fmt)
+                datetime.strptime(self.tourney.end_date, fmt).replace(
+                    tzinfo=timezone.utc
+                )
                 if self.tourney.end_date
-                else datetime.now()
+                else datetime.now(timezone.utc)
             )
             diff = dt_end - dt_start
             hours, remainder = divmod(diff.seconds, 3600)
@@ -411,7 +419,7 @@ class StandingsPanel(wx.Panel):
             if not self.is_final:
                 dur_str += " (Provvisoria)"
             lines.append(f"Durata complessiva: {dur_str}")
-        except Exception:
+        except (ValueError, TypeError):
             lines.append("Durata complessiva: Sconosciuta")
 
         lines.append("")
@@ -589,7 +597,9 @@ class StandingsPanel(wx.Panel):
                     pass
 
                 if len(all_pts) >= 4:
-                    try:
+                    with contextlib.suppress(
+                        ValueError, TypeError, ZeroDivisionError, IndexError
+                    ):
                         sorted_pts = sorted(all_pts)
                         min_val = sorted_pts[0]
                         max_val = sorted_pts[-1]
@@ -644,10 +654,8 @@ class StandingsPanel(wx.Panel):
                                         lines.append(
                                             f"  {q['name']}: 0 partite - Punteggi da {fmt_pts(q['min'])} a {fmt_pts(q['max'])}"
                                         )
-                    except Exception:
-                        pass
                 elif len(all_pts) > 1:
-                    try:
+                    with contextlib.suppress(AttributeError, ValueError):
                         # Fallback alla visualizzazione base se ci sono meno di 4 partite (non si possono fare 4 gruppi reali)
                         quartiles = statistics.quantiles(all_pts, n=4)
                         q1 = quartiles[0]
@@ -655,8 +663,6 @@ class StandingsPanel(wx.Panel):
                         lines.append(
                             f"Quartili: il 25% dei punteggi registrati è inferiore a {q1:.2f} punti; il 25% è superiore a {q3:.2f} punti."
                         )
-                    except (AttributeError, ValueError):
-                        pass
 
                 if len(all_pts) > 1:
                     stdev_val = statistics.stdev(all_pts)
@@ -674,13 +680,17 @@ class StandingsPanel(wx.Panel):
                 )
 
                 if len(all_pts) > 1 and self.tourney.start_date:
-                    try:
+                    with contextlib.suppress(ValueError, TypeError, ZeroDivisionError):
                         fmt = "%Y-%m-%d %H:%M:%S"
-                        dt_start = datetime.strptime(self.tourney.start_date, fmt)
+                        dt_start = datetime.strptime(
+                            self.tourney.start_date, fmt
+                        ).replace(tzinfo=timezone.utc)
                         dt_end = (
-                            datetime.strptime(self.tourney.end_date, fmt)
+                            datetime.strptime(self.tourney.end_date, fmt).replace(
+                                tzinfo=timezone.utc
+                            )
                             if self.tourney.end_date
-                            else datetime.now()
+                            else datetime.now(timezone.utc)
                         )
                         diff = dt_end - dt_start
 
@@ -703,8 +713,6 @@ class StandingsPanel(wx.Panel):
                             lines.append(
                                 f"Ritmo medio di gioco: una partita ogni {', '.join(parts)}."
                             )
-                    except Exception:
-                        pass
 
         self.txt_display.SetValue("\n".join(lines))
         self.current_standings = flat
@@ -756,12 +764,12 @@ class StandingsPanel(wx.Panel):
         medals_map = {1: "🥇 ORO", 2: "🥈 ARGENTO", 3: "🥉 BRONZO", 4: "🪵 LEGNO"}
 
         start = (
-            self.tourney.start_date.split(" ")[0]
+            format_date_extended(self.tourney.start_date)
             if self.tourney.start_date
             else "Sconosciuta"
         )
         end = (
-            self.tourney.end_date.split(" ")[0]
+            format_date_extended(self.tourney.end_date)
             if self.tourney.end_date
             else "Sconosciuta"
         )
