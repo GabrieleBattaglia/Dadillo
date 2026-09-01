@@ -1,8 +1,17 @@
 import contextlib
-from datetime import datetime, timezone
 
 import wx
-from data import format_date_extended
+from data import (
+    MAIN_CRITERIA,
+    RANKING_VIEWS,
+    TIEBREAKERS_1,
+    TIEBREAKERS_2,
+    format_date_extended,
+    normalize_main_criterion,
+    now_local,
+    parse_timestamp,
+)
+from ui_utils import save_or_warn
 
 
 def _extract_match_details(data):
@@ -18,6 +27,39 @@ def _extract_match_details(data):
         else:
             pt1, pt2 = mpts / 2.0, mpts / 2.0
     return mn1, mn2, mres, pt1, pt2
+
+
+def calculate_streaks(active_players, played_matches):
+    """Striscia di vittorie consecutive piu' lunga di ogni giocatore.
+    Le partite dei giocatori ritirati restano negli archivi del torneo anche
+    dopo la loro rimozione dalla classifica: i contatori vanno quindi costruiti
+    su tutti i nomi che compaiono nelle partite, altrimenti la schermata delle
+    classifiche si interrompe con un errore. Il risultato riporta pero' solo i
+    giocatori ancora in gara, che sono gli unici a comparire in classifica.
+    """
+    nomi = set(active_players)
+    for data in played_matches.values():
+        nomi.add(data[0])
+        nomi.add(data[1])
+
+    strikes = dict.fromkeys(nomi, 0)
+    current = dict.fromkeys(nomi, 0)
+
+    for data in played_matches.values():
+        mn1, mn2, mres = data[0], data[1], data[2]
+        if mres == "1":
+            current[mn1] += 1
+            strikes[mn1] = max(strikes[mn1], current[mn1])
+            current[mn2] = 0
+        elif mres == "2":
+            current[mn2] += 1
+            strikes[mn2] = max(strikes[mn2], current[mn2])
+            current[mn1] = 0
+        else:
+            current[mn1] = 0
+            current[mn2] = 0
+
+    return {nome: valore for nome, valore in strikes.items() if nome in active_players}
 
 
 def _calculate_mini_league_stats(group_names, played_matches):
@@ -230,20 +272,17 @@ class StandingsPanel(wx.Panel):
         ctrl_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         lbl_order = wx.StaticText(self, label="Ordina per:")
-        self.cb_order = wx.Choice(
-            self,
-            choices=["Vittorie", "Punti", "Sconfitte", "Pareggi", "Nome Giocatore"],
-        )
+        self.cb_order = wx.Choice(self, choices=list(RANKING_VIEWS))
 
         main_crit = getattr(
             self.tourney,
             "main_criterion",
-            getattr(self.settings, "main_criterion", "Vittorie"),
+            getattr(self.settings, "main_criterion", MAIN_CRITERIA[0]),
         )
-        if main_crit in ["Vittorie", "Punti", "Sconfitte", "Pareggi", "Nome Giocatore"]:
-            self.cb_order.SetStringSelection(main_crit)
-        else:
-            self.cb_order.SetStringSelection("Vittorie")
+        # normalize_main_criterion riconosce anche le vecchie etichette, per
+        # esempio Punti Totali, che altrimenti facevano ricadere l'ordinamento
+        # su Vittorie senza dirlo a nessuno.
+        self.cb_order.SetStringSelection(normalize_main_criterion(main_crit))
 
         self.cb_order.Bind(wx.EVT_CHOICE, self.on_update)
 
@@ -264,35 +303,26 @@ class StandingsPanel(wx.Panel):
         self.cb_score_dir.Bind(wx.EVT_CHOICE, self.on_update)
 
         lbl_tie1 = wx.StaticText(self, label="1° Spareggio:")
-        self.cb_tie1 = wx.Choice(
-            self,
-            choices=[
-                "Scontro Diretto (Punti)",
-                "Scontro Diretto (Vittorie)",
-                "Nessuno",
-            ],
-        )
+        self.cb_tie1 = wx.Choice(self, choices=list(TIEBREAKERS_1))
         tie1 = getattr(
             self.tourney,
             "tiebreaker_1",
-            getattr(self.settings, "tiebreaker_1", "Scontro Diretto (Punti)"),
+            getattr(self.settings, "tiebreaker_1", TIEBREAKERS_1[0]),
         )
-        if tie1 in ["Scontro Diretto (Punti)", "Scontro Diretto (Vittorie)", "Nessuno"]:
+        if tie1 in TIEBREAKERS_1:
             self.cb_tie1.SetStringSelection(tie1)
         else:
             self.cb_tie1.SetSelection(0)
         self.cb_tie1.Bind(wx.EVT_CHOICE, self.on_update)
 
         lbl_tie2 = wx.StaticText(self, label="2° Spareggio:")
-        self.cb_tie2 = wx.Choice(
-            self, choices=["Punti Totali", "Vittorie Totali", "Nessuno"]
-        )
+        self.cb_tie2 = wx.Choice(self, choices=list(TIEBREAKERS_2))
         tie2 = getattr(
             self.tourney,
             "tiebreaker_2",
-            getattr(self.settings, "tiebreaker_2", "Punti Totali"),
+            getattr(self.settings, "tiebreaker_2", TIEBREAKERS_2[0]),
         )
-        if tie2 in ["Punti Totali", "Vittorie Totali", "Nessuno"]:
+        if tie2 in TIEBREAKERS_2:
             self.cb_tie2.SetStringSelection(tie2)
         else:
             self.cb_tie2.SetSelection(0)
@@ -364,7 +394,7 @@ class StandingsPanel(wx.Panel):
         self.tourney.tiebreaker_1 = self.cb_tie1.GetStringSelection()
         self.tourney.tiebreaker_2 = self.cb_tie2.GetStringSelection()
 
-        self.tourney.save()
+        save_or_warn(self.tourney.save, self)
         self.update_display()
 
     def update_display(self):
@@ -398,20 +428,23 @@ class StandingsPanel(wx.Panel):
         lines.append(f"Data inizio: {formatted_start}")
         lines.append(f"Data fine: {formatted_end}")
 
-        try:
-            fmt = "%Y-%m-%d %H:%M:%S"
-            dt_start = datetime.strptime(start, fmt).replace(tzinfo=timezone.utc)
-            dt_end = (
-                datetime.strptime(self.tourney.end_date, fmt).replace(
-                    tzinfo=timezone.utc
-                )
-                if self.tourney.end_date
-                else datetime.now(timezone.utc)
-            )
+        # Le due estremita' vanno confrontate nello stesso fuso orario, altrimenti
+        # la durata sbaglia di tutto l'offset e per i tornei appena iniziati
+        # risulta addirittura negativa.
+        dt_start = parse_timestamp(start)
+        dt_end = (
+            parse_timestamp(self.tourney.end_date)
+            if self.tourney.end_date
+            else now_local()
+        )
+        if dt_start is None or dt_end is None:
+            lines.append("Durata complessiva: Sconosciuta")
+        else:
             diff = dt_end - dt_start
-            hours, remainder = divmod(diff.seconds, 3600)
-            minutes, _ = divmod(remainder, 60)
-            days = diff.days
+            secondi_totali = max(int(diff.total_seconds()), 0)
+            days, resto = divmod(secondi_totali, 86400)
+            hours, resto = divmod(resto, 3600)
+            minutes = resto // 60
             dur_str = ""
             if days > 0:
                 dur_str += f"{days} giorni, "
@@ -419,8 +452,6 @@ class StandingsPanel(wx.Panel):
             if not self.is_final:
                 dur_str += " (Provvisoria)"
             lines.append(f"Durata complessiva: {dur_str}")
-        except (ValueError, TypeError):
-            lines.append("Durata complessiva: Sconosciuta")
 
         lines.append("")
         lines.append("-" * 60)
@@ -467,8 +498,9 @@ class StandingsPanel(wx.Panel):
             recalto_list = []
             recbasso_list = []
 
-            strikes = {name: 0 for name in self.tourney.players}
-            current_strikes = {name: 0 for name in self.tourney.players}
+            strikes = calculate_streaks(
+                self.tourney.players, self.tourney.played_matches
+            )
 
             for m_id, data in self.tourney.played_matches.items():
                 mn1, mn2, mres, mpts = data[:4]
@@ -493,19 +525,6 @@ class StandingsPanel(wx.Panel):
                     recbasso_list = [desc]
                 elif mpts == recbasso_val:
                     recbasso_list.append(desc)
-
-                # Strikes
-                if mres == "1":
-                    current_strikes[mn1] += 1
-                    strikes[mn1] = max(strikes[mn1], current_strikes[mn1])
-                    current_strikes[mn2] = 0
-                elif mres == "2":
-                    current_strikes[mn2] += 1
-                    strikes[mn2] = max(strikes[mn2], current_strikes[mn2])
-                    current_strikes[mn1] = 0
-                else:
-                    current_strikes[mn1] = 0
-                    current_strikes[mn2] = 0
 
             def fmt_pts(p):
                 return (
@@ -561,7 +580,10 @@ class StandingsPanel(wx.Panel):
 
                 if mres in ("1", "2"):
                     win_pts.append(val)
-                elif mres == "X":
+                elif mres == "3":
+                    # Il codice del pareggio e' 3 in tutto il programma: il
+                    # confronto con X non era mai vero e la media dei pareggi
+                    # non veniva mai calcolata.
                     draw_pts.append(val)
 
             if all_pts:
@@ -680,21 +702,16 @@ class StandingsPanel(wx.Panel):
                 )
 
                 if len(all_pts) > 1 and self.tourney.start_date:
-                    with contextlib.suppress(ValueError, TypeError, ZeroDivisionError):
-                        fmt = "%Y-%m-%d %H:%M:%S"
-                        dt_start = datetime.strptime(
-                            self.tourney.start_date, fmt
-                        ).replace(tzinfo=timezone.utc)
-                        dt_end = (
-                            datetime.strptime(self.tourney.end_date, fmt).replace(
-                                tzinfo=timezone.utc
-                            )
-                            if self.tourney.end_date
-                            else datetime.now(timezone.utc)
-                        )
-                        diff = dt_end - dt_start
+                    ritmo_start = parse_timestamp(self.tourney.start_date)
+                    ritmo_end = (
+                        parse_timestamp(self.tourney.end_date)
+                        if self.tourney.end_date
+                        else now_local()
+                    )
+                    if ritmo_start is not None and ritmo_end is not None:
+                        diff = ritmo_end - ritmo_start
 
-                        freq_seconds = diff.total_seconds() / len(all_pts)
+                        freq_seconds = max(diff.total_seconds(), 0) / len(all_pts)
                         if freq_seconds > 0:
                             f_days, remainder = divmod(int(freq_seconds), 86400)
                             f_hours, remainder = divmod(remainder, 3600)
@@ -738,7 +755,7 @@ class StandingsPanel(wx.Panel):
         self.tourney.score_direction = score_direction
         self.tourney.tiebreaker_1 = tiebreaker_1
         self.tourney.tiebreaker_2 = tiebreaker_2
-        self.tourney.save()
+        save_or_warn(self.tourney.save, self)
 
         # Calcola la classifica ufficiale (sempre 1° posto al migliore, indipendentemente dalla vista temporanea)
         official_standings = rank_tournament_players(
@@ -817,7 +834,17 @@ class StandingsPanel(wx.Panel):
                 else:
                     skipped_count += 1
 
-        db.save()
+        if not save_or_warn(db.save, self):
+            wx.MessageBox(
+                "Le medaglie non sono state\n"
+                "registrate: l'archivio dei\n"
+                "discepoli non e' stato salvato.\n"
+                "Risolvi il problema e premi di\n"
+                "nuovo il pulsante Avanti.",
+                "Premiazione non registrata",
+                wx.OK | wx.ICON_ERROR,
+            )
+            return
 
         msg = (
             "Oh mio insuperabile e implacabile dominatore!\n\n"

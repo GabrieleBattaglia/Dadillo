@@ -2,6 +2,63 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.8.2] - 2026-09-01
+
+Correzioni del blocco 2 della revisione di fase 1, dedicato agli errori bloccanti e ai dati mostrati sbagliati. Riferimento: `analisi_codice_fase_1.txt`.
+
+### Risolto
+- **Classifica inconsultabile dopo il ritiro di un giocatore** (rilievo 1, critico):
+  - Le strisce di vittorie venivano contate su dizionari costruiti con i soli partecipanti attivi, ma indicizzati con i nomi letti dalle partite giocate. Dopo aver soppresso un discepolo che aveva già vinto almeno una partita, la schermata delle classifiche si interrompeva con un errore, proprio quando il ritiro chiudeva le battaglie e portava alla premiazione.
+  - Il calcolo è ora nella funzione `calculate_streaks` di [standings.py](file:///E:/git/mine/Dadillo/standings.py), che tiene conto di tutti i nomi presenti negli archivi del torneo e restituisce i soli giocatori ancora in gara.
+- **Annullamento di una partita che coinvolge un ritirato** (rilievo 2, critico):
+  - Premere `Canc` su una vittoria a tavolino, o su una partita disputata da chi era stato poi ritirato, interrompeva il ripristino dei punteggi a metà, lasciando i dati incoerenti.
+  - Ora la condizione viene verificata prima di toccare qualsiasi statistica e l'operazione viene rifiutata con un messaggio che spiega il motivo.
+- **Criterio di classifica perduto in silenzio** (rilievo 3):
+  - La finestra Regole Torneo offriva "Punti Totali" mentre creazione torneo e classifica usavano "Punti": aprendo le Regole su un torneo a punti la casella restava senza selezione e la conferma salvava un criterio vuoto, facendo ricadere l'ordinamento su Vittorie senza alcun avviso.
+  - Introdotto in [data.py](file:///E:/git/mine/Dadillo/data.py) il vocabolario unico `MAIN_CRITERIA`, `RANKING_VIEWS`, `TIEBREAKERS_1`, `TIEBREAKERS_2`, `DRAW_SPLITS`, usato da tutte e tre le finestre, più `normalize_main_criterion` e `normalize_choice`, che al caricamento riconoscono le vecchie etichette e recuperano i criteri già azzerati nei file salvati.
+- **Durata del torneo e ritmo di gioco sbagliati di tutto il fuso orario** (rilievo 4):
+  - Le date erano salvate in ora locale e rilette come se fossero UTC, mentre il momento attuale era preso in UTC reale: un torneo iniziato dieci minuti prima risultava durato 22 ore.
+  - Le date e ore sono ora salvate in formato ISO completo di fuso, con `now_timestamp`, e rilette con `parse_timestamp`, che accetta anche il vecchio formato interpretandolo come ora locale. Nessun file già salvato va convertito a mano.
+- **Media punti per pareggio mai calcolata** (rilievo 12):
+  - La statistica confrontava il risultato con il codice `X`, che il programma non produce mai: il codice del pareggio è `3`. La riga ora compare correttamente.
+
+### Aggiunto
+- Quattro nuovi test automatici: strisce di vittorie con un giocatore ritirato, riconoscimento delle vecchie etichette del criterio principale, sopravvivenza del criterio a punti al salvataggio e rilettura, durata calcolata correttamente con i due formati di data. La suite passa da 19 a 23 test.
+
+---
+
+## [2.8.1] - 2026-09-01
+
+Correzioni del blocco 1 della revisione di fase 1, dedicato alla sicurezza dei dati. Riferimento: `analisi_codice_fase_1.txt`.
+
+### Risolto
+- **Percorsi dei file di dati indipendenti dalla cartella di avvio** (rilievo 6):
+  - `Dadillo.json`, `Dadillo_settings.json`, `Dadillo_players.json` e `Giocatori.txt` erano risolti rispetto alla directory di lavoro corrente. Avviando il programma da un'altra cartella non venivano più trovati e ne venivano creati di nuovi e vuoti altrove.
+  - Introdotta `get_app_dir()` in [data.py](file:///E:/git/mine/Dadillo/data.py), che ricava la cartella dell'applicazione dal modulo quando si esegue da sorgente e da `sys.executable` quando si esegue l'eseguibile PyInstaller. Tutti i percorsi sono ora assoluti e costruiti con `os.path.join`.
+  - `TournamentData`, `SettingsData` e `PlayerDB` accettano un parametro opzionale `base_dir`, usato dai test per lavorare su cartelle temporanee senza toccare gli archivi reali.
+- **Salvataggi atomici con copia di sicurezza** (rilievo 5, prima parte):
+  - Tutti i salvataggi troncavano il file di destinazione prima di scrivere: un errore a metà scrittura, un disco pieno o un file bloccato da un altro programma potevano distruggere il torneo in corso o la Hall of Fame.
+  - Aggiunte `atomic_write_text` e `atomic_write_json`, che scrivono su file temporaneo nella stessa cartella, forzano i dati su disco con `os.fsync`, conservano la versione precedente in un file con estensione `.bak` e solo allora sostituiscono l'originale con `os.replace`.
+  - Aggiunta l'eccezione `SaveError`, con messaggio già pronto per l'utente e organizzato in righe brevi per la lettura su display braille.
+  - Al primo avvio, se il file delle impostazioni non è scrivibile, il programma parte comunque con i valori predefiniti invece di interrompersi.
+  - Nuovo modulo [ui_utils.py](file:///E:/git/mine/Dadillo/ui_utils.py) con `save_or_warn`: ogni salvataggio dell'applicazione passa da qui e, se non riesce, mostra un messaggio parlante invece di far risalire l'errore. Chiudendo il programma con un salvataggio fallito viene chiesto se uscire lo stesso; il messaggio "Salvato", quello di esportazione riuscita e quello di premiazione compaiono solo a scrittura realmente avvenuta.
+  - Se il salvataggio fallisce durante la rinomina o l'eliminazione di un discepolo, la modifica viene annullata anche in memoria, così il programma non resta disallineato dai dati su disco.
+- **Archivi danneggiati riconosciuti invece che scambiati per assenti** (rilievo 16):
+  - Il caricamento del torneo non restituiva più alcuna differenza fra file mancante e file corrotto: un `Dadillo.json` danneggiato veniva trattato come assenza di torneo e il torneo nuovo lo sovrascriveva. L'archivio dei giocatori, nello stesso caso, veniva semplicemente svuotato e il primo salvataggio cancellava la Hall of Fame.
+  - Aggiunte l'eccezione `DataFileError`, la funzione `quarantine_file`, che mette da parte una copia datata del file danneggiato senza toccare l'originale, e la validazione della struttura dei dati letti (giocatori, partite giocate e non giocate).
+  - All'avvio Dadillo avvisa se il torneo o l'archivio dei discepoli non sono leggibili, indicando il nome della copia messa da parte. Finché l'archivio dei discepoli resta danneggiato, salvataggio ed esportazione della Hall of Fame vengono rifiutati con un messaggio esplicito.
+- **Fusione database che poteva cancellare un discepolo** (rilievo 7):
+  - Unendo un database esterno, scegliere per il discepolo un nickname già appartenente a un altro giocatore locale ne sovrascriveva medagliere e storico, senza avviso e senza possibilità di recupero.
+  - Ora i due storici vengono fusi sotto il nome scelto, senza duplicare i tornei già presenti, con i contatori delle medaglie ricalcolati e il dettaglio riportato nel resoconto della fusione.
+
+### Aggiunto
+- Cinque nuovi test automatici in `test_standings_ranking.py`, che coprono la scrittura atomica con copia di sicurezza, il rifiuto di un torneo danneggiato o strutturalmente non valido, la protezione dell'archivio discepoli non leggibile e la fusione senza perdita di storici. La suite passa da 14 a 19 test.
+
+### Modificato
+- I test di `test_standings_ranking.py` non usano più `os.chdir` ma il parametro `base_dir`, così non possono in nessun caso scrivere sui file di dati reali.
+
+---
+
 ## [2.8.0] - 2026-08-20
 
 ### Aggiunto

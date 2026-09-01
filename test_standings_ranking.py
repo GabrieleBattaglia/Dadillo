@@ -1,6 +1,7 @@
 import os
+from pathlib import Path
 
-from data import DATA_FILE, TournamentData
+from data import TournamentData
 
 
 class MockChoice:
@@ -50,30 +51,28 @@ class DummyStandingsHelper:
 
 
 def test_tournament_json_persistence(tmp_path):
-    orig_dir = os.getcwd()
-    os.chdir(tmp_path)
-    try:
-        t = TournamentData()
-        t.title = "Torneo Golf Test"
-        t.main_criterion = "Punti"
-        t.score_direction = "Basso"
-        t.tiebreaker_1 = "Scontro Diretto (Punti)"
-        t.tiebreaker_2 = "Vittorie Totali"
-        t.save()
+    # base_dir isola il test dai file di dati reali dell'applicazione
+    base = str(tmp_path)
+    t = TournamentData(base_dir=base)
+    t.title = "Torneo Golf Test"
+    t.main_criterion = "Punti"
+    t.score_direction = "Basso"
+    t.tiebreaker_1 = "Scontro Diretto (Punti)"
+    t.tiebreaker_2 = "Vittorie Totali"
+    t.save()
 
-        assert os.path.exists(DATA_FILE)
+    assert os.path.exists(t.filename)
+    assert os.path.dirname(t.filename) == base
 
-        t2 = TournamentData()
-        loaded = t2.load()
+    t2 = TournamentData(base_dir=base)
+    loaded = t2.load()
 
-        assert loaded is True
-        assert t2.title == "Torneo Golf Test"
-        assert t2.main_criterion == "Punti"
-        assert t2.score_direction == "Basso"
-        assert t2.tiebreaker_1 == "Scontro Diretto (Punti)"
-        assert t2.tiebreaker_2 == "Vittorie Totali"
-    finally:
-        os.chdir(orig_dir)
+    assert loaded is True
+    assert t2.title == "Torneo Golf Test"
+    assert t2.main_criterion == "Punti"
+    assert t2.score_direction == "Basso"
+    assert t2.tiebreaker_1 == "Scontro Diretto (Punti)"
+    assert t2.tiebreaker_2 == "Vittorie Totali"
 
 
 def test_ranking_primary_points_score_basso():
@@ -329,52 +328,48 @@ def test_merge_db_no_duplicate_medals(tmp_path):
 
     from data import PlayerDB
 
-    orig_dir = os.getcwd()
-    os.chdir(tmp_path)
-    try:
-        db = PlayerDB()
-        db.add_or_update_player(
-            "Peppe",
-            1,
-            True,
-            False,
-            False,
-            False,
-            "Torneo Alfa",
-            "2026-01-01",
-            "2026-01-10",
-        )
-        db.add_or_update_player(
-            "Selene",
-            2,
-            False,
-            True,
-            False,
-            False,
-            "Torneo Alfa",
-            "2026-01-01",
-            "2026-01-10",
-        )
-        db.save()
+    base = str(tmp_path)
+    db = PlayerDB(base_dir=base)
+    db.add_or_update_player(
+        "Peppe",
+        1,
+        True,
+        False,
+        False,
+        False,
+        "Torneo Alfa",
+        "2026-01-01",
+        "2026-01-10",
+    )
+    db.add_or_update_player(
+        "Selene",
+        2,
+        False,
+        True,
+        False,
+        False,
+        "Torneo Alfa",
+        "2026-01-01",
+        "2026-01-10",
+    )
+    db.save()
 
-        # Verifica stato iniziale
-        assert db.players["Peppe"]["medals"]["oro"] == 1
-        assert db.players["Selene"]["medals"]["argento"] == 1
+    # Verifica stato iniziale
+    assert db.players["Peppe"]["medals"]["oro"] == 1
+    assert db.players["Selene"]["medals"]["argento"] == 1
 
-        # File esterno con gli stessi dati
-        ext_path = "external_players.json"
-        with open(ext_path, "w", encoding="utf-8") as f:
-            json.dump(db.players, f, indent=4)
+    # File esterno con gli stessi dati
+    ext_path = os.path.join(base, "external_players.json")
+    with open(ext_path, "w", encoding="utf-8") as f:
+        json.dump(db.players, f, indent=4)
 
-        # Fonde lo stesso file
-        success, _log = db.merge_db(ext_path)
-        assert success is True
-        # I contatori NON devono raddoppiare!
-        assert db.players["Peppe"]["medals"]["oro"] == 1
-        assert db.players["Selene"]["medals"]["argento"] == 1
-        assert len(db.players["Peppe"]["history"]) == 1
-    finally:
-        os.chdir(orig_dir)
+    # Fonde lo stesso file
+    success, _log = db.merge_db(ext_path)
+    assert success is True
+    # I contatori NON devono raddoppiare!
+    assert db.players["Peppe"]["medals"]["oro"] == 1
+    assert db.players["Selene"]["medals"]["argento"] == 1
+    assert len(db.players["Peppe"]["history"]) == 1
 
 
 def test_merge_db_fuzzy_matching_and_resolution(tmp_path):
@@ -382,50 +377,46 @@ def test_merge_db_fuzzy_matching_and_resolution(tmp_path):
 
     from data import PlayerDB
 
-    orig_dir = os.getcwd()
-    os.chdir(tmp_path)
-    try:
-        db = PlayerDB()
-        db.players["Siddharta"] = {
-            "medals": {"oro": 0, "argento": 0, "bronzo": 1, "legno": 0},
-            "history": ["3° in Farkle Bonus - 2026-03-17 - 2026-04-20"],
-            "placements_sum": 0,
+    base = str(tmp_path)
+    db = PlayerDB(base_dir=base)
+    db.players["Siddharta"] = {
+        "medals": {"oro": 0, "argento": 0, "bronzo": 1, "legno": 0},
+        "history": ["3° in Farkle Bonus - 2026-03-17 - 2026-04-20"],
+        "placements_sum": 0,
+    }
+    db.save()
+
+    # File esterno con nome simile 'Siddharta33' e un nuovo torneo
+    ext_data = {
+        "Siddharta33": {
+            "medals": {"oro": 0, "argento": 0, "bronzo": 0, "legno": 0},
+            "history": ["10° in Yatzee con Bonus - 2026-05-01 - 2026-05-30"],
+            "placements_sum": 10,
         }
-        db.save()
+    }
+    ext_path = os.path.join(base, "ext_siddharta.json")
+    with open(ext_path, "w", encoding="utf-8") as f:
+        json.dump(ext_data, f, indent=4)
 
-        # File esterno con nome simile 'Siddharta33' e un nuovo torneo
-        ext_data = {
-            "Siddharta33": {
-                "medals": {"oro": 0, "argento": 0, "bronzo": 0, "legno": 0},
-                "history": ["10° in Yatzee con Bonus - 2026-05-01 - 2026-05-30"],
-                "placements_sum": 10,
-            }
-        }
-        ext_path = "ext_siddharta.json"
-        with open(ext_path, "w", encoding="utf-8") as f:
-            json.dump(ext_data, f, indent=4)
+    # Simula il resolver che conferma che sono la stessa persona e sceglie 'Siddharta33'
+    resolved = []
 
-        # Simula il resolver che conferma che sono la stessa persona e sceglie 'Siddharta33'
-        resolved = []
+    def mock_resolver(ext_name, candidate_name):
+        resolved.append((ext_name, candidate_name))
+        return True, "Siddharta33"
 
-        def mock_resolver(ext_name, candidate_name):
-            resolved.append((ext_name, candidate_name))
-            return True, "Siddharta33"
+    success, _log = db.merge_db(ext_path, interactive_resolver=mock_resolver)
+    assert success is True
+    assert len(resolved) == 1
+    assert resolved[0] == ("Siddharta33", "Siddharta")
 
-        success, _log = db.merge_db(ext_path, interactive_resolver=mock_resolver)
-        assert success is True
-        assert len(resolved) == 1
-        assert resolved[0] == ("Siddharta33", "Siddharta")
-
-        # Verifica che il giocatore sia stato unificato sotto 'Siddharta33'
-        assert "Siddharta33" in db.players
-        assert "Siddharta" not in db.players
-        p = db.players["Siddharta33"]
-        assert len(p["history"]) == 2
-        assert p["medals"]["bronzo"] == 1
-        assert p["placements_sum"] == 10
-    finally:
-        os.chdir(orig_dir)
+    # Verifica che il giocatore sia stato unificato sotto 'Siddharta33'
+    assert "Siddharta33" in db.players
+    assert "Siddharta" not in db.players
+    p = db.players["Siddharta33"]
+    assert len(p["history"]) == 2
+    assert p["medals"]["bronzo"] == 1
+    assert p["placements_sum"] == 10
 
 
 def test_format_date_extended():
@@ -451,6 +442,233 @@ def test_format_date_extended():
     assert format_date_extended("1 agosto 2026") == "sabato 1 agosto 2026"
 
 
+def test_strisce_con_giocatore_ritirato():
+    from standings import calculate_streaks
+
+    # Alice e' stata ritirata: non e' piu' fra i partecipanti, ma le sue
+    # partite, comprese le vittorie a tavolino, restano negli archivi.
+    active = {"Bob": [3, 1, 0, 1], "Carla": [0, 0, 0, 1]}
+    played = {
+        1: ["Alice", "Bob", "1", 3, 3, 0],
+        2: ["Bob", "Carla", "1", 3, 3, 0],
+        3: ["Alice", "Bob", "2", 0],
+    }
+
+    strikes = calculate_streaks(active, played)
+
+    # Nessun errore, e in classifica compaiono solo i giocatori ancora in gara
+    assert set(strikes) == {"Bob", "Carla"}
+    assert strikes["Bob"] == 2
+    assert strikes["Carla"] == 0
+
+
+def test_criterio_punti_totali_viene_riconosciuto():
+    from data import normalize_choice, normalize_main_criterion
+
+    # Vecchia etichetta della finestra Regole
+    assert normalize_main_criterion("Punti Totali") == "Punti"
+    # Valore gia' corretto
+    assert normalize_main_criterion("Punti") == "Punti"
+    # Criterio perduto da una conferma delle Regole: si torna al predefinito
+    assert normalize_main_criterion("") == "Vittorie"
+    assert normalize_main_criterion(None) == "Vittorie"
+    assert normalize_main_criterion("Qualcosa di ignoto") == "Vittorie"
+    assert normalize_choice("Nessuno", ("Punti Totali", "Nessuno")) == "Nessuno"
+    assert normalize_choice("boh", ("Punti Totali", "Nessuno")) == "Punti Totali"
+
+
+def test_criterio_a_punti_sopravvive_al_salvataggio(tmp_path):
+    import json
+
+    base = str(tmp_path)
+    t = TournamentData(base_dir=base)
+    t.title = "Torneo a penalita'"
+    t.main_criterion = "Punti"
+    t.save()
+
+    # Un file scritto da una versione precedente con l'etichetta vecchia
+    with open(t.filename, encoding="utf-8") as f:
+        salvato = json.load(f)
+    salvato["main_criterion"] = "Punti Totali"
+    with open(t.filename, "w", encoding="utf-8") as f:
+        json.dump(salvato, f)
+
+    t2 = TournamentData(base_dir=base)
+    assert t2.load() is True
+    assert t2.main_criterion == "Punti"
+
+    # E un file in cui il criterio era stato azzerato
+    salvato["main_criterion"] = ""
+    with open(t.filename, "w", encoding="utf-8") as f:
+        json.dump(salvato, f)
+    t3 = TournamentData(base_dir=base)
+    assert t3.load() is True
+    assert t3.main_criterion == "Vittorie"
+
+
+def test_durata_torneo_con_fuso_orario():
+    import datetime
+
+    from data import now_timestamp, parse_timestamp
+
+    # Formato nuovo, con fuso: la durata deve essere quella reale
+    adesso = datetime.datetime.now(datetime.timezone.utc).astimezone()
+    inizio = (adesso - datetime.timedelta(minutes=10)).replace(microsecond=0)
+    dt_inizio = parse_timestamp(inizio.isoformat())
+    assert dt_inizio is not None
+    minuti = (adesso - dt_inizio).total_seconds() / 60
+    assert 9 <= minuti <= 11
+
+    # Vecchio formato senza fuso: va letto come ora locale, non come UTC
+    testo_vecchio = inizio.strftime("%Y-%m-%d %H:%M:%S")
+    dt_vecchio = parse_timestamp(testo_vecchio)
+    assert dt_vecchio is not None
+    minuti_vecchio = (adesso - dt_vecchio).total_seconds() / 60
+    assert 9 <= minuti_vecchio <= 11
+
+    # Il timestamp generato ora e' rileggibile e porta con se' il fuso
+    riletto = parse_timestamp(now_timestamp())
+    assert riletto is not None
+    assert riletto.tzinfo is not None
+
+    # Valori non interpretabili non fanno saltare nulla
+    assert parse_timestamp("") is None
+    assert parse_timestamp("non una data") is None
+
+
+def test_atomic_write_conserva_la_versione_precedente(tmp_path):
+    from data import atomic_write_text
+
+    percorso = os.path.join(str(tmp_path), "prova.txt")
+    atomic_write_text(percorso, "primo contenuto")
+    assert Path(percorso).read_text(encoding="utf-8") == "primo contenuto"
+    # Alla prima scrittura non esiste nulla da conservare
+    assert not os.path.exists(percorso + ".bak")
+
+    atomic_write_text(percorso, "secondo contenuto")
+    assert Path(percorso).read_text(encoding="utf-8") == "secondo contenuto"
+    assert Path(percorso + ".bak").read_text(encoding="utf-8") == "primo contenuto"
+
+    # Nessun file temporaneo lasciato indietro
+    residui = [n for n in os.listdir(str(tmp_path)) if n.startswith(".dadillo_")]
+    assert residui == []
+
+
+def test_torneo_danneggiato_non_viene_scambiato_per_assente(tmp_path):
+    from data import DataFileError
+
+    base = str(tmp_path)
+    t = TournamentData(base_dir=base)
+    with open(t.filename, "w", encoding="utf-8") as f:
+        f.write("{questo non e' JSON valido")
+
+    try:
+        t.load()
+        raise AssertionError("il caricamento doveva fallire con DataFileError")
+    except DataFileError as e:
+        # Una copia del file danneggiato deve essere stata messa da parte
+        assert e.quarantine_path is not None
+        assert os.path.exists(e.quarantine_path)
+        # L'originale non viene toccato
+        assert os.path.exists(t.filename)
+
+
+def test_torneo_con_struttura_non_valida_viene_rifiutato(tmp_path):
+    import json
+
+    from data import DataFileError
+
+    base = str(tmp_path)
+    t = TournamentData(base_dir=base)
+    # JSON valido ma con statistiche giocatore incomplete
+    with open(t.filename, "w", encoding="utf-8") as f:
+        json.dump({"title": "Rotto", "players": {"Alice": [0, 0]}}, f)
+
+    try:
+        t.load()
+        raise AssertionError("la validazione doveva rifiutare i dati")
+    except DataFileError:
+        pass
+
+
+def test_archivio_giocatori_danneggiato_non_viene_sovrascritto(tmp_path):
+    from data import PlayerDB, SaveError
+
+    base = str(tmp_path)
+    percorso = os.path.join(base, "Dadillo_players.json")
+    with open(percorso, "w", encoding="utf-8") as f:
+        f.write("archivio rovinato, non JSON")
+
+    db = PlayerDB(base_dir=base)
+    assert db.load_error is not None
+    assert db.players == {}
+
+    # Salvare ora cancellerebbe la Hall of Fame: deve essere rifiutato
+    try:
+        db.save()
+        raise AssertionError("il salvataggio doveva essere rifiutato")
+    except SaveError:
+        pass
+    try:
+        db.export_to_txt()
+        raise AssertionError("l'esportazione doveva essere rifiutata")
+    except SaveError:
+        pass
+
+    # Il file originale e' ancora li', intatto
+    assert Path(percorso).read_text(encoding="utf-8") == "archivio rovinato, non JSON"
+
+
+def test_merge_db_non_sovrascrive_un_discepolo_esistente(tmp_path):
+    import json
+
+    from data import PlayerDB
+
+    base = str(tmp_path)
+    db = PlayerDB(base_dir=base)
+    db.players["Marco"] = {
+        "medals": {"oro": 1, "argento": 0, "bronzo": 0, "legno": 0},
+        "history": ["1° in Torneo Uno - 2026-01-01 - 2026-01-10"],
+        "placements_sum": 0,
+    }
+    db.players["marco1990"] = {
+        "medals": {"oro": 0, "argento": 1, "bronzo": 0, "legno": 0},
+        "history": ["2° in Torneo Due - 2026-02-01 - 2026-02-10"],
+        "placements_sum": 0,
+    }
+    db.save()
+
+    ext_data = {
+        "Marco90": {
+            "medals": {"oro": 0, "argento": 0, "bronzo": 1, "legno": 0},
+            "history": ["3° in Torneo Tre - 2026-03-01 - 2026-03-10"],
+            "placements_sum": 0,
+        }
+    }
+    ext_path = os.path.join(base, "ext_marco.json")
+    with open(ext_path, "w", encoding="utf-8") as f:
+        json.dump(ext_data, f, indent=4)
+
+    # L'utente conferma che Marco90 e il candidato locale sono la stessa persona
+    # e sceglie come nome definitivo 'Marco', che pero' esiste gia' in archivio.
+    def resolver(ext_name, candidate_name):
+        return True, "Marco"
+
+    success, _log = db.merge_db(ext_path, interactive_resolver=resolver)
+    assert success is True
+
+    # Nessuno storico deve andare perduto nella fusione: ne' quello del
+    # discepolo di destinazione, ne' quello del candidato assorbito.
+    storico = db.players["Marco"]["history"]
+    assert any("Torneo Uno" in v for v in storico)
+    assert any("Torneo Due" in v for v in storico)
+    assert any("Torneo Tre" in v for v in storico)
+    assert db.players["Marco"]["medals"]["oro"] == 1
+    assert db.players["Marco"]["medals"]["argento"] == 1
+    assert db.players["Marco"]["medals"]["bronzo"] == 1
+    assert "marco1990" not in db.players
+
+
 if __name__ == "__main__":
     import pathlib
     import tempfile
@@ -470,4 +688,21 @@ if __name__ == "__main__":
     test_setup_players_db_selection_behavior()
     test_merge_db_no_duplicate_medals(pathlib.Path(tempfile.mkdtemp()))
     test_merge_db_fuzzy_matching_and_resolution(pathlib.Path(tempfile.mkdtemp()))
+    test_strisce_con_giocatore_ritirato()
+    test_criterio_punti_totali_viene_riconosciuto()
+    test_criterio_a_punti_sopravvive_al_salvataggio(pathlib.Path(tempfile.mkdtemp()))
+    test_durata_torneo_con_fuso_orario()
+    test_atomic_write_conserva_la_versione_precedente(pathlib.Path(tempfile.mkdtemp()))
+    test_torneo_danneggiato_non_viene_scambiato_per_assente(
+        pathlib.Path(tempfile.mkdtemp())
+    )
+    test_torneo_con_struttura_non_valida_viene_rifiutato(
+        pathlib.Path(tempfile.mkdtemp())
+    )
+    test_archivio_giocatori_danneggiato_non_viene_sovrascritto(
+        pathlib.Path(tempfile.mkdtemp())
+    )
+    test_merge_db_non_sovrascrive_un_discepolo_esistente(
+        pathlib.Path(tempfile.mkdtemp())
+    )
     print("Tutti i test sono stati superati con successo!")

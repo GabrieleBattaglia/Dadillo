@@ -1,5 +1,14 @@
 import wx
-from data import format_date_extended
+from data import (
+    DRAW_SPLITS,
+    MAIN_CRITERIA,
+    TIEBREAKERS_1,
+    TIEBREAKERS_2,
+    format_date_extended,
+    normalize_choice,
+    normalize_main_criterion,
+)
+from ui_utils import save_or_warn
 
 
 class SetupTournamentDialog(wx.Dialog):
@@ -74,7 +83,7 @@ class SetupTournamentDialog(wx.Dialog):
         )
 
         lbl_main = wx.StaticText(panel, label="Criterio Principale:")
-        self.cb_main_criterion = wx.Choice(panel, choices=["Vittorie", "Punti"])
+        self.cb_main_criterion = wx.Choice(panel, choices=list(MAIN_CRITERIA))
         self.cb_main_criterion.SetSelection(0)
 
         lbl_score_dir = wx.StaticText(panel, label="Priorità Punteggio:")
@@ -85,20 +94,11 @@ class SetupTournamentDialog(wx.Dialog):
         self.cb_score_direction.SetSelection(0)
 
         lbl_tie1 = wx.StaticText(panel, label="Primo Spareggio (Scontri Diretti):")
-        self.cb_tiebreaker_1 = wx.Choice(
-            panel,
-            choices=[
-                "Scontro Diretto (Punti)",
-                "Scontro Diretto (Vittorie)",
-                "Nessuno",
-            ],
-        )
+        self.cb_tiebreaker_1 = wx.Choice(panel, choices=list(TIEBREAKERS_1))
         self.cb_tiebreaker_1.SetSelection(0)
 
         lbl_tie2 = wx.StaticText(panel, label="Secondo Spareggio (Totale nel Torneo):")
-        self.cb_tiebreaker_2 = wx.Choice(
-            panel, choices=["Punti Totali", "Vittorie Totali", "Nessuno"]
-        )
+        self.cb_tiebreaker_2 = wx.Choice(panel, choices=list(TIEBREAKERS_2))
         self.cb_tiebreaker_2.SetSelection(0)
 
         rank_box.Add(lbl_main, 0, wx.LEFT | wx.RIGHT | wx.TOP, 5)
@@ -504,8 +504,10 @@ class SettingsDialog(wx.Dialog):
 
         # Criterio Principale
         lbl_main = wx.StaticText(panel, label="Criterio Principale:")
-        self.cb_main = wx.Choice(panel, choices=["Vittorie", "Punti Totali"])
-        self.cb_main.SetStringSelection(self.settings.main_criterion)
+        self.cb_main = wx.Choice(panel, choices=list(MAIN_CRITERIA))
+        self.cb_main.SetStringSelection(
+            normalize_main_criterion(self.settings.main_criterion)
+        )
         vbox.Add(lbl_main, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
         vbox.Add(self.cb_main, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
 
@@ -524,24 +526,19 @@ class SettingsDialog(wx.Dialog):
 
         # Primo Spareggio
         lbl_tie1 = wx.StaticText(panel, label="Primo Spareggio (Scontri Diretti):")
-        self.cb_tie1 = wx.Choice(
-            panel,
-            choices=[
-                "Scontro Diretto (Punti)",
-                "Scontro Diretto (Vittorie)",
-                "Nessuno",
-            ],
+        self.cb_tie1 = wx.Choice(panel, choices=list(TIEBREAKERS_1))
+        self.cb_tie1.SetStringSelection(
+            normalize_choice(self.settings.tiebreaker_1, TIEBREAKERS_1)
         )
-        self.cb_tie1.SetStringSelection(self.settings.tiebreaker_1)
         vbox.Add(lbl_tie1, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
         vbox.Add(self.cb_tie1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
 
         # Secondo Spareggio
         lbl_tie2 = wx.StaticText(panel, label="Secondo Spareggio (Totale nel Torneo):")
-        self.cb_tie2 = wx.Choice(
-            panel, choices=["Punti Totali", "Vittorie Totali", "Nessuno"]
+        self.cb_tie2 = wx.Choice(panel, choices=list(TIEBREAKERS_2))
+        self.cb_tie2.SetStringSelection(
+            normalize_choice(self.settings.tiebreaker_2, TIEBREAKERS_2)
         )
-        self.cb_tie2.SetStringSelection(self.settings.tiebreaker_2)
         vbox.Add(lbl_tie2, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
         vbox.Add(self.cb_tie2, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
 
@@ -549,16 +546,10 @@ class SettingsDialog(wx.Dialog):
         lbl_split = wx.StaticText(
             panel, label="In caso di pareggio in partita i punti inseriti verranno:"
         )
-        self.cb_split = wx.Choice(
-            panel,
-            choices=[
-                "Inserimento Manuale",
-                "Punti Pieni a Entrambi",
-                "Nessun Punto",
-                "Metà ciascuno",
-            ],
+        self.cb_split = wx.Choice(panel, choices=list(DRAW_SPLITS))
+        self.cb_split.SetStringSelection(
+            normalize_choice(self.settings.draw_points_split, DRAW_SPLITS)
         )
-        self.cb_split.SetStringSelection(self.settings.draw_points_split)
         vbox.Add(lbl_split, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
         vbox.Add(self.cb_split, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
 
@@ -572,7 +563,9 @@ class SettingsDialog(wx.Dialog):
         panel.SetSizer(vbox)
 
     def get_settings(self):
-        self.settings.main_criterion = self.cb_main.GetStringSelection()
+        self.settings.main_criterion = normalize_main_criterion(
+            self.cb_main.GetStringSelection()
+        )
         self.settings.score_direction = (
             "Alto" if self.cb_score_dir.GetSelection() == 0 else "Basso"
         )
@@ -977,52 +970,59 @@ class ManagePlayersDialog(wx.Dialog):
             # Rename key in player database
             data = self.db.players.pop(old_name)
             self.db.players[new_name] = data
-            self.db.save()
 
-            # Rename in active tournament if present
-            main_frame = self.parent
-            if hasattr(main_frame, "tourney") and main_frame.tourney.title:
-                tourney_changed = False
+            if not save_or_warn(self.db.save, self):
+                # Senza salvataggio l'archivio su disco resta col nome vecchio:
+                # annulliamo la rinomina anche in memoria per non lasciare
+                # il programma disallineato dai dati salvati.
+                self.db.players[old_name] = self.db.players.pop(new_name)
+            else:
+                # Rename in active tournament if present
+                main_frame = self.parent
+                if hasattr(main_frame, "tourney") and main_frame.tourney.title:
+                    tourney_changed = False
 
-                # Rename in players
-                if old_name in main_frame.tourney.players:
-                    stats = main_frame.tourney.players.pop(old_name)
-                    main_frame.tourney.players[new_name] = stats
-                    tourney_changed = True
-
-                # Rename in played matches
-                for m_data in main_frame.tourney.played_matches.values():
-                    if m_data[0] == old_name:
-                        m_data[0] = new_name
-                        tourney_changed = True
-                    if m_data[1] == old_name:
-                        m_data[1] = new_name
+                    # Rename in players
+                    if old_name in main_frame.tourney.players:
+                        stats = main_frame.tourney.players.pop(old_name)
+                        main_frame.tourney.players[new_name] = stats
                         tourney_changed = True
 
-                # Rename in unplayed matches
-                for m_data in main_frame.tourney.unplayed_matches.values():
-                    if m_data[0] == old_name:
-                        m_data[0] = new_name
+                    # Rename in played matches
+                    for m_data in main_frame.tourney.played_matches.values():
+                        if m_data[0] == old_name:
+                            m_data[0] = new_name
+                            tourney_changed = True
+                        if m_data[1] == old_name:
+                            m_data[1] = new_name
+                            tourney_changed = True
+
+                    # Rename in unplayed matches
+                    for m_data in main_frame.tourney.unplayed_matches.values():
+                        if m_data[0] == old_name:
+                            m_data[0] = new_name
+                            tourney_changed = True
+                        if m_data[1] == old_name:
+                            m_data[1] = new_name
+                            tourney_changed = True
+
+                    # Rename in records_high / records_low
+                    if main_frame.tourney.records_high[0] == old_name:
+                        main_frame.tourney.records_high[0] = new_name
                         tourney_changed = True
-                    if m_data[1] == old_name:
-                        m_data[1] = new_name
+                    if main_frame.tourney.records_low[0] == old_name:
+                        main_frame.tourney.records_low[0] = new_name
                         tourney_changed = True
 
-                # Rename in records_high / records_low
-                if main_frame.tourney.records_high[0] == old_name:
-                    main_frame.tourney.records_high[0] = new_name
-                    tourney_changed = True
-                if main_frame.tourney.records_low[0] == old_name:
-                    main_frame.tourney.records_low[0] = new_name
-                    tourney_changed = True
+                    if tourney_changed:
+                        save_or_warn(main_frame.tourney.save, self)
+                        if hasattr(main_frame, "panel") and main_frame.panel:
+                            main_frame.check_state_and_show()
 
-                if tourney_changed:
-                    main_frame.tourney.save()
-                    if hasattr(main_frame, "panel") and main_frame.panel:
-                        main_frame.check_state_and_show()
-
-            self.update_list()
-            wx.MessageBox(f"Giocatore rinominato in {new_name}.", "Modifica Completata")
+                self.update_list()
+                wx.MessageBox(
+                    f"Giocatore rinominato in {new_name}.", "Modifica Completata"
+                )
         dlg.Destroy()
 
     def on_delete(self, event):
@@ -1040,12 +1040,16 @@ class ManagePlayersDialog(wx.Dialog):
             wx.YES_NO | wx.ICON_WARNING,
         )
         if dlg.ShowModal() == wx.ID_YES:
-            self.db.players.pop(name)
-            self.db.save()
-            self.update_list()
-            wx.MessageBox(
-                f"Giocatore {name} rimosso dal database.", "Eliminazione Completata"
-            )
+            rimosso = self.db.players.pop(name)
+            if save_or_warn(self.db.save, self):
+                self.update_list()
+                wx.MessageBox(
+                    f"Giocatore {name} rimosso dal database.", "Eliminazione Completata"
+                )
+            else:
+                # Il salvataggio non e' riuscito: il giocatore torna in archivio
+                # perche' su disco non e' mai stato cancellato.
+                self.db.players[name] = rimosso
         dlg.Destroy()
 
 

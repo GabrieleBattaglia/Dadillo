@@ -1,9 +1,16 @@
 import itertools
 import os
-from datetime import datetime, timezone
 
 import wx
-from data import DATA_FILE, SettingsData, TournamentData, format_date_extended
+from data import (
+    DATA_FILE,
+    DataFileError,
+    PlayerDB,
+    SettingsData,
+    TournamentData,
+    format_date_extended,
+    now_timestamp,
+)
 from dialogs import (
     AddPlayerDialog,
     HallOfFameDialog,
@@ -15,6 +22,7 @@ from dialogs import (
     SetupTournamentDialog,
 )
 from standings import StandingsPanel
+from ui_utils import save_or_warn
 from version import VERSION
 
 
@@ -30,10 +38,44 @@ class MainFrame(wx.Frame):
 
         self.panel = None  # Riferimento al pannello corrente
 
-        if not self.tourney.load() or not self.tourney.title:
+        self.check_players_archive()
+
+        try:
+            caricato = self.tourney.load()
+        except DataFileError as e:
+            # Il file del torneo esiste ma non e' leggibile. Una copia e' gia'
+            # stata messa da parte: avvisiamo invece di creare un torneo nuovo
+            # sopra dati che potrebbero essere ancora recuperabili.
+            caricato = False
+            wx.MessageBox(
+                f"{e}\n"
+                "Puoi chiudere ora e tentare il\n"
+                "recupero, oppure proseguire e\n"
+                "creare un nuovo torneo.",
+                "Torneo non leggibile",
+                wx.OK | wx.ICON_ERROR,
+            )
+
+        if not caricato or not self.tourney.title:
             wx.CallAfter(self.startup_sequence)
         else:
             wx.CallAfter(self.check_state_and_show)
+
+    def check_players_archive(self):
+        """Avvisa subito se l'archivio dei discepoli non e' leggibile.
+        Finche' resta in questo stato Dadillo rifiuta di salvarlo e di
+        esportarlo, per non cancellare la Hall of Fame.
+        """
+        db = PlayerDB()
+        if db.load_error:
+            wx.MessageBox(
+                f"{db.load_error}\n"
+                "Fino al ripristino non registrero'\n"
+                "nuove medaglie ne' esportero'\n"
+                "il file Giocatori.txt.",
+                "Archivio discepoli non leggibile",
+                wx.OK | wx.ICON_ERROR,
+            )
 
     def startup_sequence(self):
         dlg1 = SetupTournamentDialog(self)
@@ -92,10 +134,8 @@ class MainFrame(wx.Frame):
                     self.tourney.unplayed_matches[match_id] = list(j)
                     match_id += 1
 
-            self.tourney.start_date = (
-                datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M:%S")
-            )
-            self.tourney.save()
+            self.tourney.start_date = now_timestamp()
+            save_or_warn(self.tourney.save, self)
             dlg2.Destroy()
             self.check_state_and_show()
 
@@ -103,7 +143,7 @@ class MainFrame(wx.Frame):
             self.tourney.players.clear()
             for p in dlg2.players:
                 self.tourney.players[p] = [0, 0, 0, 0]
-            self.tourney.save()
+            save_or_warn(self.tourney.save, self)
             dlg2.Destroy()
             self.Close()
 
@@ -295,7 +335,17 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.on_close)
 
     def on_close(self, event):
-        self.tourney.save()
+        if not save_or_warn(self.tourney.save, self) and event.CanVeto():
+            risposta = wx.MessageBox(
+                "Il torneo non e' stato salvato.\n"
+                "Vuoi uscire lo stesso e perdere\n"
+                "le ultime modifiche?",
+                "Uscita senza salvataggio",
+                wx.YES_NO | wx.ICON_WARNING,
+            )
+            if risposta != wx.YES:
+                event.Veto()
+                return
         event.Skip()
 
     def on_menu_standings(self, event):
@@ -453,18 +503,14 @@ class MainFrame(wx.Frame):
             self.tourney.played_matches[m_id] = [p1, p2, res, save_pts, pt1, pt2]
             del self.tourney.unplayed_matches[m_id]
 
-            self.tourney.save()
+            save_or_warn(self.tourney.save, self)
 
             self.update_lists()
             self.list_unplayed.SetFocus()
 
             if len(self.tourney.unplayed_matches) == 0:
-                self.tourney.end_date = (
-                    datetime.now(timezone.utc)
-                    .astimezone()
-                    .strftime("%Y-%m-%d %H:%M:%S")
-                )
-                self.tourney.save()
+                self.tourney.end_date = now_timestamp()
+                save_or_warn(self.tourney.save, self)
                 wx.MessageBox(
                     "Oh insuperabile divinità, tutte le battaglie sono concluse! Ti accompagno alla sala delle classifiche.",
                     "Torneo Concluso",
@@ -480,6 +526,25 @@ class MainFrame(wx.Frame):
                 return
 
             m_id = self.list_played.GetClientData(sel)
+            data = self.tourney.played_matches.get(m_id)
+            if not data:
+                return
+
+            # Un giocatore ritirato resta nelle partite gia' giocate ma non e'
+            # piu' fra i partecipanti: senza questo controllo il ripristino dei
+            # punteggi si interrompeva a meta', lasciando i dati incoerenti.
+            mancanti = [n for n in (data[0], data[1]) if n not in self.tourney.players]
+            if mancanti:
+                wx.MessageBox(
+                    "Non posso annullare questa partita.\n"
+                    f"{', '.join(mancanti)} non fa piu'\n"
+                    "parte del torneo, quindi i punteggi\n"
+                    "non tornerebbero al loro posto.",
+                    "Annullamento impossibile",
+                    wx.OK | wx.ICON_WARNING,
+                )
+                return
+
             if (
                 wx.MessageBox(
                     "Mio padrone, sei sicuro di voler annullare questo risultato e riportare la partita tra le non giocate?",
@@ -488,8 +553,6 @@ class MainFrame(wx.Frame):
                 )
                 == wx.YES
             ):
-                data = self.tourney.played_matches[m_id]
-
                 # Retrocompatibilità: se la lista ha 4 elementi (vecchi tornei)
                 if len(data) == 4:
                     p1, p2, res, pts = data
@@ -518,7 +581,7 @@ class MainFrame(wx.Frame):
 
                 self.tourney.unplayed_matches[m_id] = [p1, p2]
                 del self.tourney.played_matches[m_id]
-                self.tourney.save()
+                save_or_warn(self.tourney.save, self)
                 self.update_lists()
                 self.list_played.SetFocus()
         else:
@@ -553,8 +616,10 @@ class MainFrame(wx.Frame):
             self.startup_sequence()
 
     def on_menu_save(self, event):
-        self.tourney.save()
-        wx.MessageBox("La tua volontà è stata incisa nella pietra digitale.", "Salvato")
+        if save_or_warn(self.tourney.save, self):
+            wx.MessageBox(
+                "La tua volontà è stata incisa nella pietra digitale.", "Salvato"
+            )
 
     def on_menu_save_unplayed(self, event):
         tot_unplayed = len(self.tourney.unplayed_matches)
@@ -648,11 +713,9 @@ class MainFrame(wx.Frame):
             )
 
     def on_menu_exit(self, event):
-        self.tourney.save()
-        from data import PlayerDB
-
+        save_or_warn(self.tourney.save, self)
         db = PlayerDB()
-        db.export_to_txt()
+        save_or_warn(db.export_to_txt, self)
         self.Close()
 
     def on_menu_merge_db(self, event):
@@ -666,7 +729,6 @@ class MainFrame(wx.Frame):
                 return
             pathname = fileDialog.GetPath()
 
-            from data import PlayerDB
             from dialogs import MergeSimilarPlayerDialog
 
             def interactive_resolver(ext_name, candidate_name):
@@ -745,7 +807,7 @@ class MainFrame(wx.Frame):
                     max_id += 1
                     self.tourney.unplayed_matches[max_id] = [p, name]
 
-            self.tourney.save()
+            save_or_warn(self.tourney.save, self)
             self.update_lists()
 
             num_matches = (
@@ -807,7 +869,7 @@ class MainFrame(wx.Frame):
                 # Rimuovi il giocatore dalle statistiche (non apparirà più in classifica)
                 del self.tourney.players[name]
 
-                self.tourney.save()
+                save_or_warn(self.tourney.save, self)
                 self.update_lists()
                 wx.MessageBox(
                     f"{name} è stato soppresso. Sono state assegnate a tavolino {len(to_delete)} vittorie ai suoi avversari.",
@@ -815,12 +877,8 @@ class MainFrame(wx.Frame):
                 )
 
                 if len(self.tourney.unplayed_matches) == 0:
-                    self.tourney.end_date = (
-                        datetime.now(timezone.utc)
-                        .astimezone()
-                        .strftime("%Y-%m-%d %H:%M:%S")
-                    )
-                    self.tourney.save()
+                    self.tourney.end_date = now_timestamp()
+                    save_or_warn(self.tourney.save, self)
                     wx.MessageBox(
                         "Questa esecuzione ha concluso le battaglie! Ti accompagno alla sala delle classifiche.",
                         "Torneo Concluso",
@@ -833,7 +891,7 @@ class MainFrame(wx.Frame):
         dlg = SettingsDialog(self, self.settings)
         if dlg.ShowModal() == wx.ID_OK:
             self.settings = dlg.get_settings()
-            self.settings.save()
+            save_or_warn(self.settings.save, self)
             if hasattr(self, "tourney") and self.tourney and self.tourney.title:
                 self.tourney.main_criterion = self.settings.main_criterion
                 self.tourney.score_direction = getattr(
@@ -842,7 +900,7 @@ class MainFrame(wx.Frame):
                 self.tourney.tiebreaker_1 = self.settings.tiebreaker_1
                 self.tourney.tiebreaker_2 = self.settings.tiebreaker_2
                 self.tourney.draw_points_split = self.settings.draw_points_split
-                self.tourney.save()
+                save_or_warn(self.tourney.save, self)
         dlg.Destroy()
 
     def on_menu_manage_db(self, event):
@@ -856,12 +914,10 @@ class MainFrame(wx.Frame):
         dlg.Destroy()
 
     def on_menu_export_hof(self, event):
-        from data import PlayerDB
-
         db = PlayerDB()
-        db.export_to_txt()
-        wx.MessageBox(
-            "File Giocatori.txt esportato con successo!",
-            "Esportazione Completata",
-            wx.OK | wx.ICON_INFORMATION,
-        )
+        if save_or_warn(db.export_to_txt, self):
+            wx.MessageBox(
+                "File Giocatori.txt esportato con successo!",
+                "Esportazione Completata",
+                wx.OK | wx.ICON_INFORMATION,
+            )

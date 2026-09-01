@@ -1,0 +1,77 @@
+Collaudo sul campo, Dadillo
+Versione: 2.8.0
+Fase di riferimento: 1
+Data di apertura: 2026-09-01
+A cura di: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto
+Come si usa questo file
+Ogni prova ha un numero, una descrizione di cosa fare e uno spazio per l'esito. Dopo aver eseguito la prova, scrivi il tuo esito e le tue osservazioni nella riga Esito, sostituendo la scritta da eseguire. Quando tutte le prove sono dichiarate OK e non aggiungi altre segnalazioni, la fase puo' considerarsi chiusa. ClaudIA rilegge questo file prima di proseguire e aggiorna la lista dei problemi da correggere.
+Attenzione, prima di iniziare: fai una copia di sicurezza di Dadillo.json, Dadillo_players.json, Dadillo_settings.json e Giocatori.txt. Alcune di queste prove servono proprio a verificare comportamenti distruttivi.
+Prove per confermare i rilievi ancora incerti
+Prova 1, rilievo 10, aggiunta giocatore con Invio
+Apri un torneo in corso, menu Giocatori, Aggiungi Giocatore al Torneo. Nel campo del nome scrivi due sole lettere, per esempio ab, e premi Invio invece di attivare il pulsante. Ripeti poi scrivendo il nome di un giocatore gia' iscritto e premendo Invio. Infine ripeti scrivendo un nome valido e nuovo e premendo Invio.
+Cosa osservare: se il messaggio di nome troppo corto compare, se il messaggio di nome duplicato compare, se il programma si chiude o segnala un errore, e se il giocatore viene comunque aggiunto quando non dovrebbe.
+Esito: da eseguire.
+Prova 2, rilievo 20, focus dopo l'inserimento dei discepoli
+Crea un nuovo torneo e arriva alla finestra Raduna i Tuoi Discepoli. Aggiungi tre nomi di seguito, digitandoli nel campo di testo e premendo Invio ogni volta, senza pause fra un nome e l'altro. Poi seleziona un nome nella lista dei partecipanti e premi Canc.
+Cosa osservare: cosa annuncia NVDA dopo ogni Invio, se ci sono due annunci sovrapposti, dove si trova davvero il cursore quando riprendi a digitare subito, e se qualche carattere finisce nel controllo sbagliato.
+Esito: da eseguire.
+Prova 3, rilievo 24, lettura delle medaglie
+Apri la classifica di un torneo concluso e leggi le prime quattro righe con NVDA, sia in lettura continua sia carattere per carattere.
+Cosa osservare: come vengono annunciate le quattro emoji di oro, argento, bronzo e legno, in particolare quella del legno, e se preferisci il solo testo.
+Esito: da eseguire.
+Prova 4, rilievo 8, leggibilita' della classifica
+Sempre nella classifica, leggi una riga completa di un giocatore e prova a seguirla su display braille.
+Cosa osservare: se riesci a capire quale numero e' quale senza contare le colonne, quanto e' lunga la riga sul display, e come preferiresti che fosse riscritta, per esempio con etichette accanto a ogni dato.
+Esito: da eseguire.
+Prove per confermare i rilievi gia' riprodotti in laboratorio
+Prova 5, rilievo 1, classifica dopo un ritiro
+In un torneo con almeno tre giocatori, fai giocare e vincere almeno una partita a un giocatore. Poi ritira proprio quel giocatore dal menu Giocatori, Ritira Giocatore dal Torneo. Infine apri la classifica con Ctrl+L.
+Cosa osservare: se la classifica si apre, se compare una finestra di errore, se il programma resta bloccato o si chiude.
+Esito: da eseguire.
+Prova 6, rilievo 2, annullamento di una partita del ritirato
+Subito dopo la prova 5, nella lista delle partite giocate seleziona una partita che coinvolge il giocatore ritirato, comprese le vittorie a tavolino, e premi Canc, confermando.
+Cosa osservare: se l'operazione va a buon fine, se compare un errore, e soprattutto se dopo l'errore i punteggi degli altri giocatori risultano cambiati.
+Esito: da eseguire.
+Prova 7, rilievo 3, criterio di classifica a punti
+Crea un torneo scegliendo Criterio Principale uguale a Punti. Salva, poi apri Opzioni, Regole Torneo, guarda cosa risulta selezionato nella casella Criterio Principale, conferma con Che sia Legge. Riapri poi la classifica con Ctrl+L e controlla il criterio mostrato.
+Cosa osservare: se la casella delle Regole risulta vuota o senza selezione, e se dopo la conferma la classifica torna a ordinare per Vittorie.
+Esito: da eseguire.
+Prova 8, rilievo 4, durata del torneo
+Crea un torneo, gioca una partita e apri subito la classifica parziale con Ctrl+L. Leggi la riga Durata complessiva e, se compare, la riga Ritmo medio di gioco.
+Cosa osservare: se la durata dichiarata corrisponde al tempo realmente trascorso o se e' di circa 22 ore, oppure sfalsata di due ore.
+Esito: da eseguire.
+Prova 9, rilievo 6, avvio da un'altra cartella
+Apri un prompt dei comandi in una cartella diversa da quella di Dadillo e avvia il programma indicando il percorso completo, per esempio python seguito dal percorso completo di Dadillo.py.
+Cosa osservare: se il programma trova il torneo in corso e la Hall of Fame, oppure se propone la creazione di un nuovo torneo e crea file nuovi nella cartella da cui hai lanciato il comando. Al termine controlla se sono comparsi Dadillo.json o Dadillo_players.json fuori posto e cancellali.
+Esito: da eseguire.
+Prova 10, rilievo 14, chiusura della finestra di premiazione
+In un torneo concluso, dalla classifica finale premi il pulsante Avanti, Conferma Criteri e Assegna Medaglie. Quando compare la finestra Destino della Hall of Fame, chiudila con Esc senza scegliere nessuno dei due pulsanti.
+Cosa osservare: se la premiazione viene comunque eseguita in massa, e quindi se le medaglie finiscono nella Hall of Fame senza che tu l'abbia chiesto.
+Esito: da eseguire.
+Prova 11, rilievo 12, statistica dei pareggi
+In un torneo con almeno due pareggi registrati, apri la classifica e cerca la riga Media punti per pareggio nella sezione delle statistiche sui punteggi assegnati.
+Cosa osservare: se la riga compare oppure no.
+Esito: da eseguire.
+Prova 12, rilievo 5, salvataggio con file bloccato
+Apri Giocatori.txt con un editor che tiene il file bloccato in scrittura, per esempio Blocco note lasciato aperto durante un salvataggio, poi dal menu Giocatori scegli Esporta Hall of Fame.
+Cosa osservare: se compare un messaggio comprensibile, se il programma si chiude, e se al termine il file risulta troncato o vuoto. Fai questa prova solo dopo aver fatto la copia di sicurezza.
+Esito: da eseguire.
+Prove sulle correzioni del blocco 1, versione 2.8.1
+Prova 13, archivio dei discepoli danneggiato
+Fai una copia di sicurezza di Dadillo_players.json, poi apri l'originale con un editor di testo, scrivici dentro una riga qualunque che non sia JSON, per esempio la parola prova, e salva. Avvia Dadillo.
+Cosa osservare: se all'avvio compare l'avviso che l'archivio non e' leggibile, se il messaggio nomina la copia messa da parte, che dovresti ritrovare nella cartella con estensione danneggiato seguita da data e ora, e se il file originale e' rimasto com'era. Prova poi il menu Giocatori, Esporta Hall of Fame: deve rifiutarsi di scrivere spiegandone il motivo, e Giocatori.txt non deve svuotarsi. Al termine ripristina la copia di sicurezza.
+Esito: da eseguire.
+Prova 14, torneo danneggiato
+Stessa cosa con Dadillo.json, dopo averne fatto copia. Rovina il contenuto e avvia Dadillo.
+Cosa osservare: se compare l'avviso di torneo non leggibile invece di partire in silenzio con la creazione di un torneo nuovo, se viene creata la copia con estensione danneggiato, e se scegliendo di proseguire il vecchio file resta comunque sul disco. Al termine ripristina la copia di sicurezza.
+Esito: da eseguire.
+Prova 15, uscita con salvataggio impedito
+Apri Dadillo.json con un programma che lo tenga bloccato in scrittura, poi gioca una partita e chiudi Dadillo.
+Cosa osservare: se compare il messaggio che il salvataggio non e' riuscito, se viene chiesto se uscire lo stesso, e se rispondendo di no la finestra resta aperta permettendoti di riprovare.
+Esito: da eseguire.
+Prova 16, copia di sicurezza automatica
+Gioca almeno due partite in un torneo, poi guarda nella cartella di Dadillo.
+Cosa osservare: se accanto a Dadillo.json compare Dadillo.json.bak con la versione precedente, e se dopo qualche salvataggio non restano file temporanei che iniziano con un punto seguito da dadillo.
+Esito: da eseguire.
+Osservazioni libere di Gabriele
+Scrivi qui sotto qualunque altro comportamento anomalo, fastidio nella lettura con NVDA o richiesta di modifica emersi durante le prove.
