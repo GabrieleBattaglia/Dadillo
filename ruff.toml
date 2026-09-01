@@ -1,0 +1,25 @@
+# Configurazione ruff di Dadillo.
+# Autori: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto.
+line-length = 88
+
+[lint]
+select = ["E", "F", "W", "B", "SIM", "UP", "I", "C4", "RET", "DTZ", "TRY"]
+ignore = [
+    # Righe lunghe: molti messaggi all'utente stanno su una riga sola
+    "E501",
+    # Messaggi di eccezione scritti direttamente nella raise: qui sono testi
+    # pensati per l'utente, spostarli in una variabile li renderebbe meno chiari
+    "EM101",
+    "EM102",
+    "TRY003",
+    # Il valore di ritorno subito dopo l'operazione riuscita, dentro il try,
+    # si legge meglio di un blocco else staccato
+    "TRY300",
+    # Le validazioni sollevano di proposito dentro il try: l'errore viene poi
+    # riavvolto in DataFileError, che porta con se' il messaggio per l'utente
+    "TRY301",
+]
+
+[lint.per-file-ignores]
+# Nei test i confronti espliciti e le asserzioni ripetute sono voluti
+"test_*.py" = ["B011"]

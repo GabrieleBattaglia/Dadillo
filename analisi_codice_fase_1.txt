@@ -9,7 +9,10 @@ Nota: alla stesura nessun file di codice era stato modificato. Le correzioni app
 Stato di avanzamento delle correzioni
 Blocco 1, sicurezza dei dati: completato il 2026-09-01 nella versione 2.8.1. Rilievi 5, 6, 7 e 16 risolti, in attesa delle prove sul campo 9 e 12 di collaudo.txt.
 Blocco 2, errori bloccanti e dati sbagliati: completato il 2026-09-01 nella versione 2.8.2. Rilievi 1, 2, 3, 4 e 12 risolti, in attesa delle prove sul campo 5, 6, 7, 8 e 11 di collaudo.txt.
-Blocchi 3, 4 e 5: non ancora avviati.
+Blocco 3, accessibilita': completato il 2026-09-01 nella versione 2.8.3. Rilievi 8, 10, 20, 24 e 37 risolti, insieme al rilievo 27 che ricadeva negli stessi punti di codice. In attesa delle prove sul campo 1, 2, 3, 4 e 17 di collaudo.txt.
+Blocco 4, coerenza delle regole del torneo: completato il 2026-09-01 nella versione 2.8.4. Rilievi 11, 13, 14, 15, 21 e 22 risolti.
+Blocco 5, pulizia e manutenzione: completato il 2026-09-01 nella versione 2.8.4. Affrontati i rilievi 9, 17, 18, 19, 23, 25, 26, 28, 29, 30, 31, 32, 33, 34, 35, 36, 38 e 39; i rilievi 19, 32, 34 e 39 sono risolti solo in parte, come spiegato nelle rispettive righe Stato.
+Restano aperti due lavori: la suddivisione delle funzioni troppo lunghe, prima fra tutte update_display, e l'aggiornamento del README alle novita' introdotte in questa revisione.
 Il file di collaudo va compilato da Gabriele prima di considerare chiusa la fase 1.
 1. File esaminati
 Dadillo.py, 69 righe, punto di ingresso e controllo aggiornamenti.
@@ -93,6 +96,7 @@ File e riga: standings.py:426, 429, 437, 458; dialogs.py:1178, 1182, 1193; main_
 Problema: l'output a schermo e i file esportati contengono nove separatori grafici composti da trattini ripetuti, da 50 a 85 caratteri. Le stesse schermate presentano tabelle a colonne allineate con la barra verticale e con riempimento a lunghezza fissa, pensate per un font a spaziatura fissa.
 Impatto per l'utente: NVDA legge ogni separatore come una lunga sequenza di trattini, e le righe della tabella come una successione di valori senza etichetta, dove il significato di ogni numero dipende solo dalla posizione della colonna. Su display braille la riga di classifica supera abbondantemente la lunghezza utile.
 Correzione proposta: eliminare tutti i separatori e riscrivere le righe in forma discorsiva, con l'etichetta accanto al dato, per esempio posizione, nome, giocate su totali, punti, vittorie, pareggi, sconfitte, medaglia, spezzando l'informazione in blocchi di circa quaranta caratteri. Le intestazioni di sezione bastano come struttura.
+Stato: risolto il 2026-09-01, versione 2.8.3. Eliminati tutti e nove i separatori e le tabelle a colonne. Classifica, Hall of Fame e file esportati usano ora righe brevi con l'etichetta accanto al dato, per esempio 1. Marco, oro. Punti 12, seguito da Giocate 6 su 6, vinte 4, pari 0, perse 2. Resi discorsivi anche i riferimenti alle partite nei record e corretto il plurale, 1 punto invece di 1 punti. Coperto dal test test_classifica_leggibile_da_screen_reader. Da confermare con le prove 4 e 17 di collaudo.txt.
 Rilievo 9
 Gravita': alto
 Categoria: regole generali, ambiente
@@ -100,6 +104,7 @@ File e riga: Dadillo.spec:9, .gitignore:7
 Problema: il changelog della versione 2.7.1 dichiara di aver incluso requests, urllib3, certifi, charset_normalizer e chardet fra gli hiddenimports del file di build, ma il Dadillo.spec presente sul disco ha hiddenimports vuoto. Il file inoltre non e' sotto controllo di versione, perche' .gitignore esclude tutti i file con estensione spec.
 Impatto per l'utente: la correzione descritta nel changelog non e' piu' presente e non e' protetta. Una nuova compilazione puo' produrre un eseguibile in cui il controllo aggiornamenti non funziona, senza che nessuno se ne accorga fino al rilascio.
 Correzione proposta: ripristinare gli hiddenimports, togliere Dadillo.spec dall'elenco dei file ignorati e metterlo sotto controllo di versione, oppure documentare esplicitamente in CHANGELOG e nelle istruzioni di rilascio che il file va rigenerato con quei parametri.
+Stato: risolto il 2026-09-01, versione 2.8.4. Gli hiddenimports sono stati ripristinati con un commento che ne spiega la necessita', e il file e' ora sotto controllo di versione. Da verificare alla prima compilazione, prova 21 di collaudo.txt.
 Rilievo 10
 Gravita': alto
 Categoria: fragilita'
@@ -108,6 +113,7 @@ Problema: nella finestra di aggiunta giocatore, la pressione di Invio nel campo 
 Nota: e' esattamente il comportamento che i due script test_dialog.py e test_dialog2.py stavano indagando, segno che il dubbio era gia' emerso.
 Impatto per l'utente: aggiungendo un giocatore con Invio invece che con il pulsante, si rischia di accettare nomi troppo corti o duplicati, oppure di far fallire l'operazione con un errore di attributo mancante. E' proprio il percorso piu' naturale per chi usa la tastiera e lo screen reader.
 Correzione proposta: spostare la validazione in un gestore agganciato al dialogo per ID_OK, inizializzare new_name nel costruttore e far chiudere il dialogo solo dopo esito positivo della validazione. Da confermare sul campo, vedere collaudo.txt.
+Stato: risolto il 2026-09-01, versione 2.8.3. Invio e pulsante passano ora entrambi per la funzione di conferma, che valida il nome, chiude la finestra solo se il nome e' accettabile e riporta il focus sul campo in caso di errore. L'attributo new_name viene inizializzato nel costruttore. Da confermare con la prova 1 di collaudo.txt.
 2.3 Rilievi medi
 Rilievo 11
 Gravita': medio
@@ -116,6 +122,7 @@ File e riga: main_window.py:394, main_window.py:844, data.py:117
 Problema: TournamentData salva un proprio draw_points_split per ogni torneo, ma il metodo che ripartisce i punti del pareggio legge sempre e solo l'impostazione globale. Il campo del torneo viene scritto e mai riletto.
 Impatto per l'utente: il README promette che ogni torneo conserva le proprie regole. In realta' cambiare la regola dei pareggi nelle impostazioni modifica il modo in cui vengono ricalcolati i punti dei tornei vecchi, per esempio quando si annulla una partita salvata nel vecchio formato a quattro elementi.
 Correzione proposta: leggere il valore dal torneo quando presente, ricadendo sulle impostazioni globali solo per i tornei che non lo hanno.
+Stato: risolto il 2026-09-01, versione 2.8.4. Sia la finestra principale sia il pannello classifica leggono ora la regola dal torneo, con le impostazioni generali come ripiego per i tornei che non la hanno.
 Rilievo 12
 Gravita': medio
 Categoria: logica
@@ -131,6 +138,7 @@ File e riga: standings.py:8, main_window.py:394
 Problema: la ricostruzione dei punti di una partita salvata nel vecchio formato a quattro elementi e' implementata due volte con regole diverse. La funzione in standings divide sempre a meta' i punti del pareggio, il metodo in main_window applica la regola scelta nelle impostazioni.
 Impatto per l'utente: la classifica e l'annullamento di una partita possono attribuire punti diversi per lo stesso identico record, generando incoerenze difficili da spiegare.
 Correzione proposta: tenere una sola funzione, esposta da data.py e usata da entrambi i moduli, che riceva la regola dei pareggi come parametro.
+Stato: risolto il 2026-09-01, versione 2.8.4. La funzione unica e' split_match_points in data.py, usata da main_window e da standings, e la regola le arriva come parametro. Coperto dal test test_regola_pareggi_unica_per_i_record_vecchi.
 Rilievo 14
 Gravita': medio
 Categoria: fragilita'
@@ -138,6 +146,7 @@ File e riga: standings.py:753, dialogs.py:653
 Problema: la finestra che chiede se revisionare i discepoli uno per uno o tutti in massa imposta il valore predefinito mass e non distingue la chiusura con Esc o con il pulsante di chiusura da una scelta esplicita.
 Impatto per l'utente: chi chiude la finestra per ripensarci si vede assegnare comunque tutte le medaglie e tutti i piazzamenti nella Hall of Fame, operazione che scrive subito su disco.
 Correzione proposta: introdurre un terzo esito di annullamento, restituito quando ShowModal non termina con una scelta esplicita, e interrompere la premiazione in quel caso.
+Stato: risolto il 2026-09-01, versione 2.8.4. La finestra parte senza scelta predefinita e la premiazione si interrompe se ShowModal non termina con uno dei due pulsanti. Da confermare con la prova 10 di collaudo.txt.
 Rilievo 15
 Gravita': medio
 Categoria: logica
@@ -145,6 +154,7 @@ File e riga: data.py:318
 Problema: il controllo dei doppioni nello storico considera gia' registrato un torneo se il titolo compare come sottostringa di una voce esistente e la data di inizio compare da qualche parte nella stessa riga.
 Impatto per l'utente: con titoli brevi o ricorrenti, per esempio Torneo, un nuovo torneo che inizia lo stesso giorno di uno gia' registrato viene scartato senza avviso e il giocatore risulta saltato nel resoconto finale.
 Correzione proposta: confrontare in modo strutturato titolo e date, meglio ancora salvare lo storico come dati strutturati invece che come riga di testo da ricomporre e analizzare.
+Stato: risolto il 2026-09-01, versione 2.8.4, nella parte del confronto: la nuova funzione split_history_entry scompone la voce e il controllo avviene su titolo e data di inizio interi. Lo storico resta salvato come riga di testo, perche' trasformarlo in dati strutturati cambierebbe il formato dell'archivio ed e' da valutare a parte. Coperto dal test test_duplicati_storico_con_titoli_simili.
 Rilievo 16
 Gravita': medio
 Categoria: fragilita'
@@ -160,6 +170,7 @@ File e riga: dialogs.py:204, dialogs.py:884, dialogs.py:1065, main_window.py:651
 Problema: PlayerDB viene istanziato di nuovo in sette punti diversi, ogni volta rileggendo e migrando l'intero file dei giocatori, e ogni istanza ha una copia indipendente dei dati.
 Impatto per l'utente: oltre alla lettura ripetuta del file, due finestre aperte in momenti diversi possono lavorare su copie diverse. Una rinomina eseguita in Gestione Discepoli non si riflette in una Hall of Fame gia' aperta, e un salvataggio successivo puo' riportare indietro i dati.
 Correzione proposta: creare una sola istanza in MainFrame e passarla alle finestre che ne hanno bisogno.
+Stato: risolto il 2026-09-01, versione 2.8.4. MainFrame crea l'unico PlayerDB e lo passa a raduno discepoli, gestione discepoli, Hall of Fame e premiazione.
 Rilievo 18
 Gravita': medio
 Categoria: fragilita'
@@ -167,6 +178,7 @@ File e riga: Dadillo.py:23, Dadillo.py:25
 Problema: la funzione di controllo aggiornamenti importa GBUtils prima di verificare se il programma e' congelato, quindi l'importazione avviene sempre, anche quando la funzione non deve fare nulla.
 Impatto per l'utente: su una macchina in cui la cartella GBUtils non e' nella path, per esempio dopo una clonazione pulita del repository, il programma si chiude all'avvio con un errore di importazione invece di partire normalmente da sorgente.
 Correzione proposta: spostare il controllo sull'attributo frozen come prima istruzione della funzione e importare GBUtils solo dopo.
+Stato: risolto il 2026-09-01, versione 2.8.4.
 Rilievo 19
 Gravita': medio
 Categoria: logica
@@ -174,6 +186,7 @@ File e riga: data.py:250, data.py:460, dialogs.py:864
 Problema: la media piazzamenti somma solo le posizioni dalla quinta in poi ma divide per il numero totale di tornei, e vale zero per chi non ha nessuna posizione registrata. Nell'ordinamento la media piu' bassa e' considerata migliore.
 Impatto per l'utente: un giocatore il cui storico contenga voci non riconosciute dall'espressione regolare, per esempio importate da un file con formato diverso, ottiene media zero e si presenta in cima alla classifica generale davanti a chi ha piazzamenti reali. Anche a parita' di medaglie il criterio premia chi ha meno dati, non chi ha fatto meglio.
 Correzione proposta: distinguere il caso assenza di dati dal caso media effettivamente ottima, escludendolo dal confronto, e documentare con chiarezza nel README che la media considera solo i piazzamenti fuori dal podio ma li divide per tutte le partecipazioni.
+Stato: risolto il 2026-09-01, versione 2.8.4, per la parte di calcolo: la funzione placement_stats distingue tre casi, media reale, solo podi e media non disponibile per storico non interpretabile, e l'ordinamento non premia piu' la mancanza di dati. Verificato sul database reale che l'ordine della Hall of Fame resta invariato. Coperto dal test test_media_piazzamenti_distingue_i_casi_senza_dati. Resta da aggiornare il README, che descrive ancora la vecchia formulazione.
 Rilievo 20
 Gravita': medio
 Categoria: regole generali, accessibilita'
@@ -181,6 +194,7 @@ File e riga: dialogs.py:346, dialogs.py:347, dialogs.py:372, dialogs.py:373
 Problema: dopo l'inserimento di un giocatore il focus viene spostato due volte con temporizzatori, prima sulla lista dopo 300 millisecondi e poi sul campo di testo dopo 600.
 Impatto per l'utente: NVDA annuncia due cambi di contesto in rapida successione, il secondo dei quali interrompe il primo. La lettura risulta confusa e, se l'utente comincia a digitare nei 600 millisecondi, i caratteri possono finire nel controllo sbagliato.
 Correzione proposta: decidere una sola destinazione del focus e portarcelo subito, senza temporizzatori. Da confermare sul campo, vedere collaudo.txt.
+Stato: risolto il 2026-09-01, versione 2.8.3. Rimossi entrambi i temporizzatori. Dopo un inserimento il focus resta nel campo del nome, pronto per il discepolo successivo; dopo una soppressione resta nell'elenco dei partecipanti, con la selezione gia' posizionata sulla voce che ha preso il posto di quella cancellata. Da confermare con la prova 2 di collaudo.txt.
 Rilievo 21
 Gravita': medio
 Categoria: logica
@@ -188,6 +202,7 @@ File e riga: standings.py:753, standings.py:766
 Problema: quando due o piu' giocatori restano in parita' dopo tutti gli spareggi, l'ordine finale e' alfabetico, ma la premiazione assegna comunque medaglie diverse in base alla sola posizione nell'elenco.
 Impatto per l'utente: un oro e un argento possono essere decisi dall'ordine alfabetico senza che l'utente venga avvisato della parita' irrisolta.
 Correzione proposta: segnalare in modo esplicito i gruppi rimasti in parita' sia nella classifica sia nella finestra di revisione del singolo discepolo, lasciando all'utente la decisione finale.
+Stato: risolto il 2026-09-01, versione 2.8.4. I giocatori rimasti in parita' portano ora l'elenco dei pari merito: la classifica lo mostra sotto la loro riga, la finestra di revisione lo ripete e, se la parita' tocca le prime quattro posizioni, la premiazione chiede conferma prima di assegnare medaglie decise dall'ordine alfabetico. Coperto dal test test_parita_irrisolta_viene_segnalata.
 Rilievo 22
 Gravita': medio
 Categoria: logica
@@ -195,6 +210,7 @@ File e riga: main_window.py:838
 Problema: confermando la finestra Regole Torneo, i criteri globali vengono copiati sul torneo in corso senza chiedere conferma e senza distinguere fra impostazione predefinita per i tornei futuri e regola del torneo attuale.
 Impatto per l'utente: chi apre le Regole per predisporre il prossimo torneo cambia di fatto le regole di quello in corso, e con esse la classifica gia' consultata.
 Correzione proposta: separare in modo netto le due cose, per esempio chiedendo esplicitamente se applicare le nuove regole anche al torneo attivo.
+Stato: risolto il 2026-09-01, versione 2.8.4. Confermando le Regole viene chiesto se applicarle anche al torneo in corso, avvisando che la classifica potrebbe cambiare.
 Rilievo 23
 Gravita': medio
 Categoria: ottimizzazione
@@ -202,6 +218,7 @@ File e riga: data.py:289, standings.py:770
 Problema: add_or_update_player riceve quattro parametri booleani per le medaglie che non usa mai, perche' le medaglie vengono ricalcolate dalla posizione con recalculate_player_stats.
 Impatto per l'utente: nessuno diretto, ma la firma inganna chi legge o modifica il codice e fa credere che le medaglie si possano assegnare a mano indipendentemente dalla posizione.
 Correzione proposta: rimuovere i quattro parametri e aggiornare l'unico punto di chiamata.
+Stato: risolto il 2026-09-01, versione 2.8.4. Aggiornati anche i test che usavano la vecchia firma.
 Rilievo 24
 Gravita': medio
 Categoria: regole generali, accessibilita'
@@ -209,6 +226,7 @@ File e riga: standings.py:431, standings.py:762
 Problema: le medaglie sono indicate con emoji seguite dal nome, e nella tabella l'informazione sulla posizione dipende dall'incolonnamento.
 Impatto per l'utente: la lettura delle emoji varia con la versione di NVDA e con le impostazioni di verbosita', e il simbolo del legno in particolare puo' essere annunciato in inglese o non annunciato affatto. Il testo accanto salva la comprensione, ma l'emoji aggiunge rumore.
 Correzione proposta: usare solo il testo, ORO, ARGENTO, BRONZO, LEGNO, riservando eventualmente le emoji a una preferenza disattivabile.
+Stato: risolto il 2026-09-01, versione 2.8.3. Le medaglie sono ora solo testo, oro, argento, bronzo e legno, sia in classifica sia nella premiazione, tramite la costante MEDAL_NAMES definita in un unico punto. Da confermare con la prova 3 di collaudo.txt.
 2.4 Rilievi bassi
 Rilievo 25
 Gravita': basso
@@ -216,90 +234,105 @@ Categoria: ottimizzazione
 File e riga: data.py:101, data.py:128, dialogs.py:1012
 Problema: i campi records_high e records_low sono inizializzati, salvati, ricaricati e perfino aggiornati durante la rinomina di un giocatore, ma non vengono mai calcolati ne' mostrati. I record veri sono ricalcolati ogni volta dalla schermata classifica.
 Correzione proposta: rimuoverli, mantenendo la lettura tollerante per i file gia' esistenti.
+Stato: risolto il 2026-09-01, versione 2.8.4. I due campi non vengono piu' creati, salvati ne' letti; nei file gia' esistenti restano e vengono semplicemente ignorati.
 Rilievo 26
 Gravita': basso
 Categoria: regole generali
 File e riga: version.py:3, tutti i moduli
 Problema: il campo AUTHORS riporta Gabriele Battaglia, Stella Gemini, senza nominativo IZ4APU e senza il formato richiesto dalle istruzioni permanenti. Nessun modulo ha docstring di intestazione con autori, modello e modalita'.
 Correzione proposta: portare AUTHORS al formato Gabriele Battaglia (IZ4APU) & ClaudIA con modello e modalita', e aggiungere una breve docstring di intestazione a ciascun modulo.
+Stato: risolto il 2026-09-01, versione 2.8.4.
 Rilievo 27
 Gravita': basso
 Categoria: regole generali, accessibilita'
 File e riga: standings.py:598, standings.py:601, standings.py:667, 668, 673
 Problema: deviazione standard, varianza, escursione e mediane sono formattate con il segno esplicito, per esempio piu' 3,50, su grandezze che non possono essere negative.
 Correzione proposta: togliere il segno forzato dalle grandezze sempre positive.
+Stato: risolto il 2026-09-01, versione 2.8.3, insieme al rilievo 37.
 Rilievo 28
 Gravita': basso
 Categoria: fragilita'
 File e riga: Dadillo.py:7
 Problema: il messaggio di benvenuto viene stampato su standard output prima ancora di creare l'applicazione, ma l'eseguibile e' compilato senza console.
 Correzione proposta: togliere la stampa oppure indirizzarla a un log, valutando comunque che nell'eseguibile lo standard output non esiste.
+Stato: risolto il 2026-09-01, versione 2.8.4. La stampa e' stata tolta.
 Rilievo 29
 Gravita': basso
 Categoria: ottimizzazione
 File e riga: test_dialog.py, test_dialog2.py
 Problema: due script di prova interattivi, che aprono finestre e stampano a video, sono nel repository accanto alla suite pytest e vengono raccolti dal nome come se fossero test automatici.
 Correzione proposta: rimuoverli o spostarli in una cartella di esperimenti esclusa dalla raccolta di pytest, dopo aver estratto in un test automatico la verifica del comportamento descritto nel rilievo 10.
+Stato: risolto il 2026-09-01, versione 2.8.4. I due script sono stati rimossi dal repository. Il comportamento che indagavano e' stato corretto nel rilievo 10 e va confermato con la prova 1 di collaudo.txt, perche' richiede la pressione reale di Invio.
 Rilievo 30
 Gravita': basso
 Categoria: ottimizzazione
 File e riga: agostino.txt
 Problema: file di lavoro estemporaneo, contenente la richiesta di integrazione manuale dei dati di un torneo di terzi, tracciato nel repository del programma.
 Correzione proposta: spostarlo fuori dal repository o in una cartella di materiali, se ha ancora valore storico.
+Stato: risolto il 2026-09-01, versione 2.8.4. Spostato in materiali/agostino.txt con git mv, quindi la storia del file e' conservata.
 Rilievo 31
 Gravita': basso
 Categoria: fragilita'
 File e riga: zip_maker.py:4, zip_maker.py:9
 Problema: lo script usa percorsi relativi alla directory di lavoro e dichiara una variabile di ciclo mai usata, segnalata da ruff come B007.
 Correzione proposta: costruire i percorsi a partire dal file dello script e rinominare la variabile inutilizzata.
+Stato: risolto il 2026-09-01, versione 2.8.4.
 Rilievo 32
 Gravita': basso
 Categoria: regole generali, qualita'
 File e riga: tutti i moduli
 Problema: con la configurazione predefinita ruff non riporta nulla e i file risultano gia' formattati. Ampliando la selezione alle famiglie E, F, W, B, SIM, UP, I, C4, RET, PLC, PLR, PLW e ARG emergono 137 segnalazioni, di cui 38 argomenti di metodo non usati, quasi tutti i parametri event dei gestori wxPython, 29 importazioni non in testa al file, 23 confronti con valori magici, 7 funzioni con troppi rami e 7 con troppe istruzioni.
 Correzione proposta: introdurre un file di configurazione ruff nel progetto che dichiari le regole scelte e le eccezioni volute, in particolare per i parametri event, e affrontare separatamente le funzioni troppo lunghe, prima fra tutte update_display in standings.py, oltre 250 righe con responsabilita' miste di calcolo e presentazione.
+Stato: risolto in parte il 2026-09-01, versione 2.8.4. Creato ruff.toml con le famiglie di regole scelte e le eccezioni motivate una per una; il progetto passa ruff senza rilievi con questa configurazione, piu' severa di quella predefinita. La suddivisione delle funzioni troppo lunghe, a partire da update_display, non e' stata affrontata: e' un intervento strutturale che merita un blocco a se' e va concordato.
 Rilievo 33
 Gravita': basso
 Categoria: ottimizzazione
 File e riga: nessun file
 Problema: manca requirements.txt e nessun file dichiara la dipendenza da wxPython e da GBUtils.
 Correzione proposta: aggiungere il file delle dipendenze, coerente con quanto indicato nel README.
+Stato: risolto il 2026-09-01, versione 2.8.4. Creato requirements.txt con wxPython, pytest e ruff.
 Rilievo 34
 Gravita': basso
 Categoria: fragilita'
 File e riga: main_window.py:497, standings.py:8
 Problema: il doppio formato dei record partita, a quattro e a sei elementi, e' gestito con controlli sparsi in punti diversi invece che con una migrazione al caricamento.
 Correzione proposta: convertire una volta per tutte i record vecchi in fase di load, registrando la versione del formato nel file.
+Stato: risolto il 2026-09-01, versione 2.8.4, per la conversione: le partite a quattro elementi diventano complete al caricamento, con la regola dei pareggi del torneo. Non e' stato aggiunto un campo di versione del formato, perche' la lunghezza del record lo identifica gia' senza ambiguita'. Coperto dal test test_migrazione_record_partita_al_formato_completo.
 Rilievo 35
 Gravita': basso
 Categoria: ottimizzazione
 File e riga: main_window.py:350
 Problema: entrambe le liste vengono svuotate e ricostruite integralmente a ogni singolo carattere digitato nei campi di ricerca, comprese le percentuali e il ricalcolo del layout.
 Correzione proposta: aggiornare solo la lista interessata dal filtro modificato.
+Stato: risolto il 2026-09-01, versione 2.8.4. update_lists e' stata divisa in fill_unplayed_list e fill_played_list, e il gestore del filtro aggiorna solo quella del campo modificato.
 Rilievo 36
 Gravita': basso
 Categoria: logica
 File e riga: main_window.py:355
 Problema: la ricerca con due nomi trova solo le partite in cui il primo nome e' il primo giocatore, quindi non trova la partita di ritorno con i ruoli invertiti.
 Correzione proposta: se voluto, cercare la coppia in entrambi gli ordini, altrimenti chiarirlo nell'etichetta del campo.
+Stato: risolto il 2026-09-01, versione 2.8.4. La coppia viene cercata in entrambi gli ordini, quindi si trova anche la partita di ritorno. Coperto dal test test_ricerca_coppia_in_entrambi_gli_ordini. Da confermare con la prova 20 di collaudo.txt.
 Rilievo 37
 Gravita': basso
 Categoria: regole generali, accessibilita'
 File e riga: dialogs.py:316, dialogs.py:770, data.py:425, data.py:430, data.py:511, standings.py:390
 Problema: diversi messaggi e file esportati contengono righe vuote di separazione, sia nei testi dei dialoghi, con doppia interruzione di riga, sia nella Hall of Fame testuale, che inserisce una riga vuota dopo ogni giocatore.
 Correzione proposta: eliminare le righe vuote non necessarie, come richiesto dalle istruzioni permanenti, affidando la struttura alle sole intestazioni.
+Stato: risolto il 2026-09-01, versione 2.8.3. Eliminate le righe vuote da classifica, dettagli discepolo, resoconto della fusione, Giocatori.txt e liste partite esportate. Riscritti su righe brevi anche i messaggi dei dialoghi di premiazione, somiglianza dei nickname, conferma eliminazione e aggiornamento disponibile. Tolto anche il segno piu' forzato dalle statistiche, rilievo 27, che era nello stesso identico punto del codice.
 Rilievo 38
 Gravita': basso
 Categoria: logica
 File e riga: dialogs.py:308
 Problema: il messaggio di nome troppo corto parla sempre di un nome di sole due lettere, anche quando ne e' stata inserita una sola.
 Correzione proposta: rendere il messaggio indipendente dalla lunghezza effettiva.
+Stato: risolto il 2026-09-01, versione 2.8.4.
 Rilievo 39
 Gravita': basso
 Categoria: ottimizzazione
 File e riga: standings.py:556, data.py:437, dialogs.py:1145
 Problema: sono presenti conversioni e ordinamenti ridondanti, per esempio int applicato a chiavi gia' intere, e tre implementazioni distinte di funzioni di confronto scritte a mano con cmp_to_key.
 Correzione proposta: uniformare i criteri di ordinamento in un unico punto e usare chiavi di ordinamento a tupla dove il confronto lo consente.
+Stato: risolto in parte il 2026-09-01, versione 2.8.4. L'ordinamento della Hall of Fame testuale usa ora la chiave a tupla hall_of_fame_sort_key al posto della funzione di confronto scritta a mano, e sono state tolte le conversioni ridondanti sulle chiavi delle partite. Resta con cmp_to_key la classifica generale nella finestra Hall of Fame, dove il criterio cambia in base alla scelta dell'utente.
 3. Cio' che e' risultato conforme e non richiede interventi
 L'algoritmo di classifica rank_tournament_players, in standings.py, e' solido: la risoluzione delle parita' a gruppi e sottogruppi ricorsivi termina sempre, perche' ogni passaggio ricorsivo lavora su un gruppo strettamente piu' piccolo o passa allo stadio successivo, e i casi ciclici ricadono correttamente sul secondo spareggio e poi sul criterio alfabetico.
 La suite test_standings_ranking.py, 14 test, viene superata interamente e copre bene i casi difficili: parita' a tre e a quattro, parita' cicliche, direzione del punteggio bassa, persistenza del file di torneo, formattazione delle date.

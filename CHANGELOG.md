@@ -2,6 +2,67 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.8.4] - 2026-09-01
+
+Correzioni dei blocchi 4 e 5 della revisione di fase 1: coerenza delle regole del torneo, pulizia e manutenzione. Riferimento: `analisi_codice_fase_1.txt`.
+
+### Risolto
+- **Regola dei pareggi presa dal torneo, non dalle impostazioni generali** (rilievo 11): ogni torneo salva la propria regola, ma il calcolo usava sempre quella globale, così cambiare le impostazioni alterava a posteriori i punti dei tornei vecchi.
+- **Una sola regola per ricostruire i punti delle partite vecchie** (rilievo 13): classifica e annullamento partita ne applicavano due diverse allo stesso record. Ora c'è `split_match_points` in [data.py](file:///E:/git/mine/Dadillo/data.py), e le partite del vecchio formato a quattro elementi vengono convertite una volta sola al caricamento (rilievo 34), con la regola del torneo.
+- **Chiudere la finestra di premiazione non assegna più le medaglie** (rilievo 14): l'uscita con Esc valeva come "tutti in massa" e registrava tutto su disco. Ora annulla.
+- **Controllo dei doppioni nello storico più preciso** (rilievo 15): il confronto avveniva per sottostringa, quindi un titolo breve o ricorrente poteva far scartare un torneo nuovo. Ora titolo e data di inizio si confrontano per intero.
+- **Parità irrisolte segnalate** (rilievo 21): quando nessuno spareggio riesce a separare due discepoli, la classifica lo dice, il dialogo di revisione lo ripete e, se la parità tocca le prime quattro posizioni, viene chiesta conferma prima di assegnare medaglie decise dall'ordine alfabetico.
+- **Le Regole non cambiano più il torneo in corso senza chiedere** (rilievo 22).
+- **Media piazzamenti onesta** (rilievo 19): chi ha solo podi viene indicato come tale e resta in cima, mentre uno storico non interpretabile non produce più uno zero che scavalcava chi ha piazzamenti veri. L'ordinamento della Hall of Fame esistente resta identico, verificato sul database reale.
+- **Un solo archivio dei discepoli in memoria** (rilievo 17): sette istanze separate rileggevano il file e potevano sovrascriversi a vicenda. Ora la finestra principale ne crea uno e lo passa alle altre.
+- **GBUtils importato solo quando serve** (rilievo 18): il controllo su `sys.frozen` viene prima dell'importazione, così da sorgente il programma parte anche dove GBUtils non è installato.
+- **Ricerca per coppia di nomi in entrambi gli ordini** (rilievo 36): prima la partita di ritorno non veniva trovata.
+
+### Modificato
+- Rimossi i quattro parametri booleani inutilizzati da `add_or_update_player` (rilievo 23) e i campi `records_high` e `records_low`, scritti e mai usati (rilievo 25).
+- Le liste delle partite si aggiornano una per volta invece che entrambe a ogni carattere digitato nella ricerca (rilievo 35).
+- Intestazione autori in tutti i moduli e in `version.py`, nel formato Gabriele Battaglia (IZ4APU) & ClaudIA con modello e modalità (rilievo 26).
+- Tolto il messaggio di benvenuto stampato su una console che l'eseguibile non ha (rilievo 28); reso indipendente dalla lunghezza il messaggio di nome troppo corto (rilievo 38).
+- `zip_maker.py` costruisce i percorsi a partire dal proprio file (rilievo 31).
+
+### Aggiunto
+- `ruff.toml` con le regole scelte per il progetto e le eccezioni motivate (rilievo 32) e `requirements.txt` con le dipendenze (rilievo 33).
+- Ripristinati in `Dadillo.spec` gli `hiddenimports` necessari all'aggiornatore, e il file è ora sotto controllo di versione invece di essere ignorato (rilievo 9).
+- Sei nuovi test: regola unica dei pareggi, migrazione dei record partita, segnalazione delle parità, media piazzamenti nei casi senza dati, ricerca simmetrica della coppia, doppioni con titoli simili. La suite passa da 24 a 30 test.
+
+### Rimosso
+- `test_dialog.py` e `test_dialog2.py`, script di prova interattivi che pytest raccoglieva come test (rilievo 29).
+- `agostino.txt` spostato nella cartella `materiali`, perché è un appunto di lavoro e non codice (rilievo 30).
+
+---
+
+## [2.8.3] - 2026-09-01
+
+Correzioni del blocco 3 della revisione di fase 1, dedicato all'accessibilità. Riferimento: `analisi_codice_fase_1.txt`.
+
+### Modificato
+- **Classifica e Hall of Fame in forma discorsiva** (rilievo 8):
+  - Eliminati tutti e nove i separatori grafici a trattini, che lo screen reader leggeva come lunghe sequenze di segni, e le tabelle a colonne allineate, in cui il significato di ogni numero dipendeva dalla posizione.
+  - Ogni giocatore occupa ora righe brevi con l'etichetta accanto al dato: `1. Marco, oro. Punti 12.` seguito da `Giocate 6 su 6, vinte 4, pari 0, perse 2.` Le stesse regole valgono per la classifica generale della Hall of Fame e per i file esportati con `File, Salva lista`.
+  - I riferimenti alle partite nei record sono discorsivi: `Marco, partita 4, Marco contro Selene157` al posto della forma con parentesi e barre.
+  - Corretto il plurale nei punteggi: `1 punto` invece di `1 punti`.
+- **Medaglie in solo testo** (rilievo 24): oro, argento, bronzo e legno non sono più accompagnati da emoji, che venivano annunciate in modo diverso a seconda della versione dello screen reader e delle sue impostazioni.
+- **Righe vuote di separazione eliminate** (rilievo 37): in classifica, dettagli discepolo, resoconto della fusione, `Giocatori.txt` e liste partite esportate. Riscritti su righe brevi anche i messaggi dei dialoghi di premiazione, di somiglianza dei nickname, di conferma eliminazione e di aggiornamento disponibile.
+- Tolto il segno più forzato da deviazione standard, varianza, escursione, mediane e moda, che lo screen reader annunciava come "più" davanti a grandezze sempre positive.
+
+### Risolto
+- **Focus spostato due volte dopo l'inserimento di un discepolo** (rilievo 20):
+  - Due temporizzatori a 300 e 600 millisecondi spostavano il focus prima sulla lista e poi sul campo del nome, producendo annunci sovrapposti e potendo far finire i primi caratteri digitati nel controllo sbagliato.
+  - Ora il focus resta nel campo del nome dopo un inserimento e nell'elenco dei partecipanti dopo una soppressione, con la selezione già posizionata sulla voce successiva.
+- **Invio che poteva saltare la validazione del nome** (rilievo 10):
+  - Nella finestra di aggiunta giocatore, Invio inoltrava al dialogo un evento del pulsante, aggirando la validazione agganciata al pulsante stesso: si poteva accettare un nome troppo corto o duplicato, o incorrere in un errore di attributo mancante.
+  - Invio e pulsante passano ora entrambi per la stessa funzione di conferma, che chiude la finestra solo a nome valido e riporta il focus sul campo in caso di errore.
+
+### Aggiunto
+- Test automatico che verifica l'assenza di separatori grafici, righe vuote ed emoji nella classifica e la presenza delle etichette accanto ai dati. La suite passa da 23 a 24 test.
+
+---
+
 ## [2.8.2] - 2026-09-01
 
 Correzioni del blocco 2 della revisione di fase 1, dedicato agli errori bloccanti e ai dati mostrati sbagliati. Riferimento: `analisi_codice_fase_1.txt`.

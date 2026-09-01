@@ -3,6 +3,7 @@ Autori: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto.
 """
 
 import wx
+
 from data import SaveError
 
 

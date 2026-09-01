@@ -1,3 +1,7 @@
+"""Modelli dati, persistenza e archivio storico dei discepoli di Dadillo.
+Autori: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto.
+"""
+
 import contextlib
 import datetime
 import json
@@ -85,6 +89,96 @@ def parse_timestamp(value):
     if dt is None:
         return None
     return dt if dt.tzinfo else dt.astimezone()
+
+
+def split_match_points(res, pts, draw_split="Metà ciascuno"):
+    """Ricostruisce i punti dei due giocatori da un record partita del vecchio
+    formato a quattro elementi, che non li conservava separatamente.
+    Regola unica per tutto il programma: prima classifica e annullamento partita
+    ne usavano due diverse e attribuivano punti differenti allo stesso record.
+    """
+    if res == "1":
+        return pts, 0
+    if res == "2":
+        return 0, pts
+    if draw_split == "Metà ciascuno":
+        return pts / 2.0, pts / 2.0
+    if draw_split == "Nessun Punto":
+        return 0, 0
+    # Punti Pieni a Entrambi e Inserimento Manuale
+    return pts, pts
+
+
+def split_history_entry(entry):
+    """Scompone una voce di storico nella forma
+    "3° in Torneo di Natale - data inizio - data fine".
+    Restituisce posizione, titolo, data inizio e data fine. La posizione e' None
+    se la voce non ha il formato atteso.
+    """
+    parti = str(entry).split(" - ")
+    testa = parti[0]
+    s_date = parti[1].strip() if len(parti) > 1 else ""
+    e_date = parti[2].strip() if len(parti) > 2 else ""
+    pos = None
+    titolo = testa.strip()
+    trovato = re.match(r"^(\d+)°\s+in\s+(.*)$", testa.strip())
+    if trovato:
+        pos = int(trovato.group(1))
+        titolo = trovato.group(2).strip()
+    return pos, titolo, s_date, e_date
+
+
+# Chiavi di ordinamento per la media piazzamenti. Un giocatore che non ha mai
+# chiuso fuori dal podio non ha una media da confrontare: se ha solo podi vale
+# come il migliore possibile, se invece il suo storico non e' interpretabile
+# finisce in fondo, perche' uno zero per mancanza di dati non e' un merito.
+SOLO_PODI = float("-inf")
+MEDIA_NON_DISPONIBILE = float("inf")
+
+
+def placement_stats(p_data):
+    """Riepilogo dei piazzamenti di un discepolo.
+    Restituisce numero di tornei, media piazzamenti come chiave di ordinamento
+    e testo gia' pronto da mostrare.
+    """
+    storico = p_data.get("history", []) or []
+    tornei = len(storico)
+    fuori_podio = 0
+    ignote = 0
+    for voce in storico:
+        pos, _, _, _ = split_history_entry(voce)
+        if pos is None:
+            ignote += 1
+        elif pos >= 5:
+            fuori_podio += 1
+
+    somma = p_data.get("placements_sum", 0)
+    if fuori_podio > 0:
+        # La media divide per tutti i tornei, non solo per quelli fuori dal
+        # podio: e' una scelta voluta, premia l'assiduita'.
+        media = somma / tornei if tornei > 0 else 0
+        return tornei, media, f"{media:.2f}"
+    if tornei > 0 and ignote == 0:
+        return tornei, SOLO_PODI, "solo podi"
+    return tornei, MEDIA_NON_DISPONIBILE, "non disponibile"
+
+
+def hall_of_fame_sort_key(name, p_data):
+    """Chiave di ordinamento della Hall of Fame, dal migliore al peggiore.
+    Piu' medaglie prima, poi media piazzamenti piu' bassa, poi piu' tornei
+    giocati, infine ordine alfabetico.
+    """
+    m = p_data.get("medals", {}) or {}
+    tornei, media, _ = placement_stats(p_data)
+    return (
+        -m.get("oro", 0),
+        -m.get("argento", 0),
+        -m.get("bronzo", 0),
+        -m.get("legno", 0),
+        media,
+        -tornei,
+        name,
+    )
 
 
 def get_app_dir():
@@ -334,8 +428,8 @@ class TournamentData:
         self.unplayed_matches = {}  # id -> [p1, p2]
         self.played_matches = {}  # id -> [p1, p2, result, points]
         # result: 1=p1, 2=p2, 3=draw
-        self.records_high = ["Giocatore sconosciuto", "Partita sconosciuta", -99999]
-        self.records_low = ["Giocatore sconosciuto", "Partita sconosciuta", 99999]
+        # I record del torneo non sono piu' campi salvati: la schermata della
+        # classifica li ricalcola sempre dalle partite giocate.
 
         # v2.1.0 new fields
         self.tourney_type = 0  # 0 = Andata e Ritorno, 1 = Solo Andata
@@ -361,8 +455,6 @@ class TournamentData:
             "players": self.players,
             "unplayed_matches": self.unplayed_matches,
             "played_matches": self.played_matches,
-            "records_high": self.records_high,
-            "records_low": self.records_low,
             "tourney_type": self.tourney_type,
             "pts_win": self.pts_win,
             "pts_draw": self.pts_draw,
@@ -375,6 +467,20 @@ class TournamentData:
         }
         atomic_write_json(self.filename, data)
 
+    def _migrate_played_matches(self):
+        """Porta le partite del vecchio formato a quattro elementi a quello
+        completo [p1, p2, esito, punti, punti1, punti2].
+        La conversione avviene una volta sola al caricamento, con la regola dei
+        pareggi del torneo: prima ogni parte del programma la ricostruiva al
+        volo, e non tutte allo stesso modo.
+        """
+        for m_id, record in self.played_matches.items():
+            if len(record) >= 6:
+                continue
+            p1, p2, res, pts = record[:4]
+            pt1, pt2 = split_match_points(res, pts, self.draw_points_split)
+            self.played_matches[m_id] = [p1, p2, res, pts, pt1, pt2]
+
     def load(self):
         """Carica il torneo.
         Restituisce True se il torneo e' stato caricato e False se il file non
@@ -385,7 +491,7 @@ class TournamentData:
         if not os.path.exists(self.filename):
             return False
         try:
-            with open(self.filename, "r", encoding="utf-8") as f:
+            with open(self.filename, encoding="utf-8") as f:
                 data = json.load(f)
             _check_tournament_data(data)
         except (json.JSONDecodeError, OSError, ValueError, TypeError) as e:
@@ -402,8 +508,6 @@ class TournamentData:
             self.played_matches = {
                 int(k): v for k, v in data.get("played_matches", {}).items()
             }
-            self.records_high = data.get("records_high", ["", "", -99999])
-            self.records_low = data.get("records_low", ["", "", 99999])
             self.tourney_type = data.get("tourney_type", 0)
             self.pts_win = data.get("pts_win", None)
             self.pts_draw = data.get("pts_draw", None)
@@ -423,6 +527,7 @@ class TournamentData:
             self.draw_points_split = normalize_choice(
                 data.get("draw_points_split"), DRAW_SPLITS
             )
+            self._migrate_played_matches()
             return True
         except (ValueError, TypeError, KeyError, AttributeError) as e:
             raise DataFileError(self.filename, e, quarantine_file(self.filename)) from e
@@ -458,7 +563,7 @@ class SettingsData:
                 self.save()
             return True
         try:
-            with open(self.filename, "r", encoding="utf-8") as f:
+            with open(self.filename, encoding="utf-8") as f:
                 data = json.load(f)
             self.main_criterion = normalize_main_criterion(data.get("main_criterion"))
             self.score_direction = normalize_choice(
@@ -497,7 +602,7 @@ class PlayerDB:
         self.load_error = None
         if os.path.exists(self.filename):
             try:
-                with open(self.filename, "r", encoding="utf-8") as f:
+                with open(self.filename, encoding="utf-8") as f:
                     caricati = json.load(f)
                 if not isinstance(caricati, dict):
                     raise TypeError("il contenuto non e' un elenco di giocatori")
@@ -515,8 +620,6 @@ class PlayerDB:
                 return False
 
         # Migrazione DB: aggiunge placements_sum e normalizza date in formato esteso
-        import re
-
         for data in self.players.values():
             if "history" in data:
                 new_hist = []
@@ -534,11 +637,10 @@ class PlayerDB:
             if "placements_sum" not in data:
                 data["placements_sum"] = 0
                 for entry in data.get("history", []):
-                    match = re.match(r"^(\d+)°", entry)
-                    if match:
-                        pos = int(match.group(1))
-                        if pos >= 5:
-                            data["placements_sum"] += pos
+                    pos, _, _, _ = split_history_entry(entry)
+                    if pos is not None and pos >= 5:
+                        data["placements_sum"] += pos
+        return True
 
     def save(self):
         if self.load_error:
@@ -565,35 +667,28 @@ class PlayerDB:
         p["medals"] = {"oro": 0, "argento": 0, "bronzo": 0, "legno": 0}
         p["placements_sum"] = 0
 
-        import re
-
+        medaglia_per_posizione = {1: "oro", 2: "argento", 3: "bronzo", 4: "legno"}
         for entry in p.get("history", []):
-            match = re.match(r"^(\d+)°", entry)
-            if match:
-                pos = int(match.group(1))
-                if pos == 1:
-                    p["medals"]["oro"] += 1
-                elif pos == 2:
-                    p["medals"]["argento"] += 1
-                elif pos == 3:
-                    p["medals"]["bronzo"] += 1
-                elif pos == 4:
-                    p["medals"]["legno"] += 1
-                elif pos >= 5:
-                    p["placements_sum"] += pos
+            pos, _, _, _ = split_history_entry(entry)
+            if pos is None:
+                continue
+            if pos in medaglia_per_posizione:
+                p["medals"][medaglia_per_posizione[pos]] += 1
+            elif pos >= 5:
+                p["placements_sum"] += pos
 
     def add_or_update_player(
         self,
         name,
         position,
-        is_oro,
-        is_argento,
-        is_bronzo,
-        is_legno,
         tourney_title,
         start_date,
         end_date,
     ):
+        """Registra il piazzamento di un discepolo in un torneo.
+        Le medaglie non sono parametri: si ricavano dalla posizione, che e'
+        l'unica fonte di verita', con recalculate_player_stats.
+        """
         actual_name = name
 
         if actual_name not in self.players:
@@ -610,11 +705,15 @@ class PlayerDB:
         # Es: 3° in Torneo di Natale - giovedì 25 dicembre 2026 - venerdì 15 gennaio 2027
         history_entry = f"{position}° in {tourney_title} - {s_fmt} - {e_fmt}"
 
-        # Controllo duplicati: se il torneo è già presente nella storia, non aggiungerlo.
+        # Controllo duplicati: titolo e data di inizio si confrontano per intero,
+        # non come sottostringhe. Con il vecchio confronto un titolo breve o
+        # ricorrente faceva scartare per errore un torneo nuovo.
+        s_originale = str(start_date).strip()
         for existing_entry in p["history"]:
-            if existing_entry == history_entry or (
-                tourney_title in existing_entry
-                and (start_date in existing_entry or s_fmt in existing_entry)
+            _, titolo_esistente, s_esistente, _ = split_history_entry(existing_entry)
+            if titolo_esistente == str(tourney_title).strip() and s_esistente in (
+                s_fmt,
+                s_originale,
             ):
                 return False  # Già aggiunto in precedenza
 
@@ -625,7 +724,7 @@ class PlayerDB:
     def merge_db(self, external_filepath, interactive_resolver=None):
         log = []
         try:
-            with open(external_filepath, "r", encoding="utf-8") as f:
+            with open(external_filepath, encoding="utf-8") as f:
                 ext_data = json.load(f)
         except (json.JSONDecodeError, OSError, ValueError, KeyError) as e:
             return False, [f"Errore nella lettura del file: {e}"]
@@ -710,23 +809,21 @@ class PlayerDB:
                 else:
                     formatted_entry = entry
 
+                # Due voci descrivono lo stesso torneo se coincidono titolo e date
+                _, titolo_ext, s_ext, e_ext = split_history_entry(formatted_entry)
                 already_present = False
                 for local_entry in self.players[target_name]["history"]:
                     if formatted_entry == local_entry or entry == local_entry:
                         already_present = True
                         break
-                    if " in " in formatted_entry and " in " in local_entry:
-                        t_part_ext = formatted_entry.split(" in ", 1)[1]
-                        t_part_loc = local_entry.split(" in ", 1)[1]
-                        if t_part_ext == t_part_loc:
-                            already_present = True
-                            break
+                    _, titolo_loc, s_loc, e_loc = split_history_entry(local_entry)
+                    if (titolo_ext, s_ext, e_ext) == (titolo_loc, s_loc, e_loc):
+                        already_present = True
+                        break
 
                 if not already_present:
                     self.players[target_name]["history"].append(formatted_entry)
-                    log.append(
-                        f"  + Aggiunto torneo a {target_name}: {formatted_entry}"
-                    )
+                    log.append(f"  Aggiunto torneo a {target_name}: {formatted_entry}")
 
             # Ricalcolo rigoroso dei contatori medaglie dal nuovo storico
             self.recalculate_player_stats(target_name)
@@ -737,7 +834,7 @@ class PlayerDB:
                 "Nessuna novità trovata nel file importato. I discepoli e i tornei erano già allineati."
             )
         else:
-            log.append("\nFusione sacra completata e archivi aggiornati con successo!")
+            log.append("Fusione sacra completata e archivi aggiornati con successo!")
         return True, log
 
     def export_to_txt(self):
@@ -754,49 +851,14 @@ class PlayerDB:
                     "Ripristina prima l'archivio."
                 ),
             )
-        parts = ["Hall of Fame di Dadillo\n\n"]
+        parts = ["Hall of Fame di Dadillo\n"]
 
-        # Funzione per ordinamento: prima ori, poi argenti, poi bronzi, poi legni (tutti in ordine decrescente = chi ne ha di più sta in cima)
-        # Poi ordina per media piazzamenti (somma piazzamenti >= 5 / numero tornei) decrescente (la media più bassa sta in cima)
-        # e infine ordina per quantità di tornei giocati (per risolvere i parimerito) e per nome alfabetico.
-        import functools
-
-        def compare_db_players(a_item, b_item):
-            name_a, data_a = a_item
-            name_b, data_b = b_item
-
-            m_a = data_a["medals"]
-            m_b = data_b["medals"]
-
-            if m_a["oro"] != m_b["oro"]:
-                return (m_b["oro"] > m_a["oro"]) - (m_b["oro"] < m_a["oro"])
-            if m_a["argento"] != m_b["argento"]:
-                return (m_b["argento"] > m_a["argento"]) - (
-                    m_b["argento"] < m_a["argento"]
-                )
-            if m_a["bronzo"] != m_b["bronzo"]:
-                return (m_b["bronzo"] > m_a["bronzo"]) - (m_b["bronzo"] < m_a["bronzo"])
-            if m_a["legno"] != m_b["legno"]:
-                return (m_b["legno"] > m_a["legno"]) - (m_b["legno"] < m_a["legno"])
-
-            # Calcolo media piazzamenti
-            len_a = len(data_a["history"])
-            len_b = len(data_b["history"])
-            avg_a = data_a.get("placements_sum", 0) / len_a if len_a > 0 else 0
-            avg_b = data_b.get("placements_sum", 0) / len_b if len_b > 0 else 0
-
-            if avg_a != avg_b:
-                return (avg_a > avg_b) - (avg_a < avg_b)
-
-            # Spareggio ulteriore: numero di partecipazioni
-            if len_a != len_b:
-                return (len_b > len_a) - (len_b < len_a)
-
-            # Alfabetico
-            return (name_a > name_b) - (name_a < name_b)
-
+        # Ordinamento: prima chi ha piu' ori, poi argenti, bronzi e legni; a pari
+        # medagliere vince la media piazzamenti piu' bassa, poi chi ha giocato
+        # piu' tornei, infine l'ordine alfabetico. Una sola chiave a tupla al
+        # posto della funzione di confronto scritta a mano.
         sorted_players = sorted(
-            self.players.items(), key=functools.cmp_to_key(compare_db_players)
+            self.players.items(), key=lambda item: hall_of_fame_sort_key(*item)
         )
 
         for name, p in sorted_players:
@@ -822,17 +884,14 @@ class PlayerDB:
                 medals_line = "  Medagliere: Ancora nessuna medaglia\n"
             parts.append(medals_line)
 
-            num_tornei = len(p["history"])
-            media = p.get("placements_sum", 0) / num_tornei if num_tornei > 0 else 0
+            num_tornei, _, media_testo = placement_stats(p)
             parts.append(
-                f"  Media Piazzamenti: {media:.2f} (Tornei giocati: {num_tornei})\n"
+                f"  Media piazzamenti {media_testo}, tornei giocati {num_tornei}.\n"
             )
 
             parts.append("  Storico Tornei:\n")
 
             # Livello 2: Tornei
             parts.extend(f"    {h}\n" for h in p["history"])
-
-            parts.append("\n")
 
         atomic_write_text(self.txt_filename, "".join(parts))

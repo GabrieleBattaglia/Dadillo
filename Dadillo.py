@@ -1,10 +1,15 @@
+"""Dadillo, L'Altare del Sacrificio. Punto di ingresso dell'applicazione.
+Gestore di tornei con interfaccia wxPython, pensato per l'uso con screen reader.
+Autori: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto.
+"""
+
 import sys
+import threading
 
 import wx
-from main_window import MainFrame
-from version import APP_NAME, AUTHORS, DATE, VERSION
 
-print(f"Welcome! {APP_NAME} by {AUTHORS} - Version {VERSION} ({DATE})")
+from main_window import MainFrame
+from version import VERSION
 
 
 class App(wx.App):
@@ -14,16 +19,14 @@ class App(wx.App):
 
 
 def check_updates_gui():
-    import sys
-    import threading
-
-    import wx
-    from version import VERSION
-
-    from GBUtils import perform_update, update_checker
-
+    """Controlla se esiste una versione piu' recente, ma solo per l'eseguibile.
+    Il controllo su sys.frozen viene prima dell'importazione di GBUtils: da
+    sorgente il programma deve partire anche dove GBUtils non e' installato.
+    """
     if not getattr(sys, "frozen", False):
         return
+
+    from GBUtils import perform_update, update_checker
 
     def _update_task():
         api_url = (
@@ -35,7 +38,11 @@ def check_updates_gui():
 
     def _show_prompt(new_ver, dl_url):
         if dl_url:
-            msg = f"E' disponibile la nuova versione {new_ver}! (Attuale: {VERSION})\n\nDesideri scaricare e installare l'aggiornamento ora?"
+            msg = (
+                f"E' disponibile la versione {new_ver}.\n"
+                f"Tu hai la {VERSION}.\n"
+                "Vuoi scaricarla e installarla ora?"
+            )
             dlg = wx.MessageDialog(
                 None, msg, "Aggiornamento Disponibile", wx.YES_NO | wx.ICON_INFORMATION
             )
@@ -52,7 +59,12 @@ def check_updates_gui():
                     )
             dlg.Destroy()
         else:
-            msg = f"E' disponibile la nuova versione {new_ver}, ma i file di installazione non sono ancora pronti per il download.\n\nRiprova più tardi."
+            msg = (
+                f"E' disponibile la versione {new_ver},\n"
+                "ma i file di installazione non sono\n"
+                "ancora pronti per il download.\n"
+                "Riprova più tardi."
+            )
             wx.MessageBox(msg, "Aggiornamento Disponibile", wx.OK | wx.ICON_INFORMATION)
 
     threading.Thread(target=_update_task, daemon=True).start()

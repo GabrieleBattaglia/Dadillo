@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 from data import TournamentData
+from standings import rank_tournament_players
 
 
 class MockChoice:
@@ -14,9 +15,6 @@ class MockChoice:
 
     def GetSelection(self):
         return self._idx
-
-
-from standings import rank_tournament_players
 
 
 class DummyStandingsHelper:
@@ -136,6 +134,7 @@ def test_head_to_head_tiebreak_score_basso():
 
 def test_setup_players_db_selection_behavior():
     import wx
+
     from dialogs import SetupPlayersDialog
 
     app = wx.App(False)
@@ -330,28 +329,8 @@ def test_merge_db_no_duplicate_medals(tmp_path):
 
     base = str(tmp_path)
     db = PlayerDB(base_dir=base)
-    db.add_or_update_player(
-        "Peppe",
-        1,
-        True,
-        False,
-        False,
-        False,
-        "Torneo Alfa",
-        "2026-01-01",
-        "2026-01-10",
-    )
-    db.add_or_update_player(
-        "Selene",
-        2,
-        False,
-        True,
-        False,
-        False,
-        "Torneo Alfa",
-        "2026-01-01",
-        "2026-01-10",
-    )
+    db.add_or_update_player("Peppe", 1, "Torneo Alfa", "2026-01-01", "2026-01-10")
+    db.add_or_update_player("Selene", 2, "Torneo Alfa", "2026-01-01", "2026-01-10")
     db.save()
 
     # Verifica stato iniziale
@@ -440,6 +419,190 @@ def test_format_date_extended():
     # Stringhe già in formato esteso o con nome mese
     assert format_date_extended("giovedì 20 agosto 2026") == "giovedì 20 agosto 2026"
     assert format_date_extended("1 agosto 2026") == "sabato 1 agosto 2026"
+
+
+def test_regola_pareggi_unica_per_i_record_vecchi():
+    from data import split_match_points
+    from standings import _extract_match_details
+
+    # Record nel vecchio formato a quattro elementi, pareggio da 10 punti
+    record = ["Alice", "Bob", "3", 10]
+
+    assert split_match_points("3", 10, "Metà ciascuno") == (5.0, 5.0)
+    assert split_match_points("3", 10, "Nessun Punto") == (0, 0)
+    assert split_match_points("3", 10, "Punti Pieni a Entrambi") == (10, 10)
+    assert split_match_points("1", 10, "Metà ciascuno") == (10, 0)
+    assert split_match_points("2", 10, "Metà ciascuno") == (0, 10)
+
+    # La classifica applica la stessa regola, non piu' una sua
+    _, _, _, pt1, pt2 = _extract_match_details(record, "Nessun Punto")
+    assert (pt1, pt2) == (0, 0)
+    _, _, _, pt1, pt2 = _extract_match_details(record, "Punti Pieni a Entrambi")
+    assert (pt1, pt2) == (10, 10)
+
+
+def test_migrazione_record_partita_al_formato_completo(tmp_path):
+    import json
+
+    base = str(tmp_path)
+    t = TournamentData(base_dir=base)
+    t.title = "Torneo vecchio"
+    t.draw_points_split = "Nessun Punto"
+    t.players = {"Alice": [0, 0, 1, 0], "Bob": [0, 0, 1, 0]}
+    t.save()
+
+    # Riscriviamo il file con una partita nel vecchio formato a 4 elementi
+    with open(t.filename, encoding="utf-8") as f:
+        salvato = json.load(f)
+    salvato["played_matches"] = {"1": ["Alice", "Bob", "3", 10]}
+    with open(t.filename, "w", encoding="utf-8") as f:
+        json.dump(salvato, f)
+
+    t2 = TournamentData(base_dir=base)
+    assert t2.load() is True
+    record = t2.played_matches[1]
+    assert len(record) == 6
+    # La conversione usa la regola del torneo, qui Nessun Punto
+    assert record[4] == 0
+    assert record[5] == 0
+
+
+def test_parita_irrisolta_viene_segnalata():
+    from standings import rank_tournament_players
+
+    # Due giocatori identici in tutto: nessuno spareggio puo' separarli
+    players = {"Anna": [10, 2, 0, 1], "Bruno": [10, 2, 0, 1]}
+    ranked = rank_tournament_players(
+        players,
+        {},
+        order_by="Vittorie",
+        tiebreaker_1="Nessuno",
+        tiebreaker_2="Nessuno",
+    )
+    nomi = [r["name"] for r in ranked]
+    assert nomi == ["Anna", "Bruno"]
+    assert ranked[0]["tied_with"] == ["Bruno"]
+    assert ranked[1]["tied_with"] == ["Anna"]
+
+
+def test_media_piazzamenti_distingue_i_casi_senza_dati():
+    from data import (
+        MEDIA_NON_DISPONIBILE,
+        SOLO_PODI,
+        hall_of_fame_sort_key,
+        placement_stats,
+    )
+
+    solo_podi = {
+        "medals": {"oro": 1, "argento": 0, "bronzo": 0, "legno": 0},
+        "history": ["1° in Torneo Uno - a - b"],
+        "placements_sum": 0,
+    }
+    con_piazzamenti = {
+        "medals": {"oro": 1, "argento": 0, "bronzo": 0, "legno": 0},
+        "history": ["1° in Torneo Uno - a - b", "8° in Torneo Due - c - d"],
+        "placements_sum": 8,
+    }
+    storico_illeggibile = {
+        "medals": {"oro": 1, "argento": 0, "bronzo": 0, "legno": 0},
+        "history": ["appunti presi a mano"],
+        "placements_sum": 0,
+    }
+
+    assert placement_stats(solo_podi)[1] == SOLO_PODI
+    assert placement_stats(solo_podi)[2] == "solo podi"
+    assert placement_stats(con_piazzamenti)[2] == "4.00"
+    assert placement_stats(storico_illeggibile)[1] == MEDIA_NON_DISPONIBILE
+    assert placement_stats(storico_illeggibile)[2] == "non disponibile"
+
+    # A parita' di medaglie chi ha solo podi sta davanti, e uno storico
+    # illeggibile non deve piu' scavalcare chi ha piazzamenti veri.
+    ordinati = sorted(
+        [
+            ("Ignoto", storico_illeggibile),
+            ("Piazzato", con_piazzamenti),
+            ("Podista", solo_podi),
+        ],
+        key=lambda item: hall_of_fame_sort_key(*item),
+    )
+    assert [nome for nome, _ in ordinati] == ["Podista", "Piazzato", "Ignoto"]
+
+
+def test_ricerca_coppia_in_entrambi_gli_ordini():
+    from main_window import MainFrame
+
+    filtro = MainFrame.match_filter
+    testo = "(3) Anna vs Bruno"
+    assert filtro(testo, "Anna", "Bruno", "anna bruno") is True
+    # La partita di ritorno va trovata anche cercando i nomi al contrario
+    assert filtro(testo, "Anna", "Bruno", "bruno anna") is True
+    assert filtro(testo, "Anna", "Bruno", "anna") is True
+    assert filtro(testo, "Anna", "Bruno", "carla") is False
+    assert filtro(testo, "Anna", "Bruno", "") is True
+
+
+def test_duplicati_storico_con_titoli_simili(tmp_path):
+    from data import PlayerDB
+
+    db = PlayerDB(base_dir=str(tmp_path))
+    assert (
+        db.add_or_update_player("Anna", 1, "Torneo", "2026-01-01", "2026-01-10") is True
+    )
+    # Stesso titolo e stessa data di inizio: e' lo stesso torneo, va scartato
+    assert (
+        db.add_or_update_player("Anna", 1, "Torneo", "2026-01-01", "2026-01-10")
+        is False
+    )
+    # Titolo che contiene il primo come sottostringa: e' un torneo diverso
+    assert (
+        db.add_or_update_player(
+            "Anna", 2, "Torneo di Natale", "2026-01-01", "2026-01-10"
+        )
+        is True
+    )
+    assert len(db.players["Anna"]["history"]) == 2
+
+
+def test_classifica_leggibile_da_screen_reader(tmp_path):
+    import wx
+
+    from data import SettingsData
+    from standings import StandingsPanel
+
+    base = str(tmp_path)
+    t = TournamentData(base_dir=base)
+    t.title = "Torneo di prova"
+    t.comment = "Che vinca il piu' devoto"
+    t.start_date = "2026-08-20T10:00:00+02:00"
+    t.end_date = "2026-08-22T18:30:00+02:00"
+    # Due partite giocate: Marco vince la prima, la seconda finisce pari
+    t.players = {"Marco": [12, 1, 1, 0], "Anna": [9, 0, 1, 1]}
+    t.played_matches = {
+        1: ["Marco", "Anna", "1", 3, 3, 0],
+        2: ["Anna", "Marco", "3", 1, 1, 1],
+    }
+
+    app = wx.App(False)
+    frame = wx.Frame(None)
+    panel = StandingsPanel(frame, t, SettingsData(base_dir=base), is_final=True)
+    testo = panel.txt_display.GetValue()
+    righe = testo.split("\n")
+    frame.Destroy()
+    app.Destroy()
+
+    # Nessun separatore grafico, nessuna riga vuota, nessuna emoji
+    assert "---" not in testo
+    assert "===" not in testo
+    assert "___" not in testo
+    assert all(r.strip() != "" for r in righe)
+    for emoji in ("🥇", "🥈", "🥉", "🪵"):
+        assert emoji not in testo
+
+    # I dati hanno l'etichetta accanto, non dipendono dalla colonna
+    assert "1. Marco, oro. Punti 12." in righe
+    assert any("Giocate 2 su 2, vinte 1, pari 1, perse 0." in r for r in righe)
+    # La media dei pareggi ora viene calcolata davvero
+    assert any("Media punti per pareggio" in r for r in righe)
 
 
 def test_strisce_con_giocatore_ritirato():
@@ -688,6 +851,13 @@ if __name__ == "__main__":
     test_setup_players_db_selection_behavior()
     test_merge_db_no_duplicate_medals(pathlib.Path(tempfile.mkdtemp()))
     test_merge_db_fuzzy_matching_and_resolution(pathlib.Path(tempfile.mkdtemp()))
+    test_regola_pareggi_unica_per_i_record_vecchi()
+    test_migrazione_record_partita_al_formato_completo(pathlib.Path(tempfile.mkdtemp()))
+    test_parita_irrisolta_viene_segnalata()
+    test_media_piazzamenti_distingue_i_casi_senza_dati()
+    test_ricerca_coppia_in_entrambi_gli_ordini()
+    test_duplicati_storico_con_titoli_simili(pathlib.Path(tempfile.mkdtemp()))
+    test_classifica_leggibile_da_screen_reader(pathlib.Path(tempfile.mkdtemp()))
     test_strisce_con_giocatore_ritirato()
     test_criterio_punti_totali_viene_riconosciuto()
     test_criterio_a_punti_sopravvive_al_salvataggio(pathlib.Path(tempfile.mkdtemp()))

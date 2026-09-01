@@ -1,7 +1,12 @@
+"""Finestra principale di Dadillo: menu, elenchi delle partite e comandi.
+Autori: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto.
+"""
+
 import itertools
 import os
 
 import wx
+
 from data import (
     DATA_FILE,
     DataFileError,
@@ -10,6 +15,7 @@ from data import (
     TournamentData,
     format_date_extended,
     now_timestamp,
+    split_match_points,
 )
 from dialogs import (
     AddPlayerDialog,
@@ -38,6 +44,10 @@ class MainFrame(wx.Frame):
 
         self.panel = None  # Riferimento al pannello corrente
 
+        # Un solo archivio dei discepoli per tutta l'applicazione: prima ogni
+        # finestra ne creava uno suo, rileggendo il file e lavorando su copie
+        # che potevano sovrascriversi a vicenda.
+        self.player_db = PlayerDB()
         self.check_players_archive()
 
         try:
@@ -66,10 +76,9 @@ class MainFrame(wx.Frame):
         Finche' resta in questo stato Dadillo rifiuta di salvarlo e di
         esportarlo, per non cancellare la Hall of Fame.
         """
-        db = PlayerDB()
-        if db.load_error:
+        if self.player_db.load_error:
             wx.MessageBox(
-                f"{db.load_error}\n"
+                f"{self.player_db.load_error}\n"
                 "Fino al ripristino non registrero'\n"
                 "nuove medaglie ne' esportero'\n"
                 "il file Giocatori.txt.",
@@ -113,7 +122,7 @@ class MainFrame(wx.Frame):
 
     def resume_setup_players(self):
         existing_names = list(self.tourney.players.keys())
-        dlg2 = SetupPlayersDialog(self, existing_names)
+        dlg2 = SetupPlayersDialog(self, existing_names, db=self.player_db)
         res = dlg2.ShowModal()
 
         if res == wx.ID_OK:
@@ -359,12 +368,14 @@ class MainFrame(wx.Frame):
         self.show_standings(is_final=False)
 
     def on_filter_change(self, event):
-        self.update_lists()
+        # Si ricostruisce solo la lista del campo che e' stato modificato,
+        # non entrambe a ogni carattere digitato.
+        if event.GetEventObject() is self.txt_filter_played:
+            self.fill_played_list()
+        else:
+            self.fill_unplayed_list()
 
     def update_lists(self):
-        self.list_unplayed.Clear()
-        self.list_played.Clear()
-
         tot_unplayed = len(self.tourney.unplayed_matches)
         tot_played = len(self.tourney.played_matches)
         tot_matches = tot_unplayed + tot_played
@@ -397,27 +408,39 @@ class MainFrame(wx.Frame):
         if self.panel:
             self.panel.Layout()
 
+        self.fill_unplayed_list()
+        self.fill_played_list()
+
+    @staticmethod
+    def match_filter(text, p1, p2, filt_str):
+        """Vero se la partita passa il filtro di ricerca.
+        Con un solo termine cerca ovunque nella riga, con due nomi cerca la
+        coppia in tutti e due gli ordini, cosi' trova anche la partita di
+        ritorno con i ruoli invertiti.
+        """
+        if not filt_str:
+            return True
+        parts = filt_str.split()
+        if len(parts) == 1:
+            return parts[0] in text.lower()
+        s1, s2 = parts[0], parts[1]
+        p1_low = p1.lower()
+        p2_low = p2.lower()
+        return (s1 in p1_low and s2 in p2_low) or (s1 in p2_low and s2 in p1_low)
+
+    def fill_unplayed_list(self):
+        """Ricostruisce la sola lista delle partite da giocare."""
+        self.list_unplayed.Clear()
         filt_u = self.txt_filter_unplayed.GetValue().strip().lower()
-        filt_p = self.txt_filter_played.GetValue().strip().lower()
-
-        def match_filter(text, p1, p2, filt_str):
-            if not filt_str:
-                return True
-            parts = filt_str.split()
-            if len(parts) == 1:
-                return parts[0] in text.lower()
-            elif len(parts) >= 2:
-                s1, s2 = parts[0], parts[1]
-                p1_low = p1.lower()
-                p2_low = p2.lower()
-                return s1 in p1_low and s2 in p2_low
-            return False
-
         for m_id, (p1, p2) in sorted(self.tourney.unplayed_matches.items()):
             text = f"({m_id}) {p1} vs {p2}"
-            if match_filter(text, p1, p2, filt_u):
+            if self.match_filter(text, p1, p2, filt_u):
                 self.list_unplayed.Append(text, m_id)
 
+    def fill_played_list(self):
+        """Ricostruisce la sola lista delle partite giocate."""
+        self.list_played.Clear()
+        filt_p = self.txt_filter_played.GetValue().strip().lower()
         # Mostriamo le partite giocate in ordine inverso (l'ultima giocata in cima)
         # In Python 3.7+ i dizionari preservano l'ordine di inserimento.
         for m_id, data in reversed(list(self.tourney.played_matches.items())):
@@ -429,7 +452,7 @@ class MainFrame(wx.Frame):
             else:
                 winner = "Pareggio"
             text = f"({m_id}) {p1} vs {p2} - {winner} (Punti base: {pts})"
-            if match_filter(text, p1, p2, filt_p):
+            if self.match_filter(text, p1, p2, filt_p):
                 self.list_played.Append(text, m_id)
 
     def on_unplayed_key(self, event):
@@ -441,16 +464,19 @@ class MainFrame(wx.Frame):
     def on_match_selected(self, event):
         self.process_selected_unplayed()
 
+    def draw_split(self):
+        """Regola di ripartizione dei punti in caso di pareggio.
+        Conta quella del torneo in corso, che ogni torneo salva nel proprio
+        file; le impostazioni generali valgono solo per i tornei che non la
+        hanno registrata.
+        """
+        return getattr(self.tourney, "draw_points_split", None) or getattr(
+            self.settings, "draw_points_split", "Inserimento Manuale"
+        )
+
     def _get_draw_points(self, pts):
-        if self.settings.draw_points_split == "Metà ciascuno":
-            return pts / 2.0, pts / 2.0
-        elif self.settings.draw_points_split == "Nessun Punto":
-            return 0, 0
-        elif self.settings.draw_points_split == "Punti Pieni a Entrambi":
-            return pts, pts
-        else:
-            # Inserimento Manuale: usiamo il valore immesso come punti per ciascuno per ora
-            return pts, pts
+        # Regola unica, condivisa con la classifica: vedi split_match_points.
+        return split_match_points("3", pts, self.draw_split())
 
     def process_selected_unplayed(self):
         sel = self.list_unplayed.GetSelection()
@@ -643,10 +669,7 @@ class MainFrame(wx.Frame):
                 )
                 if self.tourney.comment:
                     f.write(f"Note: {self.tourney.comment}\n")
-                f.write("-" * 50 + "\n")
-                f.write(
-                    f"Lista partite NON GIOCATE ({tot_unplayed} su {tot_matches}):\n\n"
-                )
+                f.write(f"Partite non giocate: {tot_unplayed} su {tot_matches}.\n")
 
                 f.writelines(
                     f"({m_id}) {p1} vs {p2}\n"
@@ -687,8 +710,7 @@ class MainFrame(wx.Frame):
                 )
                 if self.tourney.comment:
                     f.write(f"Note: {self.tourney.comment}\n")
-                f.write("-" * 50 + "\n")
-                f.write(f"Lista partite GIOCATE ({tot_played} su {tot_matches}):\n\n")
+                f.write(f"Partite giocate: {tot_played} su {tot_matches}.\n")
 
                 for m_id, data in reversed(list(self.tourney.played_matches.items())):
                     p1, p2, res, pts = data[:4]
@@ -714,8 +736,7 @@ class MainFrame(wx.Frame):
 
     def on_menu_exit(self, event):
         save_or_warn(self.tourney.save, self)
-        db = PlayerDB()
-        save_or_warn(db.export_to_txt, self)
+        save_or_warn(self.player_db.export_to_txt, self)
         self.Close()
 
     def on_menu_merge_db(self, event):
@@ -738,8 +759,7 @@ class MainFrame(wx.Frame):
                 dlg.Destroy()
                 return is_same, chosen
 
-            db = PlayerDB()
-            _success, log = db.merge_db(
+            _success, log = self.player_db.merge_db(
                 pathname, interactive_resolver=interactive_resolver
             )
 
@@ -858,12 +878,8 @@ class MainFrame(wx.Frame):
                     self.tourney.players[opp][1] += 1
 
                     p1, p2 = self.tourney.unplayed_matches[m_id]
-                    self.tourney.played_matches[m_id] = [
-                        p1,
-                        p2,
-                        res,
-                        0,
-                    ]  # 0 punti a tavolino
+                    # Record completo fin da subito: 0 punti a tavolino
+                    self.tourney.played_matches[m_id] = [p1, p2, res, 0, 0, 0]
                     del self.tourney.unplayed_matches[m_id]
 
                 # Rimuovi il giocatore dalle statistiche (non apparirà più in classifica)
@@ -892,30 +908,41 @@ class MainFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             self.settings = dlg.get_settings()
             save_or_warn(self.settings.save, self)
-            if hasattr(self, "tourney") and self.tourney and self.tourney.title:
-                self.tourney.main_criterion = self.settings.main_criterion
-                self.tourney.score_direction = getattr(
-                    self.settings, "score_direction", "Alto"
+            # Le nuove regole valgono di sicuro per i tornei futuri. Applicarle
+            # al torneo in corso cambia la classifica gia' consultata, quindi
+            # va chiesto invece di farlo in silenzio.
+            if self.tourney and self.tourney.title:
+                risposta = wx.MessageBox(
+                    "Le nuove regole valgono per i\n"
+                    "prossimi tornei. Vuoi applicarle\n"
+                    f"anche al torneo in corso,\n{self.tourney.title}?\n"
+                    "La classifica potrebbe cambiare.",
+                    "Regole del torneo in corso",
+                    wx.YES_NO | wx.ICON_QUESTION,
                 )
-                self.tourney.tiebreaker_1 = self.settings.tiebreaker_1
-                self.tourney.tiebreaker_2 = self.settings.tiebreaker_2
-                self.tourney.draw_points_split = self.settings.draw_points_split
-                save_or_warn(self.tourney.save, self)
+                if risposta == wx.YES:
+                    self.tourney.main_criterion = self.settings.main_criterion
+                    self.tourney.score_direction = getattr(
+                        self.settings, "score_direction", "Alto"
+                    )
+                    self.tourney.tiebreaker_1 = self.settings.tiebreaker_1
+                    self.tourney.tiebreaker_2 = self.settings.tiebreaker_2
+                    self.tourney.draw_points_split = self.settings.draw_points_split
+                    save_or_warn(self.tourney.save, self)
         dlg.Destroy()
 
     def on_menu_manage_db(self, event):
-        dlg = ManagePlayersDialog(self)
+        dlg = ManagePlayersDialog(self, db=self.player_db)
         dlg.ShowModal()
         dlg.Destroy()
 
     def on_menu_hof(self, event):
-        dlg = HallOfFameDialog(self)
+        dlg = HallOfFameDialog(self, db=self.player_db)
         dlg.ShowModal()
         dlg.Destroy()
 
     def on_menu_export_hof(self, event):
-        db = PlayerDB()
-        if save_or_warn(db.export_to_txt, self):
+        if save_or_warn(self.player_db.export_to_txt, self):
             wx.MessageBox(
                 "File Giocatori.txt esportato con successo!",
                 "Esportazione Completata",

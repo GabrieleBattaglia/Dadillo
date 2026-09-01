@@ -73,5 +73,44 @@ Prova 16, copia di sicurezza automatica
 Gioca almeno due partite in un torneo, poi guarda nella cartella di Dadillo.
 Cosa osservare: se accanto a Dadillo.json compare Dadillo.json.bak con la versione precedente, e se dopo qualche salvataggio non restano file temporanei che iniziano con un punto seguito da dadillo.
 Esito: da eseguire.
+Prove sulle correzioni del blocco 3, versione 2.8.3
+Nota: le prove da 1 a 4, scritte per verificare i difetti, servono ora a confermare che le correzioni funzionino davvero. Rileggile con la nuova versione.
+Prova 17, lettura della classifica riscritta
+Apri la classifica di un torneo con Ctrl+L e leggila tutta, prima in lettura continua e poi riga per riga con le frecce.
+Cosa osservare: ogni giocatore occupa due righe, la prima con posizione, nome, medaglia e punti, la seconda con giocate, vinte, pari e perse. Dimmi se preferisci una riga sola per giocatore, anche se piu' lunga, oppure se vanno bene due righe. Verifica anche che non compaiano piu' sequenze di trattini, righe vuote o emoji, e che la riga della durata sia chiara.
+Esito: da eseguire.
+Prova 18, Hall of Fame e file Giocatori.txt
+Apri Giocatori, Classifica Generale e leggi le prime voci. Poi apri il file Giocatori.txt e leggilo.
+Cosa osservare: nella finestra ogni discepolo occupa tre righe brevi, nome, medagliere e tornei con media. Nel file di testo non ci sono piu' righe vuote fra un discepolo e l'altro. Le righe dello storico tornei restano lunghe, perche' contengono titolo e due date: dimmi se vuoi che le spezzi su due righe, cosa che comporta cambiare il formato con cui lo storico viene salvato.
+Esito: da eseguire.
+Prova 19, messaggi dei dialoghi
+Fai comparire almeno due fra questi messaggi: fine torneo con scelta della modalita' di premiazione, conferma di eliminazione di un discepolo dal database, richiesta di somiglianza fra nickname durante l'unione dei database.
+Cosa osservare: se il testo e' leggibile senza pause strane, se le righe sono di lunghezza comoda anche sul display braille e se manca qualche informazione che prima c'era.
+Esito: da eseguire.
+Prove sulle correzioni dei blocchi 4 e 5, versione 2.8.4
+Prova 20, ricerca della coppia di nomi
+Nella finestra principale, nel campo Cerca non giocate, scrivi due nomi separati da spazio, per esempio anna bruno, poi riprova invertendoli, bruno anna.
+Cosa osservare: in entrambi i casi devono comparire sia l'andata sia il ritorno fra quei due giocatori. Se preferivi il comportamento di prima, in cui contava l'ordine, dimmelo e lo riporto indietro.
+Esito: da eseguire.
+Prova 21, compilazione dell'eseguibile
+Compila come da istruzioni in docs, Compilazione e invio release, e prova l'eseguibile su una macchina o cartella pulita.
+Cosa osservare: se l'applicazione parte, se trova gli archivi accanto all'eseguibile e se il controllo aggiornamenti funziona, cioe' se non compaiono errori legati a requests o ai certificati. Questa prova verifica il rilievo 9, sugli hiddenimports rimessi nel file di build.
+Esito: da eseguire.
+Prova 22, regole del torneo in corso
+Con un torneo avviato, apri Opzioni, Regole Torneo, cambia qualcosa e conferma.
+Cosa osservare: deve comparire la domanda se applicare le nuove regole anche al torneo in corso. Rispondendo di no, la classifica del torneo attuale non deve cambiare; rispondendo di si', deve cambiare di conseguenza.
+Esito: da eseguire.
+Prova 23, parita' non risolta
+Prepara un torneo in cui due giocatori chiudano identici in tutto e imposta i due spareggi su Nessuno, poi apri la classifica e avvia la premiazione.
+Cosa osservare: sotto i due giocatori deve comparire la riga che segnala il pari merito, e prima della premiazione deve arrivare la richiesta di conferma che avvisa che le medaglie verrebbero assegnate in ordine alfabetico.
+Esito: da eseguire.
+Prova 24, gestione discepoli e Hall of Fame insieme
+Apri Giocatori, Gestione Giocatori DB, rinomina un discepolo e chiudi. Subito dopo apri Giocatori, Classifica Generale.
+Cosa osservare: il nome nuovo deve comparire subito nella classifica generale. Prima le due finestre lavoravano su copie separate dell'archivio.
+Esito: da eseguire.
+Prova 25, controllo generale dopo la pulizia
+Fai un giro completo dell'applicazione: nuovo torneo, inserimento discepoli, qualche partita, annullamento di una partita, classifica parziale, salvataggio delle liste, uscita e riapertura.
+Cosa osservare: qualunque comportamento diverso da quello atteso, messaggi poco chiari o passaggi che ti sembrano peggiorati rispetto a prima. Questa e' la prova che vale piu' di tutte, perche' i blocchi 4 e 5 hanno toccato molti punti del programma.
+Esito: da eseguire.
 Osservazioni libere di Gabriele
 Scrivi qui sotto qualunque altro comportamento anomalo, fastidio nella lettura con NVDA o richiesta di modifica emersi durante le prove.

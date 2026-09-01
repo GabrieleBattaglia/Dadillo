@@ -1,12 +1,20 @@
+"""Finestre di dialogo di Dadillo, pensate per la navigazione da tastiera
+e per la lettura con screen reader.
+Autori: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto.
+"""
+
 import wx
+
 from data import (
     DRAW_SPLITS,
     MAIN_CRITERIA,
     TIEBREAKERS_1,
     TIEBREAKERS_2,
+    PlayerDB,
     format_date_extended,
     normalize_choice,
     normalize_main_criterion,
+    placement_stats,
 )
 from ui_utils import save_or_warn
 
@@ -189,7 +197,7 @@ class SetupTournamentDialog(wx.Dialog):
 
 
 class SetupPlayersDialog(wx.Dialog):
-    def __init__(self, parent, existing_players=None):
+    def __init__(self, parent, existing_players=None, db=None):
         super().__init__(parent, title="Raduna i Tuoi Discepoli", size=(500, 650))
 
         self.players = existing_players[:] if existing_players else []
@@ -204,9 +212,7 @@ class SetupPlayersDialog(wx.Dialog):
         vbox.Add(msg, 0, wx.ALL | wx.EXPAND, 10)
 
         # Listbox per i giocatori del DB
-        from data import PlayerDB
-
-        self.db = PlayerDB()
+        self.db = db if db is not None else PlayerDB()
         self.all_db_players = sorted(self.db.players.keys())
         db_players = [p for p in self.all_db_players if p not in self.players]
 
@@ -312,7 +318,10 @@ class SetupPlayersDialog(wx.Dialog):
             return
         if len(name) < 3:
             wx.MessageBox(
-                "Oh insondabile pozzo di saggezza, un nome di sole 2 lettere è un insulto alla tua grandezza! Servono almeno 3 caratteri.",
+                "Oh insondabile pozzo di saggezza,\n"
+                "un nome così corto è un insulto\n"
+                "alla tua grandezza!\n"
+                "Servono almeno 3 caratteri.",
                 "Nome troppo corto",
                 wx.OK | wx.ICON_WARNING,
             )
@@ -342,8 +351,10 @@ class SetupPlayersDialog(wx.Dialog):
                     self.list_db_players.SetSelection(new_sel)
                 break
 
-        wx.CallLater(300, self.list_players.SetFocus)
-        wx.CallLater(600, self.txt_player.SetFocus)
+        # Il focus resta nel campo del nome, pronto per il discepolo successivo.
+        # I due spostamenti temporizzati di prima producevano due annunci
+        # sovrapposti dello screen reader e potevano rubare i primi caratteri.
+        self.txt_player.SetFocus()
 
     def on_key_down(self, event):
         if event.GetKeyCode() == wx.WXK_DELETE:
@@ -370,8 +381,13 @@ class SetupPlayersDialog(wx.Dialog):
                         except ValueError:
                             pass
 
-                wx.CallLater(300, self.list_players.SetFocus)
-                wx.CallLater(600, self.txt_player.SetFocus)
+                # Il focus resta nell'elenco dei partecipanti, sulla voce che
+                # ha preso il posto di quella soppressa, cosi' si puo'
+                # continuare a cancellare senza cercare di nuovo la lista.
+                rimasti = self.list_players.GetCount()
+                if rimasti > 0:
+                    self.list_players.SetSelection(min(sel, rimasti - 1))
+                self.list_players.SetFocus()
         else:
             event.Skip()
 
@@ -579,6 +595,7 @@ class AddPlayerDialog(wx.Dialog):
     def __init__(self, parent, existing_players):
         super().__init__(parent, title="Nuova Carne da Macello", size=(400, 200))
         self.existing_players = existing_players
+        self.new_name = ""
 
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -604,25 +621,34 @@ class AddPlayerDialog(wx.Dialog):
         panel.SetSizer(vbox)
 
     def on_enter(self, event):
-        event_ok = wx.CommandEvent(wx.wxEVT_BUTTON, wx.ID_OK)
-        self.ProcessEvent(event_ok)
+        # Invio e pulsante devono passare per la stessa validazione: prima
+        # l'evento veniva girato al dialogo, che poteva chiudersi saltandola.
+        self._conferma()
 
     def on_ok(self, event):
+        self._conferma()
+
+    def _conferma(self):
+        """Valida il nome e chiude il dialogo solo se e' accettabile."""
         name = self.txt_player.GetValue().strip()
         if len(name) < 3:
             wx.MessageBox(
-                "Troppo corto! Almeno 3 caratteri.", "Errore", wx.OK | wx.ICON_WARNING
+                "Nome troppo corto: servono almeno\n3 caratteri.",
+                "Errore",
+                wx.OK | wx.ICON_WARNING,
             )
             self.txt_player.SelectAll()
+            self.txt_player.SetFocus()
             return
         if name in self.existing_players:
             wx.MessageBox(
                 "Questo discepolo è già tra noi.", "Errore", wx.OK | wx.ICON_WARNING
             )
             self.txt_player.SelectAll()
+            self.txt_player.SetFocus()
             return
         self.new_name = name
-        event.Skip()
+        self.EndModal(wx.ID_OK)
 
 
 class RetirePlayerDialog(wx.Dialog):
@@ -661,12 +687,15 @@ class TournamentFinalReviewChoiceDialog(wx.Dialog):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         msg_text = (
-            "Oh mio insigne monarca!\n\n"
-            "L'ultimo dado è stato tratto e tutte le sfide sono concluse. "
-            "Prima di incidere definitivamente le medaglie e i piazzamenti nella Hall of Fame, "
-            "come desideri procedere?\n\n"
-            "• 'Uno per uno': revisiona ogni discepolo singolarmente, potendo decidere se aggiornarlo o saltarlo.\n"
-            "• 'Tutti in massa': immortala tutti i partecipanti all'istante senza ulteriori indugi."
+            "Oh mio insigne monarca!\n"
+            "L'ultimo dado è stato tratto e tutte\n"
+            "le sfide sono concluse. Prima di\n"
+            "incidere medaglie e piazzamenti nella\n"
+            "Hall of Fame, come devo procedere?\n"
+            "Uno per uno: revisiona ogni discepolo\n"
+            "e decidi se aggiornarlo o saltarlo.\n"
+            "Tutti in massa: immortala subito\n"
+            "tutti i partecipanti."
         )
 
         self.txt_msg = wx.TextCtrl(
@@ -689,7 +718,9 @@ class TournamentFinalReviewChoiceDialog(wx.Dialog):
         self.btn_individual.Bind(wx.EVT_BUTTON, self.on_individual)
         self.btn_mass.Bind(wx.EVT_BUTTON, self.on_mass)
 
-        self.choice = "mass"
+        # Nessuna scelta predefinita: chiudere la finestra con Esc deve
+        # annullare la premiazione, non farla partire in massa.
+        self.choice = None
         wx.CallAfter(self.txt_msg.SetFocus)
 
     def on_individual(self, event):
@@ -711,6 +742,7 @@ class SinglePlayerReviewDialog(wx.Dialog):
         tourney_title,
         start_date,
         end_date,
+        tied_with=None,
     ):
         super().__init__(
             parent, title=f"Aggiornamento Discepolo: {player_name}", size=(500, 320)
@@ -726,9 +758,14 @@ class SinglePlayerReviewDialog(wx.Dialog):
             f"Discepolo: {player_name}\n"
             f"Posizione ufficiale: {position}° posto{med_text}\n"
             f"Torneo: {tourney_title}\n"
-            f"Date: {s_fmt} - {e_fmt}\n\n"
-            "Confermi l'immolazione di questo piazzamento nella sacra Hall of Fame?"
+            f"Date: {s_fmt} - {e_fmt}\n"
         )
+        if tied_with:
+            msg_text += (
+                f"Attenzione: a pari merito con\n{', '.join(tied_with)}.\n"
+                "La posizione dipende dall'ordine\nalfabetico.\n"
+            )
+        msg_text += "Confermi questo piazzamento nella\nsacra Hall of Fame?"
 
         self.txt_msg = wx.TextCtrl(
             panel, value=msg_text, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH
@@ -760,10 +797,12 @@ class MergeSimilarPlayerDialog(wx.Dialog):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         msg_text = (
-            "Mio onnisciente sovrano!\n\n"
-            f"Nel file importato ho scovato il discepolo '{ext_name}', che somiglia "
-            f"sospettosamente al seguace già registrato '{local_name}'.\n\n"
-            "Si tratta della stessa persona in carne, ossa e dadi?"
+            "Mio onnisciente sovrano!\n"
+            "Nel file importato ho scovato il\n"
+            f"discepolo {ext_name}, che somiglia\n"
+            f"al seguace già registrato {local_name}.\n"
+            "Si tratta della stessa persona\n"
+            "in carne, ossa e dadi?"
         )
 
         self.txt_msg = wx.TextCtrl(
@@ -798,10 +837,9 @@ class MergeSimilarPlayerDialog(wx.Dialog):
         sel = self.rb_choices.GetSelection()
         if sel == 0:
             return True, self.local_name
-        elif sel == 1:
+        if sel == 1:
             return True, self.ext_name
-        else:
-            return False, self.ext_name
+        return False, self.ext_name
 
 
 class UpdatePlayerDialog(wx.Dialog):
@@ -812,7 +850,7 @@ class UpdatePlayerDialog(wx.Dialog):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         msg_text = (
-            f"Il formidabile {player_name} è già presente negli archivi sacri.\n\n"
+            f"Il formidabile {player_name} è già\npresente negli archivi sacri.\n"
             f"Vuoi aggiornare il suo storico e il suo medagliere con il risultato di questo torneo (Posizione {position})?"
         )
 
@@ -852,17 +890,14 @@ class PlayerDetailsDialog(wx.Dialog):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         m = p_data["medals"]
-        num_tornei = len(p_data["history"])
-        media = p_data.get("placements_sum", 0) / num_tornei if num_tornei > 0 else 0
+        num_tornei, _, media_testo = placement_stats(p_data)
 
         lines = []
         lines.append(f"Giocatore: {name}")
-        lines.append(
-            f"Medagliere: Oro {m['oro']}, Argento {m['argento']}, Bronzo {m['bronzo']}, Legno {m['legno']}"
-        )
-        lines.append(f"Media Piazzamenti: {media:.2f} (Tornei giocati: {num_tornei})")
-        lines.append("")
-        lines.append("Storico Tornei:")
+        lines.append(f"Medagliere: ori {m['oro']}, argenti {m['argento']},")
+        lines.append(f"  bronzi {m['bronzo']}, legni {m['legno']}.")
+        lines.append(f"Media piazzamenti {media_testo}, tornei {num_tornei}.")
+        lines.append("Storico tornei:")
         for h in p_data["history"]:
             lines.append(f"  {h}")
 
@@ -879,13 +914,13 @@ class PlayerDetailsDialog(wx.Dialog):
 
 
 class ManagePlayersDialog(wx.Dialog):
-    def __init__(self, parent):
+    def __init__(self, parent, db=None):
         super().__init__(parent, title="Gestione Discepoli", size=(550, 480))
         self.parent = parent
 
-        from data import PlayerDB
-
-        self.db = PlayerDB()
+        # L'archivio arriva dalla finestra principale: una sola copia in memoria,
+        # cosi' una rinomina qui si vede subito anche nelle altre finestre.
+        self.db = db if db is not None else PlayerDB()
 
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -1006,14 +1041,6 @@ class ManagePlayersDialog(wx.Dialog):
                             m_data[1] = new_name
                             tourney_changed = True
 
-                    # Rename in records_high / records_low
-                    if main_frame.tourney.records_high[0] == old_name:
-                        main_frame.tourney.records_high[0] = new_name
-                        tourney_changed = True
-                    if main_frame.tourney.records_low[0] == old_name:
-                        main_frame.tourney.records_low[0] = new_name
-                        tourney_changed = True
-
                     if tourney_changed:
                         save_or_warn(main_frame.tourney.save, self)
                         if hasattr(main_frame, "panel") and main_frame.panel:
@@ -1035,7 +1062,9 @@ class ManagePlayersDialog(wx.Dialog):
         name = self.list_players.GetString(sel)
         dlg = wx.MessageDialog(
             self,
-            f"Sei sicuro di voler eliminare definitivamente {name} e tutto il suo storico dal database?\nQuesta azione non può essere annullata.",
+            f"Sei sicuro di voler eliminare {name}\n"
+            "e tutto il suo storico dal database?\n"
+            "L'azione non può essere annullata.",
             "Conferma Eliminazione",
             wx.YES_NO | wx.ICON_WARNING,
         )
@@ -1054,14 +1083,12 @@ class ManagePlayersDialog(wx.Dialog):
 
 
 class HallOfFameDialog(wx.Dialog):
-    def __init__(self, parent):
+    def __init__(self, parent, db=None):
         super().__init__(
             parent, title="Classifica Generale (Hall of Fame)", size=(700, 550)
         )
 
-        from data import PlayerDB
-
-        self.db = PlayerDB()
+        self.db = db if db is not None else PlayerDB()
 
         panel = wx.Panel(self)
         main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -1120,10 +1147,7 @@ class HallOfFameDialog(wx.Dialog):
         flat = []
         for name, p_data in self.db.players.items():
             m = p_data["medals"]
-            num_tornei = len(p_data["history"])
-            media = (
-                p_data.get("placements_sum", 0) / num_tornei if num_tornei > 0 else 0
-            )
+            num_tornei, media, media_testo = placement_stats(p_data)
 
             flat.append(
                 {
@@ -1134,6 +1158,7 @@ class HallOfFameDialog(wx.Dialog):
                     "legno": m["legno"],
                     "tornei": num_tornei,
                     "media": media,
+                    "media_testo": media_testo,
                 }
             )
 
@@ -1178,21 +1203,20 @@ class HallOfFameDialog(wx.Dialog):
         flat.sort(key=functools.cmp_to_key(compare_hof), reverse=reverse)
 
         lines = []
-        lines.append("CLASSIFICA GENERALE (HALL OF FAME)")
-        lines.append("-" * 75)
-        lines.append(
-            f"{'Pos':<4} | {'Giocatore':<18} | {'Ori':<4} | {'Arg':<4} | {'Bro':<4} | {'Leg':<4} | {'Tornei':<6} | {'Media Piazz.':<12}"
-        )
-        lines.append("-" * 75)
+        lines.append("Classifica generale, Hall of Fame")
+        lines.append(f"Ordinata per {order_by}, {len(flat)} discepoli")
 
+        # Due righe corte per discepolo, con l'etichetta accanto a ogni numero:
+        # la tabella a colonne rendeva il significato dipendente dalla posizione.
         for idx, row in enumerate(flat):
-            if reverse:
-                pos = idx + 1
-            else:
-                pos = len(flat) - idx
+            pos = idx + 1 if reverse else len(flat) - idx
+            lines.append(f"{pos}. {row['name']}.")
             lines.append(
-                f"{pos:<4} | {row['name']:<18} | {row['oro']:<4} | {row['argento']:<4} | {row['bronzo']:<4} | {row['legno']:<4} | {row['tornei']:<6} | {row['media']:.2f}"
+                f"  Ori {row['oro']}, argenti {row['argento']}, "
+                f"bronzi {row['bronzo']}, legni {row['legno']}."
+            )
+            lines.append(
+                f"  Tornei {row['tornei']}, media piazzamenti {row['media_testo']}."
             )
 
-        lines.append("-" * 75)
         self.txt_display.SetValue("\n".join(lines))

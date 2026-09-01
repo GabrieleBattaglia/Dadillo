@@ -1,6 +1,11 @@
+"""Calcolo della classifica, schermata delle classifiche e premiazione.
+Autori: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto.
+"""
+
 import contextlib
 
 import wx
+
 from data import (
     MAIN_CRITERIA,
     RANKING_VIEWS,
@@ -10,23 +15,27 @@ from data import (
     normalize_main_criterion,
     now_local,
     parse_timestamp,
+    split_match_points,
 )
 from ui_utils import save_or_warn
 
 
-def _extract_match_details(data):
-    """Estrae (p1, p2, res, pt1, pt2) da un record partita, gestendo sia 4 che 6+ elementi."""
+def _extract_match_details(data, draw_split="Metà ciascuno"):
+    """Estrae (p1, p2, res, pt1, pt2) da un record partita, gestendo sia 4 che 6+ elementi.
+    Per i record del vecchio formato la ricostruzione dei punti passa da
+    split_match_points, la stessa regola usata dal resto del programma.
+    """
     if len(data) >= 6:
         mn1, mn2, mres, _, pt1, pt2 = data[:6]
     else:
         mn1, mn2, mres, mpts = data[:4]
-        if mres == "1":
-            pt1, pt2 = mpts, 0
-        elif mres == "2":
-            pt1, pt2 = 0, mpts
-        else:
-            pt1, pt2 = mpts / 2.0, mpts / 2.0
+        pt1, pt2 = split_match_points(mres, mpts, draw_split)
     return mn1, mn2, mres, pt1, pt2
+
+
+# Nomi delle medaglie in solo testo: le emoji venivano annunciate in modo
+# diverso a seconda della versione dello screen reader e delle sue impostazioni.
+MEDAL_NAMES = {1: "oro", 2: "argento", 3: "bronzo", 4: "legno"}
 
 
 def calculate_streaks(active_players, played_matches):
@@ -62,13 +71,15 @@ def calculate_streaks(active_players, played_matches):
     return {nome: valore for nome, valore in strikes.items() if nome in active_players}
 
 
-def _calculate_mini_league_stats(group_names, played_matches):
+def _calculate_mini_league_stats(
+    group_names, played_matches, draw_split="Metà ciascuno"
+):
     """Calcola punti e vittorie nel mini-girone per i soli giocatori del gruppo specificato."""
-    mini_pts = {name: 0.0 for name in group_names}
-    mini_wins = {name: 0 for name in group_names}
+    mini_pts = dict.fromkeys(group_names, 0.0)
+    mini_wins = dict.fromkeys(group_names, 0)
 
     for data in played_matches.values():
-        mn1, mn2, mres, pt1, pt2 = _extract_match_details(data)
+        mn1, mn2, mres, pt1, pt2 = _extract_match_details(data, draw_split)
         if mn1 in group_names and mn2 in group_names:
             mini_pts[mn1] += pt1
             mini_pts[mn2] += pt2
@@ -89,12 +100,13 @@ def rank_tournament_players(
     tiebreaker_2="Punti Totali",
     unplayed_matches=None,
     reverse=True,
+    draw_points_split="Metà ciascuno",
 ):
     """
     Ordina i giocatori di un torneo con il metodo a gruppi e sottogruppi ricorsivi (classifica avulsa).
     Risolve correttamente le parità a 2, 3 o più giocatori secondo le regole impostate.
     """
-    unplayed_counts = {name: 0 for name in players_dict}
+    unplayed_counts = dict.fromkeys(players_dict, 0)
     if unplayed_matches:
         for p1, p2 in unplayed_matches.values():
             if p1 in unplayed_counts:
@@ -106,7 +118,6 @@ def rank_tournament_players(
     for name, stats in players_dict.items():
         played = stats[1] + stats[2] + stats[3]
         total = played + unplayed_counts.get(name, 0)
-        played_str = f"{played}/{total}"
         all_players.append(
             {
                 "name": name,
@@ -114,7 +125,8 @@ def rank_tournament_players(
                 "wins": stats[1],
                 "draws": stats[2],
                 "losses": stats[3],
-                "played_str": played_str,
+                "played": played,
+                "total": total,
             }
         )
 
@@ -131,7 +143,7 @@ def rank_tournament_players(
             if tiebreaker_1 != "Nessuno":
                 sub_names = {p["name"] for p in sub}
                 mini_pts, mini_wins = _calculate_mini_league_stats(
-                    sub_names, played_matches
+                    sub_names, played_matches, draw_points_split
                 )
 
                 mini_subgroups = {}
@@ -163,12 +175,10 @@ def rank_tournament_players(
                                 )
                             )
                     return res
-                else:
-                    return _resolve_subgroup(sub, current_tie_stage="tie2")
-            else:
                 return _resolve_subgroup(sub, current_tie_stage="tie2")
+            return _resolve_subgroup(sub, current_tie_stage="tie2")
 
-        elif current_tie_stage == "tie2":
+        if current_tie_stage == "tie2":
             if tiebreaker_2 != "Nessuno":
                 tie2_scores = {}
                 for p in sub:
@@ -206,13 +216,18 @@ def rank_tournament_players(
                                 )
                             )
                     return res
-                else:
-                    return _resolve_subgroup(sub, current_tie_stage="fallback")
-            else:
                 return _resolve_subgroup(sub, current_tie_stage="fallback")
+            return _resolve_subgroup(sub, current_tie_stage="fallback")
 
-        else:
-            return sorted(sub, key=lambda p: p["name"].lower())
+        # Parita' che nessuno spareggio ha saputo sciogliere: l'ordine e'
+        # alfabetico, quindi va detto, perche' altrimenti una medaglia
+        # verrebbe assegnata dal nome e nessuno se ne accorgerebbe.
+        gruppo = sorted(sub, key=lambda p: p["name"].lower())
+        if len(gruppo) > 1:
+            nomi = [p["name"] for p in gruppo]
+            for p in gruppo:
+                p["tied_with"] = [n for n in nomi if n != p["name"]]
+        return gruppo
 
     # Raggruppamento per Criterio Principale
     main_subgroups = {}
@@ -383,6 +398,15 @@ class StandingsPanel(wx.Panel):
         # Forza il focus per lo screen reader
         wx.CallAfter(self.txt_display.SetFocus)
 
+    def draw_split(self):
+        """Regola di ripartizione dei punti in caso di pareggio.
+        Vale quella del torneo, che ogni torneo salva nel proprio file; le
+        impostazioni generali servono solo ai tornei che non la hanno.
+        """
+        return getattr(self.tourney, "draw_points_split", None) or getattr(
+            self.settings, "draw_points_split", "Inserimento Manuale"
+        )
+
     def on_update(self, event):
         order_sel = self.cb_order.GetStringSelection()
         if order_sel in ["Vittorie", "Punti"]:
@@ -413,11 +437,12 @@ class StandingsPanel(wx.Panel):
             tiebreaker_2=tiebreaker_2,
             unplayed_matches=self.tourney.unplayed_matches,
             reverse=reverse,
+            draw_points_split=self.draw_split(),
         )
         lines = []
         lines.append(f"Torneo: {self.tourney.title}")
-        lines.append(f"Editto Divino: {self.tourney.comment}")
-        lines.append("")
+        if self.tourney.comment:
+            lines.append(f"Editto Divino: {self.tourney.comment}")
 
         start = self.tourney.start_date
         end = self.tourney.end_date if self.tourney.end_date else "In corso"
@@ -453,27 +478,15 @@ class StandingsPanel(wx.Panel):
                 dur_str += " (Provvisoria)"
             lines.append(f"Durata complessiva: {dur_str}")
 
-        lines.append("")
-        lines.append("-" * 60)
-        header_text = "CLASSIFICA FINALE" if self.is_final else "CLASSIFICA PARZIALE"
+        header_text = "Classifica finale" if self.is_final else "Classifica parziale"
         lines.append(header_text)
-        lines.append("-" * 60)
 
-        medals = ["🥇 ORO", "🥈 ARGENTO", "🥉 BRONZO", "🪵 LEGNO (4° posto)"]
-
-        # Intestazione colonne
-        lines.append(
-            f"{'Pos':<4} | {'Giocatore':<18} | {'Gio/Tot':<7} | {'Punti':<6} | {'Vit':<4} | {'Par':<4} | {'Sco':<4} | Medaglia"
-        )
-        lines.append("-" * 85)
-
+        # Ogni giocatore occupa due righe corte, con l'etichetta accanto al dato:
+        # niente colonne allineate, il cui significato dipenderebbe dalla posizione.
         for idx, row in enumerate(flat):
-            if reverse:
-                pos = idx + 1
-            else:
-                pos = len(flat) - idx
+            pos = idx + 1 if reverse else len(flat) - idx
 
-            med_str = medals[pos - 1] if (pos - 1) < len(medals) else ""
+            med_str = MEDAL_NAMES.get(pos, "")
 
             # Formattazione punti senza .0 se intero
             p_val = row["points"]
@@ -482,13 +495,23 @@ class StandingsPanel(wx.Panel):
             else:
                 p_str = f"{p_val:.1f}"
 
+            prima = f"{pos}. {row['name']}"
+            if med_str:
+                prima += f", {med_str}"
+            prima += f". Punti {p_str}."
+            lines.append(prima)
             lines.append(
-                f"{pos:<4} | {row['name']:<18} | {row['played_str']:<7} | {p_str:<6} | {row['wins']:<4} | {row['draws']:<4} | {row['losses']:<4} | {med_str}"
+                f"  Giocate {row['played']} su {row['total']}, "
+                f"vinte {row['wins']}, pari {row['draws']}, "
+                f"perse {row['losses']}."
             )
+            if row.get("tied_with"):
+                lines.append(
+                    f"  A pari merito con {', '.join(row['tied_with'])}:"
+                    " ordine alfabetico."
+                )
 
-        lines.append("-" * 85)
-        lines.append("")
-        lines.append("STATISTICHE E RECORD")
+        lines.append("Statistiche e record")
 
         if not self.tourney.played_matches:
             lines.append("Nessuna partita ancora giocata.")
@@ -511,8 +534,8 @@ class StandingsPanel(wx.Panel):
                 elif mres == "2":
                     winner = mn2
                 else:
-                    winner = f"{mn1} (Pareggio) {mn2}"
-                desc = f"{winner} in ({m_id}) {mn1} vs {mn2}"
+                    winner = f"pareggio fra {mn1} e {mn2}"
+                desc = f"{winner}, partita {m_id}, {mn1} contro {mn2}"
 
                 if mpts > recalto_val:
                     recalto_val = mpts
@@ -533,13 +556,18 @@ class StandingsPanel(wx.Panel):
                     else str(p)
                 )
 
-            lines.append(f"Punteggio più alto: {fmt_pts(recalto_val)} punti.")
-            for d in recalto_list:
-                lines.append(f"  - {d}")
+            def punti(valore):
+                """Numero seguito da punto o punti, per una lettura corretta."""
+                testo = fmt_pts(valore)
+                return f"{testo} punto" if testo == "1" else f"{testo} punti"
 
-            lines.append(f"Punteggio più basso: {fmt_pts(recbasso_val)} punti.")
+            lines.append(f"Punteggio più alto: {punti(recalto_val)}.")
+            for d in recalto_list:
+                lines.append(f"  {d}")
+
+            lines.append(f"Punteggio più basso: {punti(recbasso_val)}.")
             for d in recbasso_list:
-                lines.append(f"  - {d}")
+                lines.append(f"  {d}")
 
             max_strike = max(strikes.values()) if strikes else 0
             if max_strike > 1:
@@ -569,10 +597,9 @@ class StandingsPanel(wx.Panel):
             win_pts = []
             draw_pts = []
 
-            sorted_items = sorted(
-                self.tourney.played_matches.items(), key=lambda x: int(x[0])
-            )
-            for m_id, data in sorted_items:
+            # Le chiavi sono gia' numeriche: basta ordinarle
+            sorted_items = sorted(self.tourney.played_matches.items())
+            for _m_id, data in sorted_items:
                 mres = data[2]
                 mpts = data[3]
                 val = float(mpts)
@@ -587,8 +614,7 @@ class StandingsPanel(wx.Panel):
                     draw_pts.append(val)
 
             if all_pts:
-                lines.append("")
-                lines.append("ALTRE STATISTICHE SUI PUNTEGGI ASSEGNATI")
+                lines.append("Altre statistiche sui punteggi assegnati")
 
                 somma_totale = sum(all_pts)
                 lines.append(
@@ -609,12 +635,12 @@ class StandingsPanel(wx.Panel):
                 med = statistics.median(all_pts)
                 med_high = statistics.median_high(all_pts)
                 lines.append(
-                    f"Mediane: bassa {med_low:+.2f}, media {med:+.2f}, alta {med_high:+.2f}."
+                    f"Mediane: bassa {med_low:.2f}, media {med:.2f}, alta {med_high:.2f}."
                 )
 
                 try:
                     mode_val = statistics.mode(all_pts)
-                    lines.append(f"Moda: {mode_val:+.2f}.")
+                    lines.append(f"Moda: {mode_val:.2f}.")
                 except statistics.StatisticsError:
                     pass
 
@@ -663,9 +689,8 @@ class StandingsPanel(wx.Panel):
                                 )
 
                             if fasce_data:
-                                lines.append("")
                                 lines.append(
-                                    "SUDDIVISIONE PER FASCE DI PUNTEGGIO (Dal peggiore al migliore):"
+                                    "Suddivisione per fasce di punteggio, dalla peggiore alla migliore:"
                                 )
                                 for q in fasce_data:
                                     if q["count"] > 0:
@@ -689,8 +714,8 @@ class StandingsPanel(wx.Panel):
                 if len(all_pts) > 1:
                     stdev_val = statistics.stdev(all_pts)
                     var_val = statistics.variance(all_pts)
-                    lines.append(f"Deviazione standard: {stdev_val:+.2f}.")
-                    lines.append(f"Varianza: {var_val:+.2f}.")
+                    lines.append(f"Deviazione standard: {stdev_val:.2f}.")
+                    lines.append(f"Varianza: {var_val:.2f}.")
 
                     if mean_val != 0:
                         cv = (stdev_val / mean_val) * 100
@@ -698,7 +723,7 @@ class StandingsPanel(wx.Panel):
 
                 range_val = max(all_pts) - min(all_pts)
                 lines.append(
-                    f"Escursione (forbice tra il valore più alto e il più basso): {range_val:+.2f}"
+                    f"Escursione, dal punteggio più basso al più alto: {range_val:.2f}"
                 )
 
                 if len(all_pts) > 1 and self.tourney.start_date:
@@ -767,18 +792,49 @@ class StandingsPanel(wx.Panel):
             tiebreaker_2=tiebreaker_2,
             unplayed_matches=self.tourney.unplayed_matches,
             reverse=True,
+            draw_points_split=self.draw_split(),
         )
 
+        # Se una medaglia sta per essere assegnata solo per ordine alfabetico
+        # l'utente deve saperlo prima, non scoprirlo a premiazione avvenuta.
+        parita_in_medaglia = [
+            row
+            for pos, row in enumerate(official_standings[: len(MEDAL_NAMES)], start=1)
+            if row.get("tied_with")
+        ]
+        if parita_in_medaglia:
+            elenco = "; ".join(
+                f"{row['name']} con {', '.join(row['tied_with'])}"
+                for row in parita_in_medaglia
+            )
+            risposta = wx.MessageBox(
+                "Attenzione, ci sono parita' che\n"
+                "nessuno spareggio ha sciolto e che\n"
+                "toccano le prime quattro posizioni:\n"
+                f"{elenco}.\n"
+                "Le medaglie verrebbero assegnate\n"
+                "in ordine alfabetico. Procedo?",
+                "Parita' non risolta",
+                wx.YES_NO | wx.ICON_WARNING,
+            )
+            if risposta != wx.YES:
+                return
+
         choice_dlg = TournamentFinalReviewChoiceDialog(self)
-        choice_dlg.ShowModal()
+        esito_scelta = choice_dlg.ShowModal()
         choice = choice_dlg.choice
         choice_dlg.Destroy()
+        # Chiudere la finestra senza scegliere non deve valere come
+        # "tutti in massa": la premiazione si ferma qui.
+        if esito_scelta != wx.ID_OK or choice is None:
+            return
 
-        db = PlayerDB()
+        # L'archivio e' quello condiviso della finestra principale, quando c'e'
+        db = getattr(self.GetParent(), "player_db", None) or PlayerDB()
         updates_done = 0
         skipped_count = 0
 
-        medals_map = {1: "🥇 ORO", 2: "🥈 ARGENTO", 3: "🥉 BRONZO", 4: "🪵 LEGNO"}
+        medals_map = MEDAL_NAMES
 
         start = (
             format_date_extended(self.tourney.start_date)
@@ -794,10 +850,6 @@ class StandingsPanel(wx.Panel):
         for idx, row in enumerate(official_standings):
             name = row["name"]
             pos = idx + 1
-            is_oro = pos == 1
-            is_argento = pos == 2
-            is_bronzo = pos == 3
-            is_legno = pos == 4
             med_str = medals_map.get(pos, "")
 
             do_update = True
@@ -810,6 +862,7 @@ class StandingsPanel(wx.Panel):
                     tourney_title=self.tourney.title,
                     start_date=start,
                     end_date=end,
+                    tied_with=row.get("tied_with"),
                 )
                 res = rev_dlg.ShowModal()
                 rev_dlg.Destroy()
@@ -821,10 +874,6 @@ class StandingsPanel(wx.Panel):
                 success = db.add_or_update_player(
                     name,
                     pos,
-                    is_oro,
-                    is_argento,
-                    is_bronzo,
-                    is_legno,
                     self.tourney.title,
                     start,
                     end,
@@ -847,17 +896,15 @@ class StandingsPanel(wx.Panel):
             return
 
         msg = (
-            "Oh mio insuperabile e implacabile dominatore!\n\n"
-            "I verdetti ufficiali sono stati incisi nella pietra digitale della Hall of Fame:\n"
-            f"• Discepoli aggiornati con successo: {updates_done}\n"
+            "Oh mio insuperabile dominatore!\n"
+            "I verdetti sono stati incisi nella\n"
+            "Hall of Fame.\n"
+            f"Discepoli aggiornati: {updates_done}.\n"
         )
         if skipped_count > 0:
-            msg += f"• Discepoli saltati o tornei già registrati: {skipped_count}\n"
+            msg += f"Saltati o già registrati: {skipped_count}.\n"
 
-        msg += (
-            "\nIl file testuale 'Giocatori.txt' è stato aggiornato all'istante.\n"
-            "Gloria eterna!"
-        )
+        msg += "Il file Giocatori.txt è aggiornato.\nGloria eterna!"
 
         wx.MessageBox(
             msg, "Premiazione e Registrazione Conclusa", wx.OK | wx.ICON_INFORMATION
