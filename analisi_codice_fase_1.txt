@@ -113,7 +113,7 @@ File e riga: dialogs.py:613, dialogs.py:617
 Problema: nella finestra di aggiunta giocatore, la pressione di Invio nel campo di testo costruisce un evento pulsante con identificatore ID_OK e lo invia al dialogo con ProcessEvent. La validazione pero' e' agganciata al pulsante, non al dialogo, quindi il percorso da tastiera puo' non attraversarla e l'attributo new_name, creato solo dentro la validazione, puo' restare non definito.
 Nota: e' esattamente il comportamento che i due script test_dialog.py e test_dialog2.py stavano indagando, segno che il dubbio era gia' emerso.
 Impatto per l'utente: aggiungendo un giocatore con Invio invece che con il pulsante, si rischia di accettare nomi troppo corti o duplicati, oppure di far fallire l'operazione con un errore di attributo mancante. E' proprio il percorso piu' naturale per chi usa la tastiera e lo screen reader.
-Correzione proposta: spostare la validazione in un gestore agganciato al dialogo per ID_OK, inizializzare new_name nel costruttore e far chiudere il dialogo solo dopo esito positivo della validazione. Da confermare sul campo, vedere collaudo.txt.
+Correzione proposta: spostare la validazione in un gestore agganciato al dialogo per ID_OK, inizializzare new_name nel costruttore e far chiudere il dialogo solo dopo esito positivo della validazione. Da confermare con una prova sul campo, perche' richiede la pressione reale di Invio.
 Stato: risolto il 2026-09-02, versione 2.8.3. Invio e pulsante passano ora entrambi per la funzione di conferma, che valida il nome, chiude la finestra solo se il nome e' accettabile e riporta il focus sul campo in caso di errore. L'attributo new_name viene inizializzato nel costruttore. Confermato dal collaudo sul campo del 2026-09-02.
 2.3 Rilievi medi
 Rilievo 11
@@ -194,7 +194,7 @@ Categoria: regole generali, accessibilita'
 File e riga: dialogs.py:346, dialogs.py:347, dialogs.py:372, dialogs.py:373
 Problema: dopo l'inserimento di un giocatore il focus viene spostato due volte con temporizzatori, prima sulla lista dopo 300 millisecondi e poi sul campo di testo dopo 600.
 Impatto per l'utente: NVDA annuncia due cambi di contesto in rapida successione, il secondo dei quali interrompe il primo. La lettura risulta confusa e, se l'utente comincia a digitare nei 600 millisecondi, i caratteri possono finire nel controllo sbagliato.
-Correzione proposta: decidere una sola destinazione del focus e portarcelo subito, senza temporizzatori. Da confermare sul campo, vedere collaudo.txt.
+Correzione proposta: decidere una sola destinazione del focus e portarcelo subito, senza temporizzatori. Da confermare con una prova sul campo, ascoltando gli annunci dello screen reader.
 Stato: risolto il 2026-09-02, versione 2.8.3. Rimossi entrambi i temporizzatori. Dopo un inserimento il focus resta nel campo del nome, pronto per il discepolo successivo; dopo una soppressione resta nell'elenco dei partecipanti, con la selezione gia' posizionata sulla voce che ha preso il posto di quella cancellata. Confermato dal collaudo sul campo del 2026-09-02.
 Rilievo 21
 Gravita': medio
@@ -362,8 +362,8 @@ Secondo blocco, errori bloccanti e dati sbagliati: rilievi 1, 2, 3, 4, 12. Rimuo
 Terzo blocco, accessibilita': rilievi 8, 24, 37, 20, 10. Ripuliscono l'output da separatori, colonne, righe vuote ed emoji, e sistemano i due punti in cui la navigazione da tastiera e il focus non si comportano come dovrebbero.
 Quarto blocco, coerenza delle regole del torneo: rilievi 11, 13, 14, 15, 21, 22. Riportano il comportamento a quanto promesso dal README.
 Quinto blocco, pulizia e manutenzione: rilievi 17, 18, 19, 23, e poi tutti i bassi, dal 25 al 39, chiudendo con il rilievo 9 sulla compilazione, che va verificato al primo rilascio utile.
-Al termine delle correzioni approvate, e prima di dichiarare conclusa la fase 1, va compilato collaudo.txt con le prove sul campo che richiedono l'interazione dell'utente.
-Aggiornamento del 2026-09-02: i cinque blocchi sono stati lavorati e tutte e ventinove le prove di collaudo sono state superate. Le correzioni nate dal collaudo sono i rilievi da 40 a 44. Non restano prove aperte: la fase 1 e' pronta per il rilascio, dopo il quale si aggiornera' la riga di Dadillo nella tabella del documento di refactoring.
+Al termine delle correzioni approvate, e prima di dichiarare conclusa la fase 1, sono state eseguite con Gabriele le prove sul campo che richiedono l'interazione dell'utente.
+Aggiornamento del 2026-09-02: i cinque blocchi sono stati lavorati e tutte e ventinove le prove di collaudo sono state superate. Le correzioni nate dal collaudo sono i rilievi da 40 a 44. Il file collaudo.txt, rimasto senza prove aperte, e' stato rimosso: la sua storia e' in questo rapporto e nel CHANGELOG.
 7. Rilievi emersi dal collaudo sul campo
 Il collaudo e' stato compilato da Gabriele il 2026-09-02 sulla versione 2.8.4. Tutte le venticinque prove hanno dato esito positivo. Da tre di esse sono emerse richieste di modifica e da una un difetto nuovo, elencati qui sotto e gia' lavorati nella versione 2.9.0.
 Rilievo 40
@@ -422,3 +422,22 @@ Stato: aperto. Rilevato il 2026-09-02, non corretto: e' un intervento sull'inter
 provato con lo screen reader, e non va infilato a ridosso di un rilascio gia' collaudato.
 Osservazione chiusa
 Nella classifica parziale i primi quattro giocatori vengono indicati con oro, argento, bronzo e legno anche se il torneo non e' finito. Sottoposta la cosa a Gabriele il 2026-09-02, ha risposto che le medaglie vanno bene anche nella parziale: nessuna modifica, il comportamento resta questo.
+8. Chiusura della fase 1
+Versione di partenza: 2.8.0. Versione rilasciata: 2.9.1, pubblicata su GitHub il 2026-09-02
+come release v2.9.1, con il solo archivio Dadillo.zip in allegato. Verificato che l'auto
+updater riconosca la release, ne riceva l'indirizzo di download e ne mostri le note.
+Bilancio: 39 rilievi dall'analisi iniziale, piu' 6 emersi dopo, quattro dal collaudo sul
+campo, il rilievo 44 dalla prova della classifica e il 45 dalla prova dell'eseguibile
+compilato. Le correzioni sono state applicate in cinque blocchi, dalle versioni 2.8.1 alla
+2.9.1, ciascuno approvato da Gabriele prima di essere lavorato.
+La suite di prove automatiche e' passata da 14 a 31 casi. Il progetto supera ruff con una
+configurazione piu' severa di quella predefinita, dichiarata in ruff.toml.
+Restano aperti tre lavori, nessuno dei quali blocca l'uso del programma:
+Il rilievo 45, gli avvisi di wxPython sui riquadri della finestra di creazione torneo, che
+va provato con NVDA prima di decidere come sistemarlo.
+La suddivisione delle funzioni troppo lunghe, prima fra tutte update_display, 349 righe che
+mescolano lettura dello stato del torneo, calcolo delle statistiche e composizione del testo.
+La nota 7 di fix_da_fare.txt in GBUtils, cioe' portare nella libreria la funzione unica che
+prepara l'archivio di release. Dadillo ha ora la versione corretta dello script, ma
+Terminal_Beast, Tornello e orologic tengono ancora la copia propria.
+Sono i tre punti da cui partira' una eventuale fase 2.
