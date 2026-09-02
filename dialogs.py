@@ -8,6 +8,7 @@ import wx
 from data import (
     DRAW_SPLITS,
     MAIN_CRITERIA,
+    SEARCH_PAIR_MODES,
     TIEBREAKERS_1,
     TIEBREAKERS_2,
     PlayerDB,
@@ -569,6 +570,19 @@ class SettingsDialog(wx.Dialog):
         vbox.Add(lbl_split, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
         vbox.Add(self.cb_split, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
 
+        # Ricerca con due nomi nelle liste delle partite
+        lbl_search = wx.StaticText(
+            panel, label="Cercando due nomi nelle liste delle partite:"
+        )
+        self.cb_search = wx.Choice(panel, choices=list(SEARCH_PAIR_MODES))
+        self.cb_search.SetStringSelection(
+            normalize_choice(
+                getattr(self.settings, "search_pair_mode", None), SEARCH_PAIR_MODES
+            )
+        )
+        vbox.Add(lbl_search, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
+        vbox.Add(self.cb_search, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+
         btn_box = wx.BoxSizer(wx.HORIZONTAL)
         btn_ok = wx.Button(panel, wx.ID_OK, "Che sia Legge!")
         btn_cancel = wx.Button(panel, wx.ID_CANCEL, "Lascia stare")
@@ -588,6 +602,9 @@ class SettingsDialog(wx.Dialog):
         self.settings.tiebreaker_1 = self.cb_tie1.GetStringSelection()
         self.settings.tiebreaker_2 = self.cb_tie2.GetStringSelection()
         self.settings.draw_points_split = self.cb_split.GetStringSelection()
+        self.settings.search_pair_mode = normalize_choice(
+            self.cb_search.GetStringSelection(), SEARCH_PAIR_MODES
+        )
         return self.settings
 
 
@@ -708,12 +725,18 @@ class TournamentFinalReviewChoiceDialog(wx.Dialog):
             panel, label="Uno per uno (Revisiona discepoli)"
         )
         self.btn_mass = wx.Button(panel, label="Tutti in massa (Aggiorna tutto subito)")
+        # Senza un pulsante con identificativo Annulla, wxPython non chiude la
+        # finestra con Esc e l'utente resta bloccato: qui c'e' anche la via
+        # d'uscita per rinviare la premiazione.
+        self.btn_cancel = wx.Button(panel, wx.ID_CANCEL, "Non ora, rimando")
 
         btn_box.Add(self.btn_individual, 0, wx.ALL, 5)
         btn_box.Add(self.btn_mass, 0, wx.ALL, 5)
+        btn_box.Add(self.btn_cancel, 0, wx.ALL, 5)
 
         vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
         panel.SetSizer(vbox)
+        self.SetEscapeId(wx.ID_CANCEL)
 
         self.btn_individual.Bind(wx.EVT_BUTTON, self.on_individual)
         self.btn_mass.Bind(wx.EVT_BUTTON, self.on_mass)

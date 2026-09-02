@@ -3,8 +3,15 @@
 
 a = Analysis(
     ['Dadillo.py'],
-    pathex=[],
+    # GBUtils, che fornisce il controllo aggiornamenti, non e' installato fra i
+    # pacchetti: sta accanto al progetto e di solito si trova per PYTHONPATH.
+    # Dichiararlo qui rende la compilazione ripetibile su qualsiasi macchina che
+    # rispetti la struttura di E:\git\mine.
+    pathex=['../GBUtils'],
     binaries=[],
+    # Dadillo non carica nessuna risorsa esterna, ne' immagini ne' suoni:
+    # tutto quello che gli serve sono i suoi file di dati, che nascono accanto
+    # all'eseguibile e non vanno impacchettati.
     datas=[],
     # Servono al controllo aggiornamenti di GBUtils: senza, l'eseguibile parte
     # ma non riesce a contattare GitHub. Non toglierli.
@@ -18,7 +25,22 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['matplotlib', 'scipy', 'numpy', 'pytest', 'pygame', 'sounddevice', 'pygments', 'tkinter'],
+    # Dadillo usa solo wxPython e la libreria standard. Queste sono installate
+    # sulla macchina di sviluppo e arriverebbero nel pacchetto seguendo le
+    # catene di import, prime fra tutte le funzioni audio di GBUtils, che
+    # Dadillo non chiama mai: escluderle tiene il pacchetto alla sua misura.
+    excludes=[
+        'matplotlib',
+        'scipy',
+        'numpy',
+        'pytest',
+        'pygame',
+        'sounddevice',
+        'pygments',
+        'tkinter',
+        'PIL',
+        'IPython',
+    ],
     noarchive=False,
     optimize=0,
 )

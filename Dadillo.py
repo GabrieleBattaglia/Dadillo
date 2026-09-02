@@ -26,7 +26,13 @@ def check_updates_gui():
     if not getattr(sys, "frozen", False):
         return
 
-    from GBUtils import perform_update, update_checker
+    try:
+        from GBUtils import perform_update, update_checker
+    except ImportError:
+        # Senza GBUtils si resta senza controllo aggiornamenti, ma il programma
+        # deve partire lo stesso: l'eseguibile non ha una console dove mostrare
+        # l'errore, quindi un'eccezione qui sarebbe una chiusura muta.
+        return
 
     def _update_task():
         api_url = (

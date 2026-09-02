@@ -598,11 +598,55 @@ def test_classifica_leggibile_da_screen_reader(tmp_path):
     for emoji in ("🥇", "🥈", "🥉", "🪵"):
         assert emoji not in testo
 
-    # I dati hanno l'etichetta accanto, non dipendono dalla colonna
-    assert "1. Marco, oro. Punti 12." in righe
-    assert any("Giocate 2 su 2, vinte 1, pari 1, perse 0." in r for r in righe)
+    # Una riga per giocatore, con la lettera davanti a ogni valore, e la
+    # legenda che spiega le lettere. A torneo concluso le giocate si omettono.
+    assert "Legenda: punti(T), vittorie(V), pareggi(P), sconfitte(S)." in righe
+    assert "1. Marco, oro. T12 V1 P1 S0" in righe
+    assert not any(r.startswith("  Giocate") for r in righe)
     # La media dei pareggi ora viene calcolata davvero
     assert any("Media punti per pareggio" in r for r in righe)
+
+
+def test_giocate_solo_se_il_torneo_non_e_concluso(tmp_path):
+    import wx
+
+    from data import SettingsData
+    from standings import StandingsPanel
+
+    base = str(tmp_path)
+    settings = SettingsData(base_dir=base)
+
+    def testo_classifica(unplayed, is_final):
+        t = TournamentData(base_dir=base)
+        t.title = "Torneo di prova"
+        t.start_date = "2026-09-01T10:00:00+02:00"
+        t.players = {"Marco": [3, 1, 0, 0], "Anna": [0, 0, 0, 1]}
+        t.played_matches = {1: ["Marco", "Anna", "1", 3, 3, 0]}
+        t.unplayed_matches = unplayed
+        frame = wx.Frame(None)
+        panel = StandingsPanel(frame, t, settings, is_final=is_final)
+        testo = panel.txt_display.GetValue()
+        frame.Destroy()
+        return testo
+
+    app = wx.App(False)
+
+    # Torneo concluso aperto con Ctrl+L, che chiede la classifica parziale:
+    # le partite giocate sono per forza tutte, non vanno ripetute su ogni riga
+    testo = testo_classifica({}, is_final=False)
+    assert "Classifica finale" in testo
+    assert "giocate(G)" not in testo
+    assert "G1/1" not in testo
+    assert "(Provvisoria)" not in testo
+
+    # Torneo ancora in corso: le giocate servono e la durata e' provvisoria
+    testo = testo_classifica({2: ["Anna", "Marco"]}, is_final=False)
+    assert "Classifica parziale" in testo
+    assert "giocate(G)" in testo
+    assert "G1/2" in testo
+    assert "(Provvisoria)" in testo
+
+    app.Destroy()
 
 
 def test_strisce_con_giocatore_ritirato():
@@ -858,6 +902,7 @@ if __name__ == "__main__":
     test_ricerca_coppia_in_entrambi_gli_ordini()
     test_duplicati_storico_con_titoli_simili(pathlib.Path(tempfile.mkdtemp()))
     test_classifica_leggibile_da_screen_reader(pathlib.Path(tempfile.mkdtemp()))
+    test_giocate_solo_se_il_torneo_non_e_concluso(pathlib.Path(tempfile.mkdtemp()))
     test_strisce_con_giocatore_ritirato()
     test_criterio_punti_totali_viene_riconosciuto()
     test_criterio_a_punti_sopravvive_al_salvataggio(pathlib.Path(tempfile.mkdtemp()))

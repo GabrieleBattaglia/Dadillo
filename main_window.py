@@ -9,6 +9,7 @@ import wx
 
 from data import (
     DATA_FILE,
+    SEARCH_PAIR_MODES,
     DataFileError,
     PlayerDB,
     SettingsData,
@@ -412,11 +413,11 @@ class MainFrame(wx.Frame):
         self.fill_played_list()
 
     @staticmethod
-    def match_filter(text, p1, p2, filt_str):
+    def match_filter(text, p1, p2, filt_str, coppia_in_qualsiasi_ordine=True):
         """Vero se la partita passa il filtro di ricerca.
-        Con un solo termine cerca ovunque nella riga, con due nomi cerca la
-        coppia in tutti e due gli ordini, cosi' trova anche la partita di
-        ritorno con i ruoli invertiti.
+        Con un solo termine cerca ovunque nella riga. Con due nomi cerca la
+        coppia in entrambi gli ordini, quindi trova anche la partita di ritorno,
+        oppure rispetta l'ordine scritto, secondo l'impostazione scelta.
         """
         if not filt_str:
             return True
@@ -426,21 +427,33 @@ class MainFrame(wx.Frame):
         s1, s2 = parts[0], parts[1]
         p1_low = p1.lower()
         p2_low = p2.lower()
-        return (s1 in p1_low and s2 in p2_low) or (s1 in p2_low and s2 in p1_low)
+        diretto = s1 in p1_low and s2 in p2_low
+        if not coppia_in_qualsiasi_ordine:
+            return diretto
+        return diretto or (s1 in p2_low and s2 in p1_low)
+
+    def coppia_in_qualsiasi_ordine(self):
+        """Vero se la ricerca per due nomi ignora l'ordine in cui sono scritti."""
+        return (
+            getattr(self.settings, "search_pair_mode", SEARCH_PAIR_MODES[0])
+            == SEARCH_PAIR_MODES[0]
+        )
 
     def fill_unplayed_list(self):
         """Ricostruisce la sola lista delle partite da giocare."""
         self.list_unplayed.Clear()
         filt_u = self.txt_filter_unplayed.GetValue().strip().lower()
+        in_qualsiasi_ordine = self.coppia_in_qualsiasi_ordine()
         for m_id, (p1, p2) in sorted(self.tourney.unplayed_matches.items()):
             text = f"({m_id}) {p1} vs {p2}"
-            if self.match_filter(text, p1, p2, filt_u):
+            if self.match_filter(text, p1, p2, filt_u, in_qualsiasi_ordine):
                 self.list_unplayed.Append(text, m_id)
 
     def fill_played_list(self):
         """Ricostruisce la sola lista delle partite giocate."""
         self.list_played.Clear()
         filt_p = self.txt_filter_played.GetValue().strip().lower()
+        in_qualsiasi_ordine = self.coppia_in_qualsiasi_ordine()
         # Mostriamo le partite giocate in ordine inverso (l'ultima giocata in cima)
         # In Python 3.7+ i dizionari preservano l'ordine di inserimento.
         for m_id, data in reversed(list(self.tourney.played_matches.items())):
@@ -452,7 +465,7 @@ class MainFrame(wx.Frame):
             else:
                 winner = "Pareggio"
             text = f"({m_id}) {p1} vs {p2} - {winner} (Punti base: {pts})"
-            if self.match_filter(text, p1, p2, filt_p):
+            if self.match_filter(text, p1, p2, filt_p, in_qualsiasi_ordine):
                 self.list_played.Append(text, m_id)
 
     def on_unplayed_key(self, event):

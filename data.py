@@ -27,6 +27,12 @@ DRAW_SPLITS = (
 )
 SCORE_DIRECTIONS = ("Alto", "Basso")
 
+# Come interpretare due nomi scritti nelle caselle di ricerca delle partite
+SEARCH_PAIR_MODES = (
+    "Coppia in qualsiasi ordine",
+    "Primo nome, poi secondo",
+)
+
 # Vecchie etichette equivalenti, ancora presenti nei file salvati
 MAIN_CRITERIA_ALIASES = {
     "Punti Totali": "Punti",
@@ -544,6 +550,7 @@ class SettingsData:
         self.tiebreaker_1 = "Scontro Diretto (Punti)"  # Scontro Diretto (Punti) o Scontro Diretto (Vittorie)
         self.tiebreaker_2 = "Punti Totali"  # Punti Totali o Vittorie Totali
         self.draw_points_split = "Inserimento Manuale"  # "Inserimento Manuale", "Punti Pieni a Entrambi", "Nessun Punto", "Metà ciascuno"
+        self.search_pair_mode = SEARCH_PAIR_MODES[0]
 
     def save(self):
         data = {
@@ -552,6 +559,7 @@ class SettingsData:
             "tiebreaker_1": self.tiebreaker_1,
             "tiebreaker_2": self.tiebreaker_2,
             "draw_points_split": self.draw_points_split,
+            "search_pair_mode": self.search_pair_mode,
         }
         atomic_write_json(self.filename, data)
 
@@ -577,6 +585,9 @@ class SettingsData:
             )
             self.draw_points_split = normalize_choice(
                 data.get("draw_points_split"), DRAW_SPLITS
+            )
+            self.search_pair_mode = normalize_choice(
+                data.get("search_pair_mode"), SEARCH_PAIR_MODES
             )
             return True
         except (json.JSONDecodeError, OSError, ValueError, KeyError, AttributeError):
@@ -894,4 +905,7 @@ class PlayerDB:
             # Livello 2: Tornei
             parts.extend(f"    {h}\n" for h in p["history"])
 
-        atomic_write_text(self.txt_filename, "".join(parts))
+        # Niente copia di sicurezza: Giocatori.txt e' un file derivato, che si
+        # rigenera dall'archivio a ogni variazione dello storico e su richiesta
+        # con Esporta Hall of Fame.
+        atomic_write_text(self.txt_filename, "".join(parts), keep_backup=False)

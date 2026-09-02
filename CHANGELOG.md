@@ -2,7 +2,41 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
-## [2.8.4] - 2026-09-01
+## [2.9.1] - 2026-09-02
+
+Chiusura del secondo giro di collaudo della fase 1. Riferimento: `collaudo.txt` e sezione 7 di `analisi_codice_fase_1.txt`.
+
+### Risolto
+- **L'assenza di GBUtils non impedisce più l'avvio**: se la libreria dell'aggiornatore non è raggiungibile, l'eseguibile parte comunque senza controllo aggiornamenti, invece di chiudersi in silenzio, dato che non ha una console dove mostrare l'errore.
+- **Classifica di un torneo concluso aperta con Ctrl+L** (collaudo, prova 26): veniva sempre presentata come parziale, quindi mostrava l'intestazione "Classifica parziale", le partite giocate su ogni riga, `G6/6`, e la durata marcata come provvisoria, anche a torneo finito. Il contenuto della schermata dipende ora dallo stato del torneo, cioè dal fatto che non ci siano più partite da giocare, mentre il parametro `is_final` decide soltanto quale pulsante compare in fondo. Difetto precedente a questa revisione, emerso solo con la classifica a riga singola.
+
+### Aggiunto
+- Test automatico che verifica entrambi i casi: torneo concluso aperto con Ctrl+L, senza giocate né dicitura provvisoria, e torneo ancora in corso, con le giocate al loro posto. La suite passa da 30 a 31 test.
+
+### Modificato
+- **Pacchetto di distribuzione a norma**: `zip_maker.py` è stato riscritto sul modello collaudato di Orologic, come indicato nelle note di GBUtils. Ora esclude dall'archivio i file personali che nascono provando l'eseguibile, cioè torneo, impostazioni, archivio dei discepoli, Hall of Fame, copie `.bak` e file messi in quarantena, ma applica il filtro solo accanto all'eseguibile e mai dentro `_internal`, dove serve tutto quello che ha messo PyInstaller, `base_library.zip` compreso. Prima Dadillo non escludeva nulla e i dati di chi compilava finivano nel pacchetto pubblico.
+- **File di build più esplicito**: dichiarata in `pathex` la posizione di GBUtils, che non è un pacchetto installato ma una cartella accanto al progetto, così la compilazione non dipende più dal `PYTHONPATH` della macchina; ampliato l'elenco delle librerie escluse e commentato il motivo di ogni sezione.
+- **Manuale aggiornato**: il README descrive ora la classifica a riga singola con la sua legenda, i salvataggi sicuri e il riconoscimento degli archivi danneggiati, la scelta del comportamento della ricerca, le parità dichiarate, la richiesta prima di applicare nuove regole al torneo in corso, la terza via "Non ora, rimando" nella premiazione e il significato preciso della Media Piazzamenti. Aggiunto anche l'elenco dei file usati dal programma e corretta l'installazione, che ora passa da `requirements.txt` e dal file di build incluso.
+
+---
+
+## [2.9.0] - 2026-09-02
+
+Interventi nati dal collaudo sul campo della fase 1, compilato da Gabriele. Riferimento: `collaudo.txt` e sezione 7 di `analisi_codice_fase_1.txt`.
+
+### Aggiunto
+- **Scelta del comportamento della ricerca per due nomi** (collaudo, prova 20): nuova voce in Opzioni, Regole Torneo, "Cercando due nomi nelle liste delle partite", con due modi, coppia in qualsiasi ordine, che resta il predefinito, e primo nome poi secondo. La scelta è permanente, salvata in `Dadillo_settings.json`, e vale allo stesso modo per la lista delle partite giocate e per quella delle non giocate.
+
+### Modificato
+- **Classifica su una riga sola per giocatore** (collaudo, prova 17): al posto delle due righe, ogni discepolo occupa ora una riga con una lettera davanti a ogni valore, `1. Marco, oro. T12 V4 P0 S2`, e la legenda subito sopra spiega le lettere, `punti(T), vittorie(V), pareggi(P), sconfitte(S)`. Le partite giocate compaiono, come `G6/7`, solo nella classifica parziale: a torneo concluso sarebbero sempre tutte. Le righe scendono da circa 43 a circa 30 caratteri.
+- **Niente copia di sicurezza per `Giocatori.txt`** (collaudo, prova 16): è un file derivato, rigenerato a ogni variazione dello storico e ricreabile con Esporta Hall of Fame, quindi non lascia più un `.bak` accanto a sé. Le copie di sicurezza restano per `Dadillo.json` e `Dadillo_players.json`, che contengono dati non ricostruibili.
+
+### Risolto
+- **Esc non chiudeva la finestra di premiazione** (collaudo, prova 10): la finestra "Destino della Hall of Fame" non aveva un pulsante di annullamento, quindi wxPython ignorava Esc e l'unica via era scegliere una delle due modalità. Ora c'è il pulsante "Non ora, rimando" ed Esc funziona.
+
+---
+
+## [2.8.4] - 2026-09-02
 
 Correzioni dei blocchi 4 e 5 della revisione di fase 1: coerenza delle regole del torneo, pulizia e manutenzione. Riferimento: `analisi_codice_fase_1.txt`.
 
@@ -36,7 +70,7 @@ Correzioni dei blocchi 4 e 5 della revisione di fase 1: coerenza delle regole de
 
 ---
 
-## [2.8.3] - 2026-09-01
+## [2.8.3] - 2026-09-02
 
 Correzioni del blocco 3 della revisione di fase 1, dedicato all'accessibilità. Riferimento: `analisi_codice_fase_1.txt`.
 
@@ -63,7 +97,7 @@ Correzioni del blocco 3 della revisione di fase 1, dedicato all'accessibilità. 
 
 ---
 
-## [2.8.2] - 2026-09-01
+## [2.8.2] - 2026-09-02
 
 Correzioni del blocco 2 della revisione di fase 1, dedicato agli errori bloccanti e ai dati mostrati sbagliati. Riferimento: `analisi_codice_fase_1.txt`.
 
@@ -88,7 +122,7 @@ Correzioni del blocco 2 della revisione di fase 1, dedicato agli errori bloccant
 
 ---
 
-## [2.8.1] - 2026-09-01
+## [2.8.1] - 2026-09-02
 
 Correzioni del blocco 1 della revisione di fase 1, dedicato alla sicurezza dei dati. Riferimento: `analisi_codice_fase_1.txt`.
 

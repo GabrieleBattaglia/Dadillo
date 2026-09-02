@@ -453,6 +453,13 @@ class StandingsPanel(wx.Panel):
         lines.append(f"Data inizio: {formatted_start}")
         lines.append(f"Data fine: {formatted_end}")
 
+        # Il contenuto della schermata dipende dallo stato del torneo, non da
+        # come ci si e' arrivati: con Ctrl+L su un torneo gia' finito la
+        # classifica e' finale a tutti gli effetti, e le partite giocate sono
+        # per forza tutte. Il parametro is_final decide solo quale pulsante
+        # mostrare in fondo.
+        concluso = not self.tourney.unplayed_matches
+
         # Le due estremita' vanno confrontate nello stesso fuso orario, altrimenti
         # la durata sbaglia di tutto l'offset e per i tornei appena iniziati
         # risulta addirittura negativa.
@@ -474,15 +481,22 @@ class StandingsPanel(wx.Panel):
             if days > 0:
                 dur_str += f"{days} giorni, "
             dur_str += f"{hours} ore, {minutes} minuti."
-            if not self.is_final:
+            if not concluso:
                 dur_str += " (Provvisoria)"
             lines.append(f"Durata complessiva: {dur_str}")
 
-        header_text = "Classifica finale" if self.is_final else "Classifica parziale"
+        header_text = "Classifica finale" if concluso else "Classifica parziale"
         lines.append(header_text)
 
-        # Ogni giocatore occupa due righe corte, con l'etichetta accanto al dato:
-        # niente colonne allineate, il cui significato dipenderebbe dalla posizione.
+        # Una riga per giocatore, con una lettera davanti a ogni valore e la
+        # legenda qui sopra: cosi' la freccia giu' passa da un giocatore al
+        # successivo e la riga resta corta anche sul display braille.
+        legenda = "Legenda: punti(T), vittorie(V), pareggi(P), sconfitte(S)"
+        if not concluso:
+            # A torneo concluso le partite giocate sono tutte, dirlo e' inutile
+            legenda += ", giocate(G)"
+        lines.append(legenda + ".")
+
         for idx, row in enumerate(flat):
             pos = idx + 1 if reverse else len(flat) - idx
 
@@ -495,16 +509,13 @@ class StandingsPanel(wx.Panel):
             else:
                 p_str = f"{p_val:.1f}"
 
-            prima = f"{pos}. {row['name']}"
+            riga = f"{pos}. {row['name']}"
             if med_str:
-                prima += f", {med_str}"
-            prima += f". Punti {p_str}."
-            lines.append(prima)
-            lines.append(
-                f"  Giocate {row['played']} su {row['total']}, "
-                f"vinte {row['wins']}, pari {row['draws']}, "
-                f"perse {row['losses']}."
-            )
+                riga += f", {med_str}"
+            riga += f". T{p_str} V{row['wins']} P{row['draws']} S{row['losses']}"
+            if not concluso:
+                riga += f" G{row['played']}/{row['total']}"
+            lines.append(riga)
             if row.get("tied_with"):
                 lines.append(
                     f"  A pari merito con {', '.join(row['tied_with'])}:"

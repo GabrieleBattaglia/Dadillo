@@ -6,16 +6,6 @@
     "players": {},
     "unplayed_matches": {},
     "played_matches": {},
-    "records_high": [
-        "Giocatore sconosciuto",
-        "Partita sconosciuta",
-        -99999
-    ],
-    "records_low": [
-        "Giocatore sconosciuto",
-        "Partita sconosciuta",
-        99999
-    ],
     "tourney_type": 0,
     "pts_win": null,
     "pts_draw": null,
