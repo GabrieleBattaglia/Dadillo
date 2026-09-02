@@ -4,6 +4,8 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
 ## [2.9.1] - 2026-09-02
 
+Pubblicata su GitHub il 2026-09-02 come release `v2.9.1`, con il solo archivio `Dadillo.zip` in allegato. Verificato che l'auto updater la riconosca e ne riceva le note.
+
 Chiusura del secondo giro di collaudo della fase 1. Riferimento: `collaudo.txt` e sezione 7 di `analisi_codice_fase_1.txt`.
 
 ### Risolto
