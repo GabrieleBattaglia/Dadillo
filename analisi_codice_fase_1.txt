@@ -12,7 +12,7 @@ Blocco 2, errori bloccanti e dati sbagliati: completato nella versione 2.8.2. Ri
 Blocco 3, accessibilita': completato nella versione 2.8.3. Rilievi 8, 10, 20, 24, 27 e 37 risolti e confermati dal collaudo, che ha pero' chiesto di tornare a una riga sola per giocatore in classifica: vedi il rilievo 41.
 Blocco 4, coerenza delle regole del torneo: completato nella versione 2.8.4. Rilievi 11, 13, 14, 15, 21 e 22 risolti e confermati dal collaudo.
 Blocco 5, pulizia e manutenzione: completato nella versione 2.8.4. Affrontati i rilievi 9, 17, 18, 19, 23, 25, 26, 28, 29, 30, 31, 32, 33, 34, 35, 36, 38 e 39; i rilievi 19, 32, 34 e 39 sono risolti solo in parte, come spiegato nelle rispettive righe Stato.
-Resta aperto un solo lavoro: la suddivisione delle funzioni troppo lunghe, prima fra tutte update_display, che al 2026-09-02 conta 349 righe in un file di 927 e mescola lettura dello stato del torneo, calcolo delle statistiche e composizione del testo. Il README e' stato aggiornato il 2026-09-02 nella versione 2.9.1.
+Restano aperti due lavori: il rilievo 45, sui riquadri della finestra di creazione torneo, e la suddivisione delle funzioni troppo lunghe, prima fra tutte update_display, che al 2026-09-02 conta 349 righe in un file di 927 e mescola lettura dello stato del torneo, calcolo delle statistiche e composizione del testo. Il README e' stato aggiornato il 2026-09-02 nella versione 2.9.1.
 Collaudo: le prove da 1 a 25 sono state eseguite il 2026-09-02 e tutte superate. Le quattro richieste emerse sono state lavorate nella versione 2.9.0 e sono descritte alla sezione 7. Anche le prove da 26 a 29, eseguite il 2026-09-02 sulla versione 2.9.0, sono state superate: dalla prova 26 e' emerso il rilievo 44, corretto nella versione 2.9.1. Il collaudo della fase 1 e' concluso.
 La riga di Dadillo nella tabella del documento di refactoring va aggiornata soltanto dopo il rilascio della nuova versione su GitHub.
 1. File esaminati
@@ -400,5 +400,25 @@ File e riga: standings.py, metodo update_display
 Problema: la classifica aperta con Ctrl+L veniva sempre presentata come parziale, perche' il contenuto era legato al modo in cui si arrivava alla schermata e non allo stato del torneo. Su un torneo gia' concluso comparivano quindi l'intestazione Classifica parziale, le partite giocate su ogni riga, per esempio G6 su 6, e la durata marcata come provvisoria.
 Impatto per l'utente: informazioni ridondanti e un'intestazione che contraddiceva lo stato reale del torneo. Il difetto e' precedente a questa revisione ed e' emerso solo quando la classifica e' passata alla riga singola, che ha reso evidente la presenza delle giocate.
 Stato: risolto il 2026-09-02, versione 2.9.1. Intestazione, giocate e dicitura provvisoria dipendono ora dall'assenza di partite ancora da giocare; il parametro is_final resta a decidere solo quale pulsante mostrare in fondo alla schermata. Coperto dal test test_giocate_solo_se_il_torneo_non_e_concluso.
+Rilievo 45
+Gravita': basso
+Categoria: regole generali, accessibilita'
+Origine: prova dell'eseguibile compilato durante la preparazione del rilascio 2.9.1
+File e riga: dialogs.py:63 e dialogs.py:90, finestra Nuovo Torneo di Adorazione
+Problema: i due riquadri della finestra di creazione torneo, Punteggi Predefiniti e Criteri
+di Classifica e Spareggi, sono costruiti con wx.StaticBoxSizer, ma i controlli che vi stanno
+dentro vengono creati come figli del pannello invece che del riquadro. Avviando l'eseguibile
+wxPython scrive quattordici avvisi, uno per controllo, del tipo Element wxStaticText di
+wxStaticBoxSizer should be created as child of its wxStaticBox.
+Impatto per l'utente: nessun malfunzionamento visibile, la finestra si apre e si usa. Resta
+pero' da verificare con NVDA se il raggruppamento venga annunciato correttamente, perche' e'
+proprio l'appartenenza al riquadro a dare il nome del gruppo ai controlli che contiene.
+Nota: gli avvisi compaiono anche eseguendo da sorgente, ma si notano soltanto guardando lo
+standard error, che l'eseguibile compilato non mostra.
+Correzione proposta: creare i controlli dei due riquadri come figli dello StaticBox, che e'
+il modo previsto da wxPython, e riprovare la finestra con NVDA per confrontare l'annuncio del
+gruppo prima e dopo.
+Stato: aperto. Rilevato il 2026-09-02, non corretto: e' un intervento sull'interfaccia che va
+provato con lo screen reader, e non va infilato a ridosso di un rilascio gia' collaudato.
 Osservazione chiusa
 Nella classifica parziale i primi quattro giocatori vengono indicati con oro, argento, bronzo e legno anche se il torneo non e' finito. Sottoposta la cosa a Gabriele il 2026-09-02, ha risposto che le medaglie vanno bene anche nella parziale: nessuna modifica, il comportamento resta questo.
