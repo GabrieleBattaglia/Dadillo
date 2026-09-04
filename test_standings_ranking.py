@@ -607,6 +607,140 @@ def test_classifica_leggibile_da_screen_reader(tmp_path):
     assert any("Media punti per pareggio" in r for r in righe)
 
 
+def test_date_scritte_a_mano_diventano_timestamp():
+    from data import fields_to_timestamp, parse_timestamp, timestamp_to_fields
+
+    ts = fields_to_timestamp("2/9/2026", "21:30")
+    riletto = parse_timestamp(ts)
+    assert riletto.day == 2
+    assert riletto.month == 9
+    assert riletto.year == 2026
+    assert riletto.hour == 21
+    assert riletto.minute == 30
+    # Il fuso deve esserci, altrimenti le durate tornano a sbagliare
+    assert riletto.tzinfo is not None
+
+    # Andata e ritorno fra campi e timestamp
+    assert timestamp_to_fields(ts) == ("02/09/2026", "21:30")
+    # Anche il vecchio formato senza fuso si lascia leggere
+    assert timestamp_to_fields("2026-08-20 10:00:00") == ("20/08/2026", "10:00")
+    # Nessuna data: campi vuoti, non un errore
+    assert timestamp_to_fields("") == ("", "")
+
+    # L'ora puo' mancare e vale mezzanotte
+    assert parse_timestamp(fields_to_timestamp("02/09/2026", "")).hour == 0
+
+    # Ogni errore ha il suo messaggio, che finisce sotto gli occhi dell'utente
+    for data, ora, atteso in (
+        ("2-9-2026", "21:30", "giorno/mese/anno"),
+        ("2/9/2026", "mezzogiorno", "ore:minuti"),
+        ("2/9/2026", "25:00", "non esiste"),
+        ("31/2/2026", "10:00", "non esiste sul calendario"),
+        ("", "", "la data manca"),
+    ):
+        try:
+            fields_to_timestamp(data, ora)
+            raise AssertionError(f"{data} {ora} doveva essere rifiutata")
+        except ValueError as e:
+            assert atteso in str(e), f"{data} {ora}: messaggio inatteso, {e}"
+
+
+def test_modifica_date_aggiorna_lo_storico_dei_discepoli():
+    from data import update_history_dates
+
+    players = {
+        "Anna": {
+            "medals": {"oro": 1, "argento": 0, "bronzo": 0, "legno": 0},
+            "history": [
+                "1° in Torneo Uno - martedì 1 settembre 2026 - mercoledì 2 settembre 2026",
+                "3° in Altro Torneo - lunedì 1 giugno 2026 - martedì 2 giugno 2026",
+            ],
+            "placements_sum": 0,
+        },
+        "Bruno": {
+            "medals": {"oro": 0, "argento": 1, "bronzo": 0, "legno": 0},
+            "history": [
+                "2° in Torneo Uno - martedì 1 settembre 2026 - mercoledì 2 settembre 2026"
+            ],
+            "placements_sum": 0,
+        },
+        "Carla": {
+            "medals": {"oro": 0, "argento": 0, "bronzo": 0, "legno": 0},
+            "history": ["5° in Altro Torneo - lunedì 1 giugno 2026 - martedì 2 giugno 2026"],
+            "placements_sum": 5,
+        },
+    }
+
+    toccati = update_history_dates(
+        players,
+        "Torneo Uno",
+        "2026-09-01T10:00:00+02:00",
+        "2026-09-05T09:00:00+02:00",
+        "2026-09-06T20:00:00+02:00",
+    )
+
+    # Solo chi ha partecipato a quel torneo
+    assert sorted(toccati) == ["Anna", "Bruno"]
+    assert (
+        players["Anna"]["history"][0]
+        == "1° in Torneo Uno - sabato 5 settembre 2026 - domenica 6 settembre 2026"
+    )
+    assert (
+        players["Bruno"]["history"][0]
+        == "2° in Torneo Uno - sabato 5 settembre 2026 - domenica 6 settembre 2026"
+    )
+    # Gli altri tornei non si toccano, e nemmeno chi non c'era
+    assert "1 giugno 2026" in players["Anna"]["history"][1]
+    assert "1 giugno 2026" in players["Carla"]["history"][0]
+
+    # Un titolo che non esiste non cambia niente
+    assert update_history_dates(players, "Torneo Mai Giocato", "", "x", "y") == []
+
+
+def test_finestra_modifica_date(tmp_path):
+    import wx
+    from dialogs import EditDatesDialog
+
+    app = wx.App(False)
+    frame = wx.Frame(None)
+
+    # Torneo concluso: i due campi arrivano compilati
+    dlg = EditDatesDialog(
+        frame,
+        "2026-09-01T10:00:00+02:00",
+        "2026-09-02T18:30:00+02:00",
+        torneo_concluso=True,
+    )
+    assert dlg.txt_data_inizio.GetValue() == "01/09/2026"
+    assert dlg.txt_ora_inizio.GetValue() == "10:00"
+    assert dlg.txt_data_fine.GetValue() == "02/09/2026"
+    assert dlg.txt_ora_fine.GetValue() == "18:30"
+
+    # Correzione di entrambe le date. Attenzione a restare coerenti: una fine
+    # anteriore all'inizio farebbe aprire alla finestra un avviso modale, che
+    # in un test automatico resterebbe li' ad aspettare per sempre.
+    dlg.txt_data_inizio.SetValue("05/09/2026")
+    dlg.txt_ora_inizio.SetValue("09:00")
+    dlg.txt_data_fine.SetValue("06/09/2026")
+    dlg.txt_ora_fine.SetValue("20:00")
+    inizio, fine = dlg.get_dates()
+    assert inizio.startswith("2026-09-05T09:00")
+    assert fine.startswith("2026-09-06T20:00")
+    dlg.Destroy()
+
+    # Torneo in corso: la data di fine puo' restare vuota
+    dlg = EditDatesDialog(
+        frame, "2026-09-01T10:00:00+02:00", "", torneo_concluso=False
+    )
+    assert dlg.txt_data_fine.GetValue() == ""
+    inizio, fine = dlg.get_dates()
+    assert fine == ""
+    dlg.Destroy()
+
+    frame.Destroy()
+    app.Destroy()
+
+
 def test_giocate_solo_se_il_torneo_non_e_concluso(tmp_path):
     import wx
 

@@ -12,10 +12,13 @@ from data import (
     TIEBREAKERS_1,
     TIEBREAKERS_2,
     PlayerDB,
+    fields_to_timestamp,
     format_date_extended,
     normalize_choice,
     normalize_main_criterion,
+    parse_timestamp,
     placement_stats,
+    timestamp_to_fields,
 )
 from ui_utils import save_or_warn
 
@@ -666,6 +669,119 @@ class AddPlayerDialog(wx.Dialog):
             return
         self.new_name = name
         self.EndModal(wx.ID_OK)
+
+
+class EditDatesDialog(wx.Dialog):
+    """Correzione manuale delle date di inizio e fine del torneo.
+    I campi sono di testo, con il formato dichiarato nell'etichetta, perche'
+    sono prevedibili alla lettura e si compilano senza uscire dalla tastiera.
+    """
+
+    def __init__(self, parent, start_date, end_date, torneo_concluso):
+        super().__init__(parent, title="Modifica date del torneo", size=(460, 340))
+        self.torneo_concluso = torneo_concluso
+        self.start_date = start_date
+        self.end_date = end_date
+
+        panel = wx.Panel(self)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+
+        avviso = (
+            "Qui correggi le date registrate dal\n"
+            "programma. Lascia vuota la data di\n"
+            "fine se il torneo e' ancora in corso."
+        )
+        if torneo_concluso:
+            avviso += "\nIl torneo e' concluso: cambiando le\ndate aggiorno anche lo storico dei\ndiscepoli che vi hanno partecipato."
+        vbox.Add(wx.StaticText(panel, label=avviso), 0, wx.ALL | wx.EXPAND, 10)
+
+        data_i, ora_i = timestamp_to_fields(start_date)
+        data_f, ora_f = timestamp_to_fields(end_date)
+
+        lbl_data_i = wx.StaticText(panel, label="Data di inizio, giorno/mese/anno:")
+        self.txt_data_inizio = wx.TextCtrl(panel, value=data_i)
+        vbox.Add(lbl_data_i, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
+        vbox.Add(self.txt_data_inizio, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+
+        lbl_ora_i = wx.StaticText(panel, label="Ora di inizio, ore:minuti:")
+        self.txt_ora_inizio = wx.TextCtrl(panel, value=ora_i)
+        vbox.Add(lbl_ora_i, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
+        vbox.Add(self.txt_ora_inizio, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+
+        lbl_data_f = wx.StaticText(panel, label="Data di fine, giorno/mese/anno:")
+        self.txt_data_fine = wx.TextCtrl(panel, value=data_f)
+        vbox.Add(lbl_data_f, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
+        vbox.Add(self.txt_data_fine, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+
+        lbl_ora_f = wx.StaticText(panel, label="Ora di fine, ore:minuti:")
+        self.txt_ora_fine = wx.TextCtrl(panel, value=ora_f)
+        vbox.Add(lbl_ora_f, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
+        vbox.Add(self.txt_ora_fine, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+
+        btn_box = wx.BoxSizer(wx.HORIZONTAL)
+        self.btn_ok = wx.Button(panel, wx.ID_OK, "Correggi le date")
+        self.btn_ok.Bind(wx.EVT_BUTTON, self.on_ok)
+        btn_cancel = wx.Button(panel, wx.ID_CANCEL, "Lascia stare")
+        btn_box.Add(self.btn_ok, 0, wx.ALL, 5)
+        btn_box.Add(btn_cancel, 0, wx.ALL, 5)
+        vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
+
+        panel.SetSizer(vbox)
+        wx.CallAfter(self.txt_data_inizio.SetFocus)
+
+    def on_ok(self, event):
+        if self.get_dates() is not None:
+            event.Skip()
+
+    def get_dates(self):
+        """Restituisce (inizio, fine) come timestamp, oppure None se i campi
+        non vanno bene. In quel caso l'utente e' gia' stato avvisato.
+        """
+        try:
+            inizio = fields_to_timestamp(
+                self.txt_data_inizio.GetValue(), self.txt_ora_inizio.GetValue()
+            )
+        except ValueError as e:
+            wx.MessageBox(
+                f"Data di inizio non valida:\n{e}.\nEsempio: 2/9/2026 e 21:30.",
+                "Data non valida",
+                wx.OK | wx.ICON_WARNING,
+            )
+            self.txt_data_inizio.SetFocus()
+            return None
+
+        fine = ""
+        if self.txt_data_fine.GetValue().strip():
+            try:
+                fine = fields_to_timestamp(
+                    self.txt_data_fine.GetValue(), self.txt_ora_fine.GetValue()
+                )
+            except ValueError as e:
+                wx.MessageBox(
+                    f"Data di fine non valida:\n{e}.\nEsempio: 2/9/2026 e 21:30.",
+                    "Data non valida",
+                    wx.OK | wx.ICON_WARNING,
+                )
+                self.txt_data_fine.SetFocus()
+                return None
+            if parse_timestamp(fine) < parse_timestamp(inizio):
+                wx.MessageBox(
+                    "La fine viene prima dell'inizio.\nControlla le due date.",
+                    "Date incoerenti",
+                    wx.OK | wx.ICON_WARNING,
+                )
+                self.txt_data_fine.SetFocus()
+                return None
+        elif self.torneo_concluso:
+            wx.MessageBox(
+                "Il torneo e' concluso, quindi la\ndata di fine non puo' restare vuota.",
+                "Data mancante",
+                wx.OK | wx.ICON_WARNING,
+            )
+            self.txt_data_fine.SetFocus()
+            return None
+
+        return inizio, fine
 
 
 class RetirePlayerDialog(wx.Dialog):

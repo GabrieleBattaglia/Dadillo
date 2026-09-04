@@ -17,9 +17,11 @@ from data import (
     format_date_extended,
     now_timestamp,
     split_match_points,
+    update_history_dates,
 )
 from dialogs import (
     AddPlayerDialog,
+    EditDatesDialog,
     HallOfFameDialog,
     ManagePlayersDialog,
     MatchResultDialog,
@@ -320,6 +322,7 @@ class MainFrame(wx.Frame):
 
         menu_options = wx.Menu()
         item_rules = menu_options.Append(wx.ID_ANY, "Regole Torneo")
+        item_dates = menu_options.Append(wx.ID_ANY, "Modifica date del torneo")
         item_merge = menu_options.Append(wx.ID_ANY, "Unisci Database Giocatori")
 
         menubar.Append(menu_file, "File")
@@ -342,6 +345,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_menu_export_hof, item_export_hof)
         self.Bind(wx.EVT_MENU, self.on_menu_merge_db, item_merge)
         self.Bind(wx.EVT_MENU, self.on_menu_rules, item_rules)
+        self.Bind(wx.EVT_MENU, self.on_menu_edit_dates, item_dates)
         self.Bind(wx.EVT_CLOSE, self.on_close)
 
     def on_close(self, event):
@@ -943,6 +947,68 @@ class MainFrame(wx.Frame):
                     self.tourney.draw_points_split = self.settings.draw_points_split
                     save_or_warn(self.tourney.save, self)
         dlg.Destroy()
+
+    def on_menu_edit_dates(self, event):
+        """Correzione manuale delle date del torneo.
+        Resta disponibile finche' il torneo esiste, anche a battaglie concluse:
+        se il torneo e' gia' stato premiato, le nuove date vengono riscritte
+        anche nello storico dei discepoli che vi hanno partecipato.
+        """
+        if not self.tourney.title:
+            wx.MessageBox(
+                "Non c'e' nessun torneo di cui\ncorreggere le date.",
+                "Nessun torneo",
+                wx.OK | wx.ICON_INFORMATION,
+            )
+            return
+
+        concluso = not self.tourney.unplayed_matches and bool(
+            self.tourney.played_matches
+        )
+        vecchia_inizio = self.tourney.start_date
+        dlg = EditDatesDialog(
+            self, self.tourney.start_date, self.tourney.end_date, concluso
+        )
+        if dlg.ShowModal() == wx.ID_OK:
+            date = dlg.get_dates()
+            if date is not None:
+                inizio, fine = date
+                self.tourney.start_date = inizio
+                self.tourney.end_date = fine
+                if save_or_warn(self.tourney.save, self):
+                    aggiornati = self.aggiorna_storici_con_nuove_date(
+                        vecchia_inizio, inizio, fine
+                    )
+                    messaggio = (
+                        f"Date corrette.\nInizio: {format_date_extended(inizio)}.\n"
+                    )
+                    messaggio += (
+                        f"Fine: {format_date_extended(fine)}.\n"
+                        if fine
+                        else "Fine: il torneo e' ancora in corso.\n"
+                    )
+                    if aggiornati:
+                        messaggio += (
+                            f"Aggiornato lo storico di {len(aggiornati)}\ndiscepoli."
+                        )
+                    wx.MessageBox(messaggio, "Date del torneo", wx.OK)
+                    # La classifica mostra le date e la durata: va ridisegnata
+                    self.check_state_and_show()
+        dlg.Destroy()
+
+    def aggiorna_storici_con_nuove_date(self, vecchia_inizio, inizio, fine):
+        """Riscrive le date di questo torneo nello storico dei discepoli.
+        Restituisce l'elenco dei nomi toccati, vuoto se il torneo non e' ancora
+        stato registrato nella Hall of Fame.
+        """
+        aggiornati = update_history_dates(
+            self.player_db.players, self.tourney.title, vecchia_inizio, inizio, fine
+        )
+        if aggiornati:
+            for nome in aggiornati:
+                self.player_db.recalculate_player_stats(nome)
+            save_or_warn(self.player_db.save, self)
+        return aggiornati
 
     def on_menu_manage_db(self, event):
         dlg = ManagePlayersDialog(self, db=self.player_db)

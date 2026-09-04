@@ -2,6 +2,22 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.10.0] - 2026-09-04
+
+Richiesta accolta dalla issue 3 del repository, piu' l'allineamento all'ambiente nuovo.
+
+### Aggiunto
+- **Modifica delle date del torneo** (issue 3): nuova voce "Modifica date del torneo" nel menu Opzioni, accanto a Regole Torneo. Apre una finestra con quattro campi, data e ora di inizio e data e ora di fine, gia' compilati con i valori registrati e con il formato dichiarato nell'etichetta, giorno/mese/anno e ore:minuti. La data di fine si puo' lasciare vuota se il torneo e' ancora in corso.
+- La voce resta disponibile per tutta la vita del torneo, anche a battaglie concluse. **Se il torneo e' gia' stato premiato, le nuove date vengono riscritte anche nello storico di tutti i discepoli che vi hanno partecipato**, e il file `Giocatori.txt` viene rigenerato: le voci gia' registrate porterebbero altrimenti le date vecchie.
+- I controlli avvisano con un messaggio parlante se la data non e' nel formato giusto, se non esiste sul calendario o se la fine viene prima dell'inizio.
+- Tre nuovi test automatici: conversione fra i campi scritti a mano e il timestamp con fuso, aggiornamento mirato dello storico dei soli partecipanti, comportamento della finestra con torneo concluso e con torneo in corso. La suite passa da 31 a 34 test.
+
+### Modificato
+- Verificato il funzionamento con **Python 3.14.5** e wxPython 4.3.1: prove, validatore, compilazione, eseguibile e archivio di distribuzione.
+- `zip_maker.py` usa ora `crea_archivio_release` di GBUtils V93, quindi la regola sulle esclusioni e' una sola per tutto il parco software. Chiude per Dadillo la nota 7 di `fix_da_fare.txt`.
+
+---
+
 ## [2.9.1] - 2026-09-02
 
 Pubblicata su GitHub il 2026-09-02 come release `v2.9.1`, con il solo archivio `Dadillo.zip` in allegato. Verificato che l'auto updater la riconosca e ne riceva le note.

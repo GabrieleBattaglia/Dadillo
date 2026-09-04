@@ -1,0 +1,25 @@
+Collaudo sul campo, Dadillo
+Versione: 2.10.0
+Ultimo aggiornamento: 2026-09-04
+A cura di: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto
+Come si usa questo file
+Ogni prova ha un numero, una descrizione di cosa fare e uno spazio per l'esito. Dopo aver eseguito la prova, scrivi il tuo esito e le tue osservazioni nella riga Esito, sostituendo la scritta da eseguire. Quando tutte le prove sono dichiarate OK e non aggiungi altre segnalazioni, il lavoro puo' considerarsi chiuso. ClaudIA rilegge questo file, corregge quanto emerge e poi toglie da qui le prove superate.
+Le prove che seguono riguardano la modifica delle date del torneo, chiesta nella issue 3, e sono tutte da eseguire sulla versione 2.10.0.
+Prova 30, modifica delle date a torneo in corso
+Con un torneo avviato e non ancora concluso, apri Opzioni, Modifica date del torneo. Leggi la finestra con NVDA prima di toccare i campi, poi cambia data e ora di inizio e conferma.
+Cosa osservare: se le quattro etichette si leggono bene e dicono il formato atteso, se i campi arrivano gia' compilati con le date registrate, se la tabulazione li attraversa in ordine sensato e se la data di fine e' correttamente vuota. Dopo la conferma, apri la classifica con Ctrl+L e controlla che la riga Data inizio riporti la data nuova e che la durata sia ricalcolata di conseguenza.
+Esito: da eseguire.
+Prova 31, modifica delle date a torneo concluso e gia' premiato
+Su un torneo concluso e con le medaglie gia' assegnate alla Hall of Fame, apri Opzioni, Modifica date del torneo e cambia entrambe le date.
+Cosa osservare: la finestra deve avvisare che il torneo e' concluso e che verranno aggiornati anche gli storici. Dopo la conferma, il messaggio deve dire quanti discepoli sono stati aggiornati. Verifica poi in Giocatori, Gestione Giocatori DB, Visualizza Dettagli, che nello storico di un partecipante il torneo porti le date nuove, e controlla lo stesso nel file Giocatori.txt. Controlla anche che gli altri tornei dello stesso discepolo siano rimasti intatti.
+Esito: da eseguire.
+Prova 32, date rifiutate
+Nella stessa finestra prova a scrivere una data nel formato sbagliato, per esempio 2-9-2026, poi una data che non esiste, per esempio 31/2/2026, poi un'ora impossibile come 25:00, e infine una data di fine anteriore a quella di inizio.
+Cosa osservare: ogni caso deve produrre un avviso che dice quale campo non va e perche', e riportarti sul campo da correggere. Nessuno di questi tentativi deve modificare le date registrate.
+Esito: da eseguire.
+Prova 33, la voce di menu resta disponibile
+Verifica che Opzioni, Modifica date del torneo sia utilizzabile sia con un torneo in corso sia con un torneo gia' concluso e consultabile, e che con nessun torneo aperto avvisi invece di aprire la finestra.
+Cosa osservare: se il comportamento e' quello atteso e se la posizione della voce nel menu Opzioni, accanto a Regole Torneo, ti convince. Se preferisci trovarla altrove, per esempio nel menu File o in un menu Torneo tutto suo, dimmelo che la sposto.
+Esito: da eseguire.
+Osservazioni libere di Gabriele
+Scrivi qui sotto qualunque comportamento anomalo, fastidio nella lettura con NVDA o richiesta di modifica che noti usando il programma.

@@ -97,6 +97,77 @@ def parse_timestamp(value):
     return dt if dt.tzinfo else dt.astimezone()
 
 
+def timestamp_to_fields(value):
+    """Scompone una data e ora salvata nei due campi che l'utente compila.
+    Restituisce ("gg/mm/aaaa", "hh:mm"), oppure due stringhe vuote se il valore
+    manca o non e' interpretabile.
+    """
+    dt = parse_timestamp(value)
+    if dt is None:
+        return "", ""
+    return dt.strftime("%d/%m/%Y"), dt.strftime("%H:%M")
+
+
+def fields_to_timestamp(data_testo, ora_testo):
+    """Compone data e ora scritte dall'utente in un timestamp con fuso locale.
+    L'ora puo' mancare, e in quel caso vale mezzanotte. Solleva ValueError con
+    un messaggio gia' pronto per l'utente se il formato non e' quello atteso.
+    """
+    data_testo = (data_testo or "").strip()
+    ora_testo = (ora_testo or "").strip() or "00:00"
+    if not data_testo:
+        raise ValueError("la data manca")
+    try:
+        completo = datetime.datetime.strptime(
+            f"{data_testo} {ora_testo}", "%d/%m/%Y %H:%M"
+        ).astimezone()
+    except ValueError:
+        # Un solo parse, ma all'utente va detto quale dei due campi non va
+        if not re.fullmatch(r"\d{1,2}/\d{1,2}/\d{4}", data_testo):
+            raise ValueError(
+                f"la data {data_testo} non e' nel formato giorno/mese/anno"
+            ) from None
+        ore_minuti = re.fullmatch(r"(\d{1,2}):(\d{2})", ora_testo)
+        if not ore_minuti:
+            raise ValueError(
+                f"l'ora {ora_testo} non e' nel formato ore:minuti"
+            ) from None
+        if int(ore_minuti.group(1)) > 23 or int(ore_minuti.group(2)) > 59:
+            raise ValueError(f"l'ora {ora_testo} non esiste") from None
+        raise ValueError(
+            f"la data {data_testo} alle {ora_testo} non esiste sul calendario"
+        ) from None
+    return completo.replace(microsecond=0).isoformat()
+
+
+def update_history_dates(players, tourney_title, old_start, new_start, new_end):
+    """Riscrive le date di un torneo nello storico di tutti i discepoli.
+    Serve quando le date del torneo vengono corrette dopo la premiazione: le
+    voci gia' registrate porterebbero altrimenti le date vecchie.
+    Le voci si riconoscono dal titolo e dalla data di inizio precedente.
+    Restituisce l'elenco dei discepoli il cui storico e' stato aggiornato.
+    """
+    titolo = str(tourney_title).strip()
+    vecchia_inizio = format_date_extended(old_start)
+    nuova_inizio = format_date_extended(new_start)
+    nuova_fine = format_date_extended(new_end)
+    toccati = []
+    for nome, dati in players.items():
+        storico = dati.get("history", [])
+        cambiato = False
+        for indice, voce in enumerate(storico):
+            pos, voce_titolo, voce_inizio, _ = split_history_entry(voce)
+            if pos is None or voce_titolo != titolo:
+                continue
+            if vecchia_inizio and voce_inizio != vecchia_inizio:
+                continue
+            storico[indice] = f"{pos}° in {titolo} - {nuova_inizio} - {nuova_fine}"
+            cambiato = True
+        if cambiato:
+            toccati.append(nome)
+    return toccati
+
+
 def split_match_points(res, pts, draw_split="Metà ciascuno"):
     """Ricostruisce i punti dei due giocatori da un record partita del vecchio
     formato a quattro elementi, che non li conservava separatamente.

@@ -432,12 +432,15 @@ compilato. Le correzioni sono state applicate in cinque blocchi, dalle versioni 
 2.9.1, ciascuno approvato da Gabriele prima di essere lavorato.
 La suite di prove automatiche e' passata da 14 a 31 casi. Il progetto supera ruff con una
 configurazione piu' severa di quella predefinita, dichiarata in ruff.toml.
-Restano aperti tre lavori, nessuno dei quali blocca l'uso del programma:
+Restano aperti due lavori, nessuno dei quali blocca l'uso del programma:
 Il rilievo 45, gli avvisi di wxPython sui riquadri della finestra di creazione torneo, che
 va provato con NVDA prima di decidere come sistemarlo.
 La suddivisione delle funzioni troppo lunghe, prima fra tutte update_display, 349 righe che
 mescolano lettura dello stato del torneo, calcolo delle statistiche e composizione del testo.
-La nota 7 di fix_da_fare.txt in GBUtils, cioe' portare nella libreria la funzione unica che
-prepara l'archivio di release. Dadillo ha ora la versione corretta dello script, ma
-Terminal_Beast, Tornello e orologic tengono ancora la copia propria.
-Sono i tre punti da cui partira' una eventuale fase 2.
+Sono i due punti da cui partira' una eventuale fase 2.
+Aggiornamento del 2026-09-04: la nota 7 di fix_da_fare.txt, che era il terzo punto aperto, e'
+stata risolta a monte. GBUtils V93 fornisce crea_archivio_release e zip_maker.py di Dadillo si
+limita ora a chiamarla passando i nomi da escludere. Restano da convertire Terminal_Beast,
+Tornello e orologic, ma non e' piu' lavoro di Dadillo.
+In pari data il progetto e' stato verificato con Python 3.14.5 e wxPython 4.3.1, senza
+bisogno di alcuna modifica al codice.
