@@ -666,7 +666,9 @@ def test_modifica_date_aggiorna_lo_storico_dei_discepoli():
         },
         "Carla": {
             "medals": {"oro": 0, "argento": 0, "bronzo": 0, "legno": 0},
-            "history": ["5° in Altro Torneo - lunedì 1 giugno 2026 - martedì 2 giugno 2026"],
+            "history": [
+                "5° in Altro Torneo - lunedì 1 giugno 2026 - martedì 2 giugno 2026"
+            ],
             "placements_sum": 5,
         },
     }
@@ -699,6 +701,7 @@ def test_modifica_date_aggiorna_lo_storico_dei_discepoli():
 
 def test_finestra_modifica_date(tmp_path):
     import wx
+
     from dialogs import EditDatesDialog
 
     app = wx.App(False)
@@ -729,9 +732,7 @@ def test_finestra_modifica_date(tmp_path):
     dlg.Destroy()
 
     # Torneo in corso: la data di fine puo' restare vuota
-    dlg = EditDatesDialog(
-        frame, "2026-09-01T10:00:00+02:00", "", torneo_concluso=False
-    )
+    dlg = EditDatesDialog(frame, "2026-09-01T10:00:00+02:00", "", torneo_concluso=False)
     assert dlg.txt_data_fine.GetValue() == ""
     inizio, fine = dlg.get_dates()
     assert fine == ""
