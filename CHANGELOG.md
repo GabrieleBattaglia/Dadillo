@@ -4,6 +4,8 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
 ## [2.10.0] - 2026-09-04
 
+Pubblicata su GitHub il 2026-09-04 come release `v2.10.0`, con il solo archivio `Dadillo.zip` in allegato. Verificato che l'auto updater la riconosca e ne riceva le note. Issue 3 chiusa.
+
 Richiesta accolta dalla issue 3 del repository, piu' l'allineamento all'ambiente nuovo.
 
 ### Aggiunto
