@@ -6,6 +6,7 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
 ### Aggiunto
 - **Le novità della versione nella finestra di aggiornamento**: una finestra nuova mostra la versione disponibile, quella in uso e le note della release in un campo di testo che si scorre e si rilegge con le frecce, con i pulsanti Aggiorna adesso e Non adesso; escape vale come Non adesso. Fino alla 2.10.0 la domanda era un sì o no secco e le note, che il controllo riceve da sempre, non si vedevano da nessuna parte. Mentre scarica compare l'avviso di attesa, che prima mancava.
+- **L'argomento `--prova-aggiornamento`**, come quello di Cartella: apre la finestra nuova con dati finti, passando dal codice vero, così la si può sentire con lo screen reader senza aspettare una release.
 
 ### Modificato
 - Il controllo aggiornamenti passa da `gestisci_aggiornamento` di GBUtils, che dalla V159 tace finché non c'è davvero un aggiornamento: è la issue 21, aperta perché Dadillo e Cartella si erano riscritti ognuno il proprio giro. Qui restano la finestra e il ponte fra il thread del controllo e quello che può aprirla; il confronto delle versioni, lo scaricamento e gli esiti sono adesso scritti in un posto solo per tutto il parco software.

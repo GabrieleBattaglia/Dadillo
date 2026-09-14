@@ -5,6 +5,7 @@ Autori: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto.
 
 import sys
 import threading
+import time
 
 import wx
 
@@ -18,7 +19,7 @@ class App(wx.App):
         return True
 
 
-def check_updates_gui():
+def check_updates_gui(prova=False):
     """Controlla se esiste una versione piu' recente, ma solo per l'eseguibile.
     Il controllo su sys.frozen viene prima dell'importazione di GBUtils: da
     sorgente il programma deve partire anche dove GBUtils non e' installato.
@@ -26,17 +27,24 @@ def check_updates_gui():
     GBUtils tace finche' non c'e' davvero qualcosa da aggiornare: qui restano
     la finestra e il ponte fra il thread del controllo e il thread della
     finestra, che e' l'unico che possa aprirla.
+    prova mette dati finti al posto del controllo e non guarda sys.frozen:
+    serve a sentire la finestra con lo screen reader senza aspettare una
+    release. Passa dal codice vero, dialogo, attesa ed esito compresi, cosi'
+    quello che si prova e' quello che poi succedera'. Lo accende l'argomento
+    --prova-aggiornamento.
     """
-    if not getattr(sys, "frozen", False):
+    if not prova and not getattr(sys, "frozen", False):
         return
 
-    try:
-        from GBUtils import gestisci_aggiornamento
-    except ImportError:
-        # Senza GBUtils si resta senza controllo aggiornamenti, ma il programma
-        # deve partire lo stesso: l'eseguibile non ha una console dove mostrare
-        # l'errore, quindi un'eccezione qui sarebbe una chiusura muta.
-        return
+    if not prova:
+        try:
+            from GBUtils import gestisci_aggiornamento
+        except ImportError:
+            # Senza GBUtils si resta senza controllo aggiornamenti, ma il
+            # programma deve partire lo stesso: l'eseguibile non ha una console
+            # dove mostrare l'errore, quindi un'eccezione qui sarebbe una
+            # chiusura muta.
+            return
 
     api_url = "https://api.github.com/repos/GabrieleBattaglia/dadillo/releases/latest"
     # L'attesa dello scaricamento: nasce quando l'utente accetta e la rilascia
@@ -84,7 +92,22 @@ def check_updates_gui():
     def avvisa(testo):
         wx.CallAfter(mostra_esito, testo)
 
+    def finta():
+        note = (
+            "Prima novità di prova.\n"
+            "Seconda novità di prova, un po' più lunga, per vedere come si scorre il testo con le frecce.\n"
+            "Terza e ultima."
+        )
+        if not proponi(VERSION, "9.9.9", note):
+            return
+        # Il tempo di sentire l'avviso di attesa, poi l'esito che lo chiude.
+        time.sleep(2)
+        avvisa("Prova finita: qui il programma si chiuderebbe per applicare l'aggiornamento.")
+
     def lavoro():
+        if prova:
+            finta()
+            return
         if gestisci_aggiornamento(APP_NAME, VERSION, api_url, proponi=proponi, avvisa=avvisa):
             # ExitMainLoop e basta: il blocco finally del programma chiama poi
             # sys.exit, e chiamarlo da qui significherebbe sollevare SystemExit
@@ -96,7 +119,7 @@ def check_updates_gui():
 
 if __name__ == "__main__":
     app = App()
-    check_updates_gui()
+    check_updates_gui(prova="--prova-aggiornamento" in sys.argv)
     try:
         app.MainLoop()
     except KeyboardInterrupt:
