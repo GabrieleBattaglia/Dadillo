@@ -1359,3 +1359,36 @@ class HallOfFameDialog(wx.Dialog):
             )
 
         self.txt_display.SetValue("\n".join(lines))
+
+
+class UpdateDialog(wx.Dialog):
+    """Propone la versione nuova con le sue novita' e due pulsanti espliciti.
+
+    Le note della release si leggono in un campo di testo, dove si scorrono e
+    si rileggono con le frecce; escape e la chiusura della finestra valgono
+    come non adesso. Fino alla 2.10.0 la domanda era un MessageDialog con si'
+    e no, e le novita' della versione, che update_checker riceve da sempre,
+    non si vedevano da nessuna parte.
+    """
+
+    def __init__(self, parent, versione_attuale, versione_nuova, note):
+        super().__init__(parent, title="Aggiornamento disponibile", size=(560, 480))
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        testo = f"È disponibile la versione {versione_nuova}. Tu hai la {versione_attuale}."
+        vbox.Add(wx.StaticText(self, label=testo), 0, wx.ALL, 10)
+        vbox.Add(wx.StaticText(self, label="Novità di questa versione:"), 0, wx.LEFT | wx.RIGHT, 10)
+        contenuto = (note or "").strip() or "Nessuna nota per questa versione."
+        self.txt_note = wx.TextCtrl(self, value=contenuto, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        vbox.Add(self.txt_note, 1, wx.EXPAND | wx.ALL, 10)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        btn_si = wx.Button(self, wx.ID_YES, "Aggiorna adesso")
+        btn_no = wx.Button(self, wx.ID_NO, "Non adesso")
+        hbox.Add(btn_si, 0, wx.RIGHT, 10)
+        hbox.Add(btn_no, 0)
+        vbox.Add(hbox, 0, wx.ALIGN_CENTER | wx.ALL, 10)
+        self.SetSizer(vbox)
+        btn_si.Bind(wx.EVT_BUTTON, lambda e: self.EndModal(wx.ID_YES))
+        btn_no.Bind(wx.EVT_BUTTON, lambda e: self.EndModal(wx.ID_NO))
+        self.SetAffirmativeId(wx.ID_YES)
+        self.SetEscapeId(wx.ID_NO)
+        self.txt_note.SetFocus()

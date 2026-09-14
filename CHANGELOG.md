@@ -2,6 +2,15 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.11.0] - 2026-09-14
+
+### Aggiunto
+- **Le novità della versione nella finestra di aggiornamento**: una finestra nuova mostra la versione disponibile, quella in uso e le note della release in un campo di testo che si scorre e si rilegge con le frecce, con i pulsanti Aggiorna adesso e Non adesso; escape vale come Non adesso. Fino alla 2.10.0 la domanda era un sì o no secco e le note, che il controllo riceve da sempre, non si vedevano da nessuna parte. Mentre scarica compare l'avviso di attesa, che prima mancava.
+
+### Modificato
+- Il controllo aggiornamenti passa da `gestisci_aggiornamento` di GBUtils, che dalla V159 tace finché non c'è davvero un aggiornamento: è la issue 21, aperta perché Dadillo e Cartella si erano riscritti ognuno il proprio giro. Qui restano la finestra e il ponte fra il thread del controllo e quello che può aprirla; il confronto delle versioni, lo scaricamento e gli esiti sono adesso scritti in un posto solo per tutto il parco software.
+- La versione compilata, al primo avvio dopo un aggiornamento, si porta via i residui che la vecchia installazione aveva lasciato dentro `_internal`. È la issue 27 di GBUtils, nata proprio dal guasto di Dadillo: dopo un aggiornamento dalla 2.7.1 o dalla 2.8.0, la cartella `simplejson` restava con dentro il solo binario e faceva fallire l'importazione di `requests`, lasciando la 2.10.0 senza controllo aggiornamenti. La pulizia arriva da GBUtils e Dadillo non deve fare niente.
+
 ## [2.10.0] - 2026-09-04
 
 Pubblicata su GitHub il 2026-09-04 come release `v2.10.0`, con il solo archivio `Dadillo.zip` in allegato. Verificato che l'auto updater la riconosca e ne riceva le note. Issue 3 chiusa.
