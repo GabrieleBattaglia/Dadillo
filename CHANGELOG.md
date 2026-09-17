@@ -2,6 +2,11 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.11.1] - 2026-09-17
+
+### Modificato
+- Il percorso di GBUtils nella ricetta di compilazione si ricava adesso dalla posizione della ricetta stessa, dove prima era `../GBUtils`, cioe' un percorso relativo alla cartella da cui si lanciava PyInstaller: bastava compilare da un'altra cartella perche' non lo trovasse. E' il punto 5.1 del prontuario di rilascio.
+
 ## [2.11.0] - 2026-09-14
 
 ### Aggiunto

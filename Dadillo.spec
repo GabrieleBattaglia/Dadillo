@@ -1,13 +1,17 @@
 # -*- mode: python ; coding: utf-8 -*-
+import os
 
+# Il percorso di GBUtils si ricava dalla posizione di questo file, cosi' la
+# compilazione riesce anche su una macchina dove i repository stanno altrove.
+GBUTILS_DIR = os.path.abspath(os.path.join(SPECPATH, '..', 'GBUtils'))
 
 a = Analysis(
     ['Dadillo.py'],
     # GBUtils, che fornisce il controllo aggiornamenti, non e' installato fra i
     # pacchetti: sta accanto al progetto e di solito si trova per PYTHONPATH.
-    # Dichiararlo qui rende la compilazione ripetibile su qualsiasi macchina che
-    # rispetti la struttura di E:\git\mine.
-    pathex=['../GBUtils'],
+    # Dichiararlo qui rende la compilazione ripetibile su qualsiasi macchina,
+    # ovunque stiano i repository.
+    pathex=[GBUTILS_DIR],
     binaries=[],
     # Dadillo non carica nessuna risorsa esterna, ne' immagini ne' suoni:
     # tutto quello che gli serve sono i suoi file di dati, che nascono accanto
