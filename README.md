@@ -1,14 +1,15 @@
-# Dadillo - L'Altare del Sacrificio (Versione 2.11.1)
+# Dadillo - L'Altare del Sacrificio (Versione 2.11.2)
 
 **Dadillo** è un gestore di tornei scritto in Python. Gestisce giocatori, abbinamenti, classifiche e record con una personalità... *molto devota* al suo utilizzatore.
 
-Le versioni dalla 2.8.1 alla 2.9.1 sono il risultato della revisione completa del codice, fase 1: salvataggi che non possono più lasciare i dati a metà, archivi danneggiati riconosciuti invece che sovrascritti, classifiche riscritte per la lettura con screen reader e display braille, regole del torneo coerenti fra tutte le finestre. Dalla 2.10.0 in poi sono arrivate la modifica delle date del torneo, la finestra di aggiornamento con le note della versione e la pulizia dei residui dopo un aggiornamento. Il dettaglio è nel [CHANGELOG](CHANGELOG.md).
+Le versioni dalla 2.8.1 alla 2.9.1 sono il risultato della revisione completa del codice, fase 1: salvataggi che non possono più lasciare i dati a metà, archivi danneggiati riconosciuti invece che sovrascritti, classifiche riscritte per la lettura con screen reader e display braille, regole del torneo coerenti fra tutte le finestre. Dalla 2.10.0 in poi sono arrivate la modifica delle date del torneo, la finestra di aggiornamento con le note della versione la pulizia dei residui dopo un aggiornamento e, con la 2.11.2, finestre che si adattano ai caratteri grandi. Il dettaglio è nel [CHANGELOG](CHANGELOG.md).
 
 ## Caratteristiche
 
 - **Date del torneo modificabili (Novità 2.10.0)**: dal menu Opzioni, la voce "Modifica date del torneo" apre una finestra con data e ora di inizio e di fine, già compilate, nel formato giorno/mese/anno e ore:minuti. La data di fine si può lasciare vuota se il torneo è in corso. La voce resta disponibile anche a torneo concluso, e se le medaglie sono già state assegnate le nuove date vengono riscritte anche nello storico di tutti i discepoli che hanno partecipato, con `Giocatori.txt` rigenerato di conseguenza. Se la data non esiste sul calendario, o la fine viene prima dell'inizio, Dadillo lo dice con un messaggio parlante.
 - **Le novità della versione sotto gli occhi (Novità 2.11.0)**: quando c'è un aggiornamento, la finestra mostra la versione disponibile, quella in uso e le note della release in un campo che si scorre e si rilegge con le frecce, con i pulsanti Aggiorna adesso e Non adesso; Escape vale come Non adesso. Fino alla 2.10.0 la domanda era un sì o no secco e le note non si vedevano da nessuna parte. Mentre scarica compare l'avviso di attesa, che prima mancava.
 - **Residui puliti dopo un aggiornamento (Novità 2.11.0)**: la versione compilata, al primo avvio dopo un aggiornamento, si porta via i file che la vecchia installazione aveva lasciato indietro. Nasce da un guasto vero: dopo un aggiornamento dalla 2.7.1 o dalla 2.8.0 restava una cartella a metà che impediva il controllo degli aggiornamenti successivi.
+- **Finestre che si adattano ai caratteri grandi (Novità 2.11.2)**: con i caratteri di Windows ingranditi, per esempio al 150 per cento, ogni finestra prende la misura del suo contenuto, si allarga trascinando il bordo o si ingrandisce a tutto schermo, e se non ci sta nello schermo scorre. Spostandosi col tab, il campo che riceve il focus viene sempre portato in vista. Fino alla 2.11.1 le finestre avevano una misura fissa, e con i caratteri grandi il campo del risultato e i pulsanti finivano fuori, senza modo di raggiungerli. Nella schermata delle classifiche le cinque scelte in alto vanno a capo invece di uscire dal bordo. Con lo screen reader non cambia niente: le finestre si leggono e si percorrono come prima.
 - **Interfaccia Grafica**: Liste interattive, finestre di dialogo chiare e complete di supporto screen reader (NVDA/Jaws).
 - **Classifica leggibile a colpo d'orecchio (Novità 2.9.0)**: Ogni giocatore occupa una riga sola, con una lettera davanti a ogni valore e la legenda subito sopra: `1. Marco, oro. T12 V4 P0 S2`, dove T sono i punti, V le vittorie, P i pareggi e S le sconfitte. Nella classifica parziale compare anche G, le partite giocate su quelle totali. Nessun separatore grafico, nessuna riga vuota, nessuna emoji: le medaglie sono scritte per esteso come oro, argento, bronzo e legno.
 - **Gestione Tornei Round Robin**: Calcola automaticamente gli abbinamenti di andata e ritorno o solo andata.
@@ -39,6 +40,17 @@ pip install -r requirements.txt
 ```
 
 Dadillo usa inoltre la libreria personale `GBUtils` per il controllo degli aggiornamenti, che serve solo all'eseguibile compilato: da sorgente il programma parte anche senza.
+
+### Aggiornare dalla 2.7.0 o da una versione precedente
+
+Fino alla 2.7.0 compresa l'aggiornamento automatico non arriva in fondo se, al momento del sì, è aperta la finestra Nuovo Torneo o quella dei giocatori: la versione vecchia non si chiude, la copia non avviene e si apre un'altra finestra della versione vecchia, che ripropone l'aggiornamento. Ogni tentativo ne aggiunge una. Il difetto sta nella versione installata e nessun pacchetto nuovo lo può aggirare; con un torneo in corso o concluso, invece, l'aggiornamento riesce. Se ti succede, aggiorna a mano:
+
+1. Chiudi tutte le finestre di Dadillo, comprese quelle aperte dai tentativi falliti.
+2. Scarica `Dadillo.zip` dall'ultima release su GitHub.
+3. Nella cartella di Dadillo cancella `Dadillo.exe` e la cartella `_internal`.
+4. Estrai l'archivio nella stessa cartella.
+
+I file dei dati accanto all'eseguibile, cioè `Dadillo.json`, `Dadillo_players.json`, `Dadillo_settings.json` e `Giocatori.txt`, non vanno toccati: la versione nuova li legge così come sono.
 
 ## Avvio
 
@@ -86,7 +98,7 @@ Vivono tutti nella cartella dell'applicazione.
 
 Creato e ideato da **Gabriele Battaglia (IZ4APU)**.
 
-Hanno contribuito o fornito supporto: Bersan Vrioni, Marco De Paoli, Emanuela Pontiroli, Stella Gemini e ClaudIA (Claude Opus 5), che hanno curato la logica, la GUI e l'accessibilità.
+Hanno contribuito o fornito supporto: Bersan Vrioni, Marco De Paoli, Emanuela Pontiroli, Stella Gemini e ClaudIA (Claude Opus 5 e Opus 5.5), che hanno curato la logica, la GUI e l'accessibilità.
 
 ## Licenza
 

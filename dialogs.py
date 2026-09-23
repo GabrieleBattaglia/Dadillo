@@ -20,16 +20,38 @@ from data import (
     placement_stats,
     timestamp_to_fields,
 )
-from ui_utils import save_or_warn
+from ui_utils import (
+    STILE_ADATTABILE,
+    adatta_finestra,
+    pannello_scorrevole,
+    save_or_warn,
+)
 
 
 class SetupTournamentDialog(wx.Dialog):
     def __init__(self, parent):
-        super().__init__(parent, title="Nuovo Torneo di Adorazione", size=(580, 680))
+        super().__init__(parent, title="Nuovo Torneo di Adorazione", style=STILE_ADATTABILE)
 
-        panel = wx.Panel(self)
+        panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
+        self._crea_nome_e_commento(panel, vbox)
+        self.cb_type = self._aggiungi_scelta(
+            panel,
+            vbox,
+            "Tipologia di Girone:",
+            [
+                "Girone all'Italiana (Andata e Ritorno)",
+                "Girone all'Italiana (Solo Andata)",
+            ],
+            10,
+        )
+        vbox.Add(self._crea_punteggi(panel), 0, wx.LEFT | wx.RIGHT | wx.EXPAND | wx.TOP, 10)
+        vbox.Add(self._crea_criteri(panel), 0, wx.LEFT | wx.RIGHT | wx.EXPAND | wx.TOP, 10)
+        vbox.Add(self._crea_pulsanti(panel), 0, wx.ALIGN_CENTER | wx.ALL, 10)
+        panel.SetSizer(vbox)
+        adatta_finestra(self, panel, (580, 680))
 
+    def _crea_nome_e_commento(self, panel, vbox):
         msg = wx.StaticText(
             panel,
             label="Oh mio adorato, supremo Maestro!\nDimmi come vuoi chiamare questo nuovo atto di sottomissione:",
@@ -48,21 +70,22 @@ class SetupTournamentDialog(wx.Dialog):
         vbox.Add(lbl_comment, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
         vbox.Add(self.txt_comment, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
 
-        # --- NEW SETTINGS FOR V2.1.0 ---
-        # 1. Tipologia di girone
-        lbl_type = wx.StaticText(panel, label="Tipologia di Girone:")
-        self.cb_type = wx.Choice(
-            panel,
-            choices=[
-                "Girone all'Italiana (Andata e Ritorno)",
-                "Girone all'Italiana (Solo Andata)",
-            ],
-        )
-        self.cb_type.SetSelection(0)  # Default: Andata e Ritorno
-        vbox.Add(lbl_type, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
-        vbox.Add(self.cb_type, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+    @staticmethod
+    def _aggiungi_scelta(genitore, sizer, etichetta, scelte, margine):
+        """Un'etichetta con sotto la sua lista di scelte, ferma sulla prima voce."""
+        sizer.Add(wx.StaticText(genitore, label=etichetta), 0, wx.LEFT | wx.RIGHT | wx.TOP, margine)
+        scelta = wx.Choice(genitore, choices=scelte)
+        scelta.SetSelection(0)
+        sizer.Add(scelta, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, margine)
+        return scelta
 
-        # 2. Punteggi Predefiniti
+    def _crea_punteggi(self, panel):
+        """Il riquadro dei punteggi predefiniti.
+        I controlli dei due riquadri sono figli del riquadro e non del
+        pannello, come vuole wxPython: e' da li' che lo screen reader ricava
+        il nome del gruppo. Fino alla 2.11.1 erano figli del pannello, e
+        all'apertura wxPython scriveva un avviso per ciascuno (issue 6).
+        """
         pts_box = wx.StaticBoxSizer(
             wx.StaticBox(
                 panel,
@@ -70,71 +93,51 @@ class SetupTournamentDialog(wx.Dialog):
             ),
             wx.HORIZONTAL,
         )
+        box = pts_box.GetStaticBox()
+        # Sette caratteri di larghezza, che crescono con i caratteri di Windows
+        # dove i 50 pixel di prima restavano fermi.
+        larghezza = (box.GetCharWidth() * 7, -1)
+        campi = []
+        for etichetta in (" Vittoria:", " Pareggio:", " Sconfitta:"):
+            pts_box.Add(wx.StaticText(box, label=etichetta), 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+            campo = wx.TextCtrl(box, size=larghezza)
+            pts_box.Add(campo, 0, wx.ALL, 5)
+            campi.append(campo)
+        self.txt_win, self.txt_draw, self.txt_loss = campi
+        return pts_box
 
-        lbl_win = wx.StaticText(panel, label=" Vittoria:")
-        self.txt_win = wx.TextCtrl(panel, size=(50, -1))
-
-        lbl_draw = wx.StaticText(panel, label=" Pareggio:")
-        self.txt_draw = wx.TextCtrl(panel, size=(50, -1))
-
-        lbl_loss = wx.StaticText(panel, label=" Sconfitta:")
-        self.txt_loss = wx.TextCtrl(panel, size=(50, -1))
-
-        pts_box.Add(lbl_win, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
-        pts_box.Add(self.txt_win, 0, wx.ALL, 5)
-        pts_box.Add(lbl_draw, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
-        pts_box.Add(self.txt_draw, 0, wx.ALL, 5)
-        pts_box.Add(lbl_loss, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
-        pts_box.Add(self.txt_loss, 0, wx.ALL, 5)
-
-        vbox.Add(pts_box, 0, wx.LEFT | wx.RIGHT | wx.EXPAND | wx.TOP, 10)
-
-        # 3. Criteri di Classifica e Spareggi (v2.6.0)
+    def _crea_criteri(self, panel):
+        """Il riquadro dei criteri di classifica e degli spareggi (v2.6.0)."""
         rank_box = wx.StaticBoxSizer(
             wx.StaticBox(panel, label="Criteri di Classifica e Spareggi"), wx.VERTICAL
         )
-
-        lbl_main = wx.StaticText(panel, label="Criterio Principale:")
-        self.cb_main_criterion = wx.Choice(panel, choices=list(MAIN_CRITERIA))
-        self.cb_main_criterion.SetSelection(0)
-
-        lbl_score_dir = wx.StaticText(panel, label="Priorità Punteggio:")
-        self.cb_score_direction = wx.Choice(
-            panel,
-            choices=["Punteggio più alto (Migliore)", "Punteggio più basso (Migliore)"],
+        box = rank_box.GetStaticBox()
+        self.cb_main_criterion = self._aggiungi_scelta(
+            box, rank_box, "Criterio Principale:", list(MAIN_CRITERIA), 5
         )
-        self.cb_score_direction.SetSelection(0)
+        self.cb_score_direction = self._aggiungi_scelta(
+            box,
+            rank_box,
+            "Priorità Punteggio:",
+            ["Punteggio più alto (Migliore)", "Punteggio più basso (Migliore)"],
+            5,
+        )
+        self.cb_tiebreaker_1 = self._aggiungi_scelta(
+            box, rank_box, "Primo Spareggio (Scontri Diretti):", list(TIEBREAKERS_1), 5
+        )
+        self.cb_tiebreaker_2 = self._aggiungi_scelta(
+            box, rank_box, "Secondo Spareggio (Totale nel Torneo):", list(TIEBREAKERS_2), 5
+        )
+        return rank_box
 
-        lbl_tie1 = wx.StaticText(panel, label="Primo Spareggio (Scontri Diretti):")
-        self.cb_tiebreaker_1 = wx.Choice(panel, choices=list(TIEBREAKERS_1))
-        self.cb_tiebreaker_1.SetSelection(0)
-
-        lbl_tie2 = wx.StaticText(panel, label="Secondo Spareggio (Totale nel Torneo):")
-        self.cb_tiebreaker_2 = wx.Choice(panel, choices=list(TIEBREAKERS_2))
-        self.cb_tiebreaker_2.SetSelection(0)
-
-        rank_box.Add(lbl_main, 0, wx.LEFT | wx.RIGHT | wx.TOP, 5)
-        rank_box.Add(self.cb_main_criterion, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 5)
-        rank_box.Add(lbl_score_dir, 0, wx.LEFT | wx.RIGHT | wx.TOP, 5)
-        rank_box.Add(self.cb_score_direction, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 5)
-        rank_box.Add(lbl_tie1, 0, wx.LEFT | wx.RIGHT | wx.TOP, 5)
-        rank_box.Add(self.cb_tiebreaker_1, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 5)
-        rank_box.Add(lbl_tie2, 0, wx.LEFT | wx.RIGHT | wx.TOP, 5)
-        rank_box.Add(self.cb_tiebreaker_2, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 5)
-
-        vbox.Add(rank_box, 0, wx.LEFT | wx.RIGHT | wx.EXPAND | wx.TOP, 10)
-        # -------------------------------
-
+    def _crea_pulsanti(self, panel):
         btn_box = wx.BoxSizer(wx.HORIZONTAL)
         self.btn_ok = wx.Button(panel, wx.ID_OK, "Sia fatta la tua volontà!")
         self.btn_ok.Bind(wx.EVT_BUTTON, self.on_ok)
         btn_cancel = wx.Button(panel, wx.ID_CANCEL, "Pietà, ho cambiato idea!")
         btn_box.Add(self.btn_ok, 0, wx.ALL, 5)
         btn_box.Add(btn_cancel, 0, wx.ALL, 5)
-
-        vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
-
-        panel.SetSizer(vbox)
+        return btn_box
 
     def on_title_enter(self, event):
         self.txt_comment.SetFocus()
@@ -202,11 +205,11 @@ class SetupTournamentDialog(wx.Dialog):
 
 class SetupPlayersDialog(wx.Dialog):
     def __init__(self, parent, existing_players=None, db=None):
-        super().__init__(parent, title="Raduna i Tuoi Discepoli", size=(500, 650))
+        super().__init__(parent, title="Raduna i Tuoi Discepoli", style=STILE_ADATTABILE)
 
         self.players = existing_players[:] if existing_players else []
 
-        panel = wx.Panel(self)
+        panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         msg = wx.StaticText(
@@ -270,6 +273,7 @@ class SetupPlayersDialog(wx.Dialog):
         vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
 
         panel.SetSizer(vbox)
+        adatta_finestra(self, panel, (500, 650))
 
     def update_db_label(self):
         count = self.list_db_players.GetCount()
@@ -411,10 +415,10 @@ class SetupPlayersDialog(wx.Dialog):
 
 class MatchResultDialog(wx.Dialog):
     def __init__(self, parent, match_id, p1, p2, use_defaults=False):
-        super().__init__(parent, title="Qual è il verdetto divino?", size=(380, 280))
+        super().__init__(parent, title="Qual è il verdetto divino?", style=STILE_ADATTABILE)
         self.use_defaults = use_defaults
 
-        panel = wx.Panel(self)
+        panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         lbl = wx.StaticText(
@@ -448,8 +452,6 @@ class MatchResultDialog(wx.Dialog):
             )
             vbox.Add(lbl_pts, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
             self.txt_pts = None
-            # riduciamo la dimensione della finestra se non serve il campo
-            self.SetSize((380, 230))
 
         btn_box = wx.BoxSizer(wx.HORIZONTAL)
         self.btn_ok = wx.Button(panel, wx.ID_OK, "Suggella il fato!")
@@ -460,6 +462,8 @@ class MatchResultDialog(wx.Dialog):
 
         vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
         panel.SetSizer(vbox)
+        # Senza il campo dei punti la finestra, al 100 per cento, e' piu' bassa.
+        adatta_finestra(self, panel, (380, 280) if self.txt_pts else (380, 230))
 
     def on_pts_enter(self, event):
         if self.txt_pts and self.txt_pts.GetValue().strip() != "":
@@ -510,10 +514,10 @@ class MatchResultDialog(wx.Dialog):
 
 class SettingsDialog(wx.Dialog):
     def __init__(self, parent, settings):
-        super().__init__(parent, title="Le Regole del Sangue", size=(480, 480))
+        super().__init__(parent, title="Le Regole del Sangue", style=STILE_ADATTABILE)
         self.settings = settings
 
-        panel = wx.Panel(self)
+        panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         lbl_msg = wx.StaticText(
@@ -594,6 +598,7 @@ class SettingsDialog(wx.Dialog):
 
         vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
         panel.SetSizer(vbox)
+        adatta_finestra(self, panel, (480, 480))
 
     def get_settings(self):
         self.settings.main_criterion = normalize_main_criterion(
@@ -613,11 +618,11 @@ class SettingsDialog(wx.Dialog):
 
 class AddPlayerDialog(wx.Dialog):
     def __init__(self, parent, existing_players):
-        super().__init__(parent, title="Nuova Carne da Macello", size=(400, 200))
+        super().__init__(parent, title="Nuova Carne da Macello", style=STILE_ADATTABILE)
         self.existing_players = existing_players
         self.new_name = ""
 
-        panel = wx.Panel(self)
+        panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         msg = wx.StaticText(
@@ -639,6 +644,7 @@ class AddPlayerDialog(wx.Dialog):
 
         vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
         panel.SetSizer(vbox)
+        adatta_finestra(self, panel, (400, 200))
 
     def on_enter(self, event):
         # Invio e pulsante devono passare per la stessa validazione: prima
@@ -678,12 +684,12 @@ class EditDatesDialog(wx.Dialog):
     """
 
     def __init__(self, parent, start_date, end_date, torneo_concluso):
-        super().__init__(parent, title="Modifica date del torneo", size=(460, 340))
+        super().__init__(parent, title="Modifica date del torneo", style=STILE_ADATTABILE)
         self.torneo_concluso = torneo_concluso
         self.start_date = start_date
         self.end_date = end_date
 
-        panel = wx.Panel(self)
+        panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         avviso = (
@@ -727,6 +733,7 @@ class EditDatesDialog(wx.Dialog):
         vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
 
         panel.SetSizer(vbox)
+        adatta_finestra(self, panel, (460, 340))
         wx.CallAfter(self.txt_data_inizio.SetFocus)
 
     def on_ok(self, event):
@@ -786,9 +793,9 @@ class EditDatesDialog(wx.Dialog):
 
 class RetirePlayerDialog(wx.Dialog):
     def __init__(self, parent, existing_players):
-        super().__init__(parent, title="Sopprimi l'Eretico", size=(400, 200))
+        super().__init__(parent, title="Sopprimi l'Eretico", style=STILE_ADATTABILE)
 
-        panel = wx.Panel(self)
+        panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         msg = wx.StaticText(panel, label="Chi ha osato fuggire dalla tua ira?")
@@ -807,6 +814,7 @@ class RetirePlayerDialog(wx.Dialog):
 
         vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
         panel.SetSizer(vbox)
+        adatta_finestra(self, panel, (400, 200))
 
     def get_selected(self):
         return self.cb_players.GetStringSelection()
@@ -814,9 +822,9 @@ class RetirePlayerDialog(wx.Dialog):
 
 class TournamentFinalReviewChoiceDialog(wx.Dialog):
     def __init__(self, parent):
-        super().__init__(parent, title="Destino della Hall of Fame", size=(540, 360))
+        super().__init__(parent, title="Destino della Hall of Fame", style=STILE_ADATTABILE)
 
-        panel = wx.Panel(self)
+        panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         msg_text = (
@@ -852,6 +860,7 @@ class TournamentFinalReviewChoiceDialog(wx.Dialog):
 
         vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
         panel.SetSizer(vbox)
+        adatta_finestra(self, panel, (540, 360))
         self.SetEscapeId(wx.ID_CANCEL)
 
         self.btn_individual.Bind(wx.EVT_BUTTON, self.on_individual)
@@ -884,10 +893,10 @@ class SinglePlayerReviewDialog(wx.Dialog):
         tied_with=None,
     ):
         super().__init__(
-            parent, title=f"Aggiornamento Discepolo: {player_name}", size=(500, 320)
+            parent, title=f"Aggiornamento Discepolo: {player_name}", style=STILE_ADATTABILE
         )
 
-        panel = wx.Panel(self)
+        panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         med_text = f" ({medal_str})" if medal_str else ""
@@ -920,6 +929,7 @@ class SinglePlayerReviewDialog(wx.Dialog):
 
         vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
         panel.SetSizer(vbox)
+        adatta_finestra(self, panel, (500, 320))
 
         wx.CallAfter(self.txt_msg.SetFocus)
 
@@ -927,12 +937,12 @@ class SinglePlayerReviewDialog(wx.Dialog):
 class MergeSimilarPlayerDialog(wx.Dialog):
     def __init__(self, parent, ext_name, local_name):
         super().__init__(
-            parent, title="Risoluzione Similarità Discepoli", size=(560, 380)
+            parent, title="Risoluzione Similarità Discepoli", style=STILE_ADATTABILE
         )
         self.ext_name = ext_name
         self.local_name = local_name
 
-        panel = wx.Panel(self)
+        panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         msg_text = (
@@ -969,6 +979,7 @@ class MergeSimilarPlayerDialog(wx.Dialog):
 
         vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
         panel.SetSizer(vbox)
+        adatta_finestra(self, panel, (560, 380))
 
         wx.CallAfter(self.txt_msg.SetFocus)
 
@@ -983,9 +994,9 @@ class MergeSimilarPlayerDialog(wx.Dialog):
 
 class UpdatePlayerDialog(wx.Dialog):
     def __init__(self, parent, player_name, position):
-        super().__init__(parent, title="Conferma Aggiornamento", size=(500, 300))
+        super().__init__(parent, title="Conferma Aggiornamento", style=STILE_ADATTABILE)
 
-        panel = wx.Panel(self)
+        panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         msg_text = (
@@ -1008,6 +1019,7 @@ class UpdatePlayerDialog(wx.Dialog):
 
         vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
         panel.SetSizer(vbox)
+        adatta_finestra(self, panel, (500, 300))
 
         self.btn_yes.Bind(wx.EVT_BUTTON, self.on_yes)
         self.btn_no.Bind(wx.EVT_BUTTON, self.on_no)
@@ -1023,9 +1035,9 @@ class UpdatePlayerDialog(wx.Dialog):
 
 class PlayerDetailsDialog(wx.Dialog):
     def __init__(self, parent, name, p_data):
-        super().__init__(parent, title=f"Dettagli Discepolo: {name}", size=(500, 400))
+        super().__init__(parent, title=f"Dettagli Discepolo: {name}", style=STILE_ADATTABILE)
 
-        panel = wx.Panel(self)
+        panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         m = p_data["medals"]
@@ -1049,19 +1061,20 @@ class PlayerDetailsDialog(wx.Dialog):
         vbox.Add(btn, 0, wx.ALIGN_CENTER | wx.BOTTOM, 10)
 
         panel.SetSizer(vbox)
+        adatta_finestra(self, panel, (500, 400))
         wx.CallAfter(txt_ctrl.SetFocus)
 
 
 class ManagePlayersDialog(wx.Dialog):
     def __init__(self, parent, db=None):
-        super().__init__(parent, title="Gestione Discepoli", size=(550, 480))
+        super().__init__(parent, title="Gestione Discepoli", style=STILE_ADATTABILE)
         self.parent = parent
 
         # L'archivio arriva dalla finestra principale: una sola copia in memoria,
         # cosi' una rinomina qui si vede subito anche nelle altre finestre.
         self.db = db if db is not None else PlayerDB()
 
-        panel = wx.Panel(self)
+        panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         lbl = wx.StaticText(panel, label="Elenco dei giocatori presenti nel database:")
@@ -1088,6 +1101,7 @@ class ManagePlayersDialog(wx.Dialog):
 
         vbox.Add(btn_sizer, 0, wx.ALIGN_CENTER | wx.ALL, 10)
         panel.SetSizer(vbox)
+        adatta_finestra(self, panel, (550, 480))
 
         wx.CallAfter(self.list_players.SetFocus)
 
@@ -1224,12 +1238,12 @@ class ManagePlayersDialog(wx.Dialog):
 class HallOfFameDialog(wx.Dialog):
     def __init__(self, parent, db=None):
         super().__init__(
-            parent, title="Classifica Generale (Hall of Fame)", size=(700, 550)
+            parent, title="Classifica Generale (Hall of Fame)", style=STILE_ADATTABILE
         )
 
         self.db = db if db is not None else PlayerDB()
 
-        panel = wx.Panel(self)
+        panel = pannello_scorrevole(self)
         main_sizer = wx.BoxSizer(wx.VERTICAL)
 
         ctrl_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -1272,6 +1286,7 @@ class HallOfFameDialog(wx.Dialog):
         main_sizer.Add(btn_sizer, 0, wx.ALIGN_CENTER | wx.ALL, 5)
 
         panel.SetSizer(main_sizer)
+        adatta_finestra(self, panel, (700, 550))
         self.update_display()
 
         wx.CallAfter(self.txt_display.SetFocus)
@@ -1372,21 +1387,23 @@ class UpdateDialog(wx.Dialog):
     """
 
     def __init__(self, parent, versione_attuale, versione_nuova, note):
-        super().__init__(parent, title="Aggiornamento disponibile", size=(560, 480))
+        super().__init__(parent, title="Aggiornamento disponibile", style=STILE_ADATTABILE)
+        panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
         testo = f"È disponibile la versione {versione_nuova}. Tu hai la {versione_attuale}."
-        vbox.Add(wx.StaticText(self, label=testo), 0, wx.ALL, 10)
-        vbox.Add(wx.StaticText(self, label="Novità di questa versione:"), 0, wx.LEFT | wx.RIGHT, 10)
+        vbox.Add(wx.StaticText(panel, label=testo), 0, wx.ALL, 10)
+        vbox.Add(wx.StaticText(panel, label="Novità di questa versione:"), 0, wx.LEFT | wx.RIGHT, 10)
         contenuto = (note or "").strip() or "Nessuna nota per questa versione."
-        self.txt_note = wx.TextCtrl(self, value=contenuto, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self.txt_note = wx.TextCtrl(panel, value=contenuto, style=wx.TE_MULTILINE | wx.TE_READONLY)
         vbox.Add(self.txt_note, 1, wx.EXPAND | wx.ALL, 10)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        btn_si = wx.Button(self, wx.ID_YES, "Aggiorna adesso")
-        btn_no = wx.Button(self, wx.ID_NO, "Non adesso")
+        btn_si = wx.Button(panel, wx.ID_YES, "Aggiorna adesso")
+        btn_no = wx.Button(panel, wx.ID_NO, "Non adesso")
         hbox.Add(btn_si, 0, wx.RIGHT, 10)
         hbox.Add(btn_no, 0)
         vbox.Add(hbox, 0, wx.ALIGN_CENTER | wx.ALL, 10)
-        self.SetSizer(vbox)
+        panel.SetSizer(vbox)
+        adatta_finestra(self, panel, (560, 480))
         btn_si.Bind(wx.EVT_BUTTON, lambda e: self.EndModal(wx.ID_YES))
         btn_no.Bind(wx.EVT_BUTTON, lambda e: self.EndModal(wx.ID_NO))
         self.SetAffirmativeId(wx.ID_YES)

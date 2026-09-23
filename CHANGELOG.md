@@ -2,6 +2,21 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.11.2] - 2026-09-23
+
+Prima release pubblica dopo la 2.10.0: porta con se' anche le novita' della 2.11.0 e della 2.11.1, che non sono uscite da sole.
+
+### Risolto
+- **Finestre inservibili con i caratteri grandi**: un utente con i caratteri di Windows al 150 per cento non riusciva a inserire i risultati, perche' la finestra non mostrava il campo da compilare e non si poteva ne' allargare ne' scorrere. Ogni finestra aveva una misura fissa in pixel, scelta con i caratteri al 100 per cento, e nessun bordo per ridimensionarla. Adesso tutte le finestre di dialogo passano da `adatta_finestra` di `ui_utils.py`: prendono la misura del contenuto, tenendo quella di prima come minimo, restano dentro lo schermo, si ridimensionano e si ingrandiscono, e il contenuto sta in un pannello che scorre e porta in vista il controllo che riceve il focus. Vale per le quindici finestre di dialogo, per il resoconto della fusione dell'archivio e per la finestra principale. Con lo screen reader non cambia niente.
+- Nella schermata delle classifiche le cinque scelte in alto erano in una riga sola, che con i caratteri grandi usciva dal bordo anche a finestra ingrandita: adesso vanno a capo, ogni etichetta accanto alla sua scelta.
+- Tre finestre erano troppo strette gia' con i caratteri al 100 per cento: il risultato della partita, 298 pixel di contenuto in 280 di finestra, la modifica delle date e la scelta della premiazione. Misurato con un banco che apre le quindici finestre con i caratteri al 100, al 150 e al 250 per cento.
+- **Riquadri della finestra Nuovo Torneo** (issue 6): i controlli dei Punteggi Predefiniti e dei Criteri di Classifica sono adesso figli del loro riquadro, come vuole wxPython, e all'apertura non compaiono piu' i quattordici avvisi. L'ordine di tabulazione e' rimasto quello di prima, verificato passo per passo. I campi dei punteggi sono larghi sette caratteri invece di 50 pixel fissi, cosi' crescono con il carattere.
+
+### Modificato
+- **Le funzioni piu' lunghe spezzate in pezzi** (issue 7): `update_display`, `rank_tournament_players`, `on_proceed`, il costruttore della schermata delle classifiche, quello della finestra Nuovo Torneo e `merge_db` superavano le cento righe, la prima ne contava 348. Ogni criterio di classifica e ogni sezione della schermata sta adesso in una funzione propria; i calcoli sono rimasti quelli di prima, e le 34 prove automatiche passano senza modifiche.
+- Nel README, per chi ha la 2.7.0 o una versione precedente, la procedura per aggiornare a mano quando l'aggiornamento automatico si blocca (issue 8).
+- Compilata con GBUtils V167, la cui `perform_update` aspetta la chiusura vera del programma prima di copiare (issue 8).
+
 ## [2.11.1] - 2026-09-17
 
 ### Modificato

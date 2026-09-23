@@ -814,64 +814,13 @@ class PlayerDB:
         if not isinstance(ext_data, dict):
             return False, ["Il file non e' nel formato corretto."]
 
-        import difflib
-
         for ext_name, ext_p in ext_data.items():
             if not isinstance(ext_p, dict) or "history" not in ext_p:
                 continue
 
             target_name = ext_name
-
             if target_name not in self.players:
-                # Ricerca candidati simili nel DB locale con difflib
-                candidates = []
-                for local_name in list(self.players.keys()):
-                    ratio = difflib.SequenceMatcher(
-                        None, ext_name.lower(), local_name.lower()
-                    ).ratio()
-                    if (
-                        ext_name.lower() in local_name.lower()
-                        or local_name.lower() in ext_name.lower()
-                        or ratio >= 0.6
-                    ):
-                        candidates.append((local_name, ratio))
-
-                candidates.sort(key=lambda x: x[1], reverse=True)
-
-                if candidates and interactive_resolver:
-                    best_candidate = candidates[0][0]
-                    is_same, chosen_name = interactive_resolver(
-                        ext_name, best_candidate
-                    )
-                    if is_same and chosen_name:
-                        if (
-                            chosen_name != best_candidate
-                            and best_candidate in self.players
-                        ):
-                            if chosen_name in self.players:
-                                # Il nome scelto appartiene gia' a un altro discepolo:
-                                # i due storici vengono fusi, mai sovrascritti.
-                                dati_da_unire = self.players.pop(best_candidate)
-                                storico = self.players[chosen_name].setdefault(
-                                    "history", []
-                                )
-                                aggiunte = 0
-                                for voce in dati_da_unire.get("history", []):
-                                    if voce not in storico:
-                                        storico.append(voce)
-                                        aggiunte += 1
-                                self.recalculate_player_stats(chosen_name)
-                                log.append(
-                                    f"'{best_candidate}' e '{chosen_name}' erano gia' entrambi in archivio: storici uniti sotto '{chosen_name}', {aggiunte} tornei aggiunti."
-                                )
-                            else:
-                                self.players[chosen_name] = self.players.pop(
-                                    best_candidate
-                                )
-                                log.append(
-                                    f"Discepolo '{best_candidate}' rinominato in '{chosen_name}' per unione."
-                                )
-                        target_name = chosen_name
+                target_name = self._risolvi_nome_simile(ext_name, interactive_resolver, log)
 
             if target_name not in self.players:
                 self.players[target_name] = {
@@ -881,31 +830,7 @@ class PlayerDB:
                 }
                 log.append(f"Nuovo discepolo immolato negli archivi: {target_name}")
 
-            # Fusione intelligente e atomica dello storico tornei (senza duplicare medaglie)
-            ext_history = ext_p.get("history", [])
-            for entry in ext_history:
-                parts = entry.split(" - ")
-                if len(parts) == 3:
-                    pos_title, s_date, e_date = parts
-                    formatted_entry = f"{pos_title} - {format_date_extended(s_date)} - {format_date_extended(e_date)}"
-                else:
-                    formatted_entry = entry
-
-                # Due voci descrivono lo stesso torneo se coincidono titolo e date
-                _, titolo_ext, s_ext, e_ext = split_history_entry(formatted_entry)
-                already_present = False
-                for local_entry in self.players[target_name]["history"]:
-                    if formatted_entry == local_entry or entry == local_entry:
-                        already_present = True
-                        break
-                    _, titolo_loc, s_loc, e_loc = split_history_entry(local_entry)
-                    if (titolo_ext, s_ext, e_ext) == (titolo_loc, s_loc, e_loc):
-                        already_present = True
-                        break
-
-                if not already_present:
-                    self.players[target_name]["history"].append(formatted_entry)
-                    log.append(f"  Aggiunto torneo a {target_name}: {formatted_entry}")
+            self._unisci_storico_esterno(target_name, ext_p.get("history", []), log)
 
             # Ricalcolo rigoroso dei contatori medaglie dal nuovo storico
             self.recalculate_player_stats(target_name)
@@ -918,6 +843,92 @@ class PlayerDB:
         else:
             log.append("Fusione sacra completata e archivi aggiornati con successo!")
         return True, log
+
+    def _candidati_simili(self, ext_name):
+        """I discepoli locali dal nome simile, il piu' somigliante per primo."""
+        import difflib
+
+        candidates = []
+        for local_name in list(self.players.keys()):
+            ratio = difflib.SequenceMatcher(
+                None, ext_name.lower(), local_name.lower()
+            ).ratio()
+            if (
+                ext_name.lower() in local_name.lower()
+                or local_name.lower() in ext_name.lower()
+                or ratio >= 0.6
+            ):
+                candidates.append((local_name, ratio))
+
+        candidates.sort(key=lambda x: x[1], reverse=True)
+        return candidates
+
+    def _risolvi_nome_simile(self, ext_name, interactive_resolver, log):
+        """Il nome sotto cui registrare un discepolo che l'archivio non ha.
+        Se in archivio ce n'e' uno dal nome simile, chiede all'utente se e'
+        la stessa persona e con quale nome tenerla; altrimenti resta ext_name.
+        """
+        candidates = self._candidati_simili(ext_name)
+        if not (candidates and interactive_resolver):
+            return ext_name
+
+        best_candidate = candidates[0][0]
+        is_same, chosen_name = interactive_resolver(ext_name, best_candidate)
+        if not (is_same and chosen_name):
+            return ext_name
+
+        if chosen_name != best_candidate and best_candidate in self.players:
+            if chosen_name in self.players:
+                aggiunte = self._unisci_discepoli(best_candidate, chosen_name)
+                log.append(
+                    f"'{best_candidate}' e '{chosen_name}' erano gia' entrambi in archivio: storici uniti sotto '{chosen_name}', {aggiunte} tornei aggiunti."
+                )
+            else:
+                self.players[chosen_name] = self.players.pop(best_candidate)
+                log.append(
+                    f"Discepolo '{best_candidate}' rinominato in '{chosen_name}' per unione."
+                )
+        return chosen_name
+
+    def _unisci_discepoli(self, da_togliere, da_tenere):
+        """Il nome scelto appartiene gia' a un altro discepolo: i due storici
+        vengono fusi, mai sovrascritti. Restituisce i tornei aggiunti.
+        """
+        dati_da_unire = self.players.pop(da_togliere)
+        storico = self.players[da_tenere].setdefault("history", [])
+        aggiunte = 0
+        for voce in dati_da_unire.get("history", []):
+            if voce not in storico:
+                storico.append(voce)
+                aggiunte += 1
+        self.recalculate_player_stats(da_tenere)
+        return aggiunte
+
+    def _unisci_storico_esterno(self, target_name, ext_history, log):
+        """Fusione intelligente e atomica dello storico tornei (senza duplicare medaglie)."""
+        for entry in ext_history:
+            parts = entry.split(" - ")
+            if len(parts) == 3:
+                pos_title, s_date, e_date = parts
+                formatted_entry = f"{pos_title} - {format_date_extended(s_date)} - {format_date_extended(e_date)}"
+            else:
+                formatted_entry = entry
+
+            # Due voci descrivono lo stesso torneo se coincidono titolo e date
+            _, titolo_ext, s_ext, e_ext = split_history_entry(formatted_entry)
+            already_present = False
+            for local_entry in self.players[target_name]["history"]:
+                if formatted_entry == local_entry or entry == local_entry:
+                    already_present = True
+                    break
+                _, titolo_loc, s_loc, e_loc = split_history_entry(local_entry)
+                if (titolo_ext, s_ext, e_ext) == (titolo_loc, s_loc, e_loc):
+                    already_present = True
+                    break
+
+            if not already_present:
+                self.players[target_name]["history"].append(formatted_entry)
+                log.append(f"  Aggiunto torneo a {target_name}: {formatted_entry}")
 
     def export_to_txt(self):
         if self.load_error:

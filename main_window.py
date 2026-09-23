@@ -31,7 +31,12 @@ from dialogs import (
     SetupTournamentDialog,
 )
 from standings import StandingsPanel
-from ui_utils import save_or_warn
+from ui_utils import (
+    STILE_ADATTABILE,
+    adatta_finestra,
+    pannello_scorrevole,
+    save_or_warn,
+)
 from version import VERSION
 
 
@@ -217,7 +222,7 @@ class MainFrame(wx.Frame):
         if self.panel:
             self.panel.Destroy()
 
-        self.panel = wx.Panel(self)
+        self.panel = pannello_scorrevole(self)
         if not self.GetMenuBar():
             self.create_menu()
 
@@ -288,6 +293,7 @@ class MainFrame(wx.Frame):
         main_sizer.Add(right_vbox, 1, wx.EXPAND | wx.ALL, 10)
 
         self.panel.SetSizer(main_sizer)
+        self.panel.SetupScrolling(scrollToTop=False)
         self.update_lists()
         self.Layout()
         self.Show()
@@ -411,6 +417,7 @@ class MainFrame(wx.Frame):
 
         # Forza un ricalcolo del layout
         if self.panel:
+            self.panel.FitInside()
             self.panel.Layout()
 
         self.fill_unplayed_list()
@@ -786,23 +793,23 @@ class MainFrame(wx.Frame):
         dlg = wx.Dialog(
             self,
             title="Resoconto Fusione Database",
-            size=(600, 400),
-            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
+            style=STILE_ADATTABILE,
         )
+        panel = pannello_scorrevole(dlg)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        lbl = wx.StaticText(dlg, label="Ecco il riepilogo delle operazioni eseguite:")
+        lbl = wx.StaticText(panel, label="Ecco il riepilogo delle operazioni eseguite:")
         vbox.Add(lbl, 0, wx.ALL, 10)
 
-        txt = wx.TextCtrl(dlg, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH)
+        txt = wx.TextCtrl(panel, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH)
         txt.SetValue(log_text)
         vbox.Add(txt, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
 
-        btn_ok = wx.Button(dlg, wx.ID_OK, label="Chiudi")
+        btn_ok = wx.Button(panel, wx.ID_OK, label="Chiudi")
         vbox.Add(btn_ok, 0, wx.ALIGN_CENTER | wx.ALL, 10)
 
-        dlg.SetSizer(vbox)
-        dlg.Layout()
+        panel.SetSizer(vbox)
+        adatta_finestra(dlg, panel, (600, 400))
 
         # Forza focus sul text ctrl per accessibilità
         wx.CallAfter(txt.SetFocus)
