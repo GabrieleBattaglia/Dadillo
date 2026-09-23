@@ -4,6 +4,8 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
 ## [2.11.2] - 2026-09-23
 
+Pubblicata su GitHub il 2026-09-23 come release `v2.11.2`, con il solo archivio `Dadillo.zip` in allegato. Verificato che l'auto updater la riconosca e ne riceva le note. Issue 4, 5, 6, 7 e 8 chiuse; l'aggiornamento vero dalla 2.10.0 e la prova con NVDA dei riquadri restano nel collaudo, issue 9.
+
 Prima release pubblica dopo la 2.10.0: porta con se' anche le novita' della 2.11.0 e della 2.11.1, che non sono uscite da sole.
 
 ### Risolto
