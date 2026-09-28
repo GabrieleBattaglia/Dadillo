@@ -4,6 +4,8 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
 ## [2.11.5] - 2026-09-28
 
+Pubblicata su GitHub il 2026-09-28 come release `v2.11.5`, con il solo archivio `Dadillo.zip` in allegato, insieme alla 2.11.4 che non e' uscita da sola. Verificato che l'auto updater la riconosca e ne riceva le note. Issue 10, 11 e 12 chiuse. L'eseguibile e' stato provato su una copia, su un desktop di Windows nascosto: titolo, fuoco sulla lista dopo aver annullato tre finestre, chiusura. Aggiornamento vero riuscito dalla 2.11.2 e dalla 2.10.0, con il riavvio nella 2.11.5 e senza auto_updater_error.log; dalla 2.11.2 riesce solo se l'OK sul messaggio di esito arriva entro 30 secondi, difetto aperto come issue 13.
+
 ### Modificato
 - **La media piazzamenti conta tutte le posizioni, podi compresi** (issue 12): e' la media delle posizioni finali di tutti i tornei giocati, quindi 1 vuol dire sempre primo e 1.83 in media meglio del secondo posto. Fino alla 2.11.4 si sommavano solo le posizioni dal quinto posto in giu' e si divideva per tutti i tornei, cosi' ogni podio contava zero: chi era arrivato secondo, secondo, sesto e primo aveva 1.50, meglio di chi era arrivato sempre secondo, invece di 2.75. Sparisce anche la dicitura "solo podi": chi ha soltanto podi ha adesso il suo numero, per esempio 1.00 o 2.50. Resta "non disponibile" quando nessuna voce dello storico dice la posizione; una voce senza posizione non entra nella media ma conta fra i tornei giocati.
 - Sull'archivio di oggi, diciannove discepoli: per sette la media non cambia, per dieci sale, al massimo di 1.75, e i due che avevano "solo podi" hanno adesso 4.00, un legno nel loro unico torneo.
