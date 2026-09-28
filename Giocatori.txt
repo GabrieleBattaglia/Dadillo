@@ -1,7 +1,5 @@
 Hall of Fame di Dadillo
-Classifica per punti: ogni torneo
-ne da' 100 al primo, agli altri in
-proporzione ai partecipanti.
+Classifica per punti: ogni torneo ne da' 100 al primo, agli altri in proporzione ai partecipanti.
 1° Siddharta33
   Medagliere: Argento 2, Bronzo 1
   Punti 306.5, tornei 4, media 4.25.
