@@ -4,6 +4,8 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
 ## [2.13.2] - 2026-09-28
 
+Pubblicata su GitHub il 2026-09-28 come release `v2.13.2`, con il solo archivio `Dadillo.zip` in allegato. Verificato che l'auto updater la riconosca e ne riceva le note. L'eseguibile e' stato provato su una copia, su un desktop di Windows nascosto, Hall of Fame compresa. Aggiornamento vero dalla 2.13.1 pubblicata con l'OK sull'esito premuto dopo 40 secondi: si applica e riparte la 2.13.2, senza auto_updater_error.log. E' la prima verifica della issue 13 fra due versioni pubblicate.
+
 ### Corretto
 - **Frasi intere nei messaggi e nei file**: l'intestazione di `Giocatori.txt`, le righe di spiegazione della Hall of Fame, l'avviso dei due minuti della finestra di aggiornamento e una ventina di messaggi andavano a capo a meta' frase, dopo una trentina di caratteri, senza motivo. Il limite dei quaranta caratteri vale solo per i prompt che si aggiornano e per le righe di stato; testi, finestre e file usano tutta la larghezza. Adesso ogni frase sta intera, e si va a capo solo fra parti diverse, per esempio fra la spiegazione e la domanda. Segnalato da Gabriele leggendo `Giocatori.txt`.
 
