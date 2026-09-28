@@ -4,6 +4,8 @@ Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
 ## [2.13.1] - 2026-09-28
 
+Pubblicata su GitHub il 2026-09-28 come release `v2.13.1`, con il solo archivio `Dadillo.zip` in allegato, insieme alla 2.12.0, alla 2.12.1 e alla 2.13.0, che non sono uscite da sole. Verificato che l'auto updater la riconosca e ne riceva le note. Issue 13 chiusa. L'eseguibile e' stato provato su una copia, su un desktop di Windows nascosto: titolo, fuoco dopo aver annullato quattro finestre, Hall of Fame ordinata per punti con gli ordinali, chiusura. Aggiornamento vero riuscito dalla 2.11.5. Con una copia del codice nuovo compilata come 2.13.0: senza risposta la proposta si chiude da sola dopo 120 secondi e il programma resta aperto; con l'OK sull'esito premuto dopo 40 secondi l'aggiornamento si applica e riparte la 2.13.1, senza auto_updater_error.log.
+
 ### Modificato
 - **Gli ordinali davanti ai nomi**: nella Hall of Fame e in `Giocatori.txt` ogni discepolo e' preceduto dalla sua posizione, "1° Siddharta33", cosi' si capisce subito che e' una classifica. Chi e' pari merito su tutto divide lo stesso ordinale. Nella finestra c'era un numero con il punto, nel file niente.
 
