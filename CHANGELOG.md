@@ -2,6 +2,23 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.12.1] - 2026-09-28
+
+### Risolto
+- **L'aggiornamento si applica anche se leggi il messaggio con calma** (issue 13): accettato un aggiornamento, compare il messaggio che il programma si chiude per applicarlo. Fino alla 2.11.5, se l'OK arrivava dopo piu' di 30 secondi, l'aggiornamento non si applicava: il programma si chiudeva, non ripartiva, e nasceva `auto_updater_error.log`. Lo script che sostituisce il programma partiva prima del messaggio e aspettava la chiusura solo 30 secondi. Adesso il messaggio viene prima, e lo script parte dopo l'OK. La correzione sta in GBUtils V172, con cui questa versione e' compilata; qui il messaggio aspetta l'OK prima di lasciar proseguire.
+- La correzione vale per gli aggiornamenti che partono da questa versione in poi. Chi aggiorna adesso da una 2.11 ha ancora il comportamento vecchio: dopo il si', l'OK sul messaggio va premuto entro 30 secondi. Se non succede, basta riaprire Dadillo, e l'aggiornamento viene riproposto.
+
+### Prove
+- Il banco dell'aggiornamento di GBUtils controlla che il messaggio arrivi prima dello script, anche con la funzione vera di sostituzione, a cui lo scaricamento e l'avvio dello script sono stati tolti.
+
+## [2.12.0] - 2026-09-28
+
+### Aggiunto
+- **La finestra di aggiornamento aspetta due minuti** (issue 13, regola di Gabriele): se nessuno risponde, si chiude da sola come Non adesso, il programma prosegue e l'aggiornamento viene riproposto al prossimo avvio. La finestra lo dice sotto la riga delle versioni. Prima restava aperta finche' qualcuno non rispondeva, davanti alla finestra principale. Il tempo lo decide GBUtils, per tutto il parco software, e da console vale lo stesso.
+
+### Prove
+- Nuova prova `test_aggiornamento.py`: la finestra aperta davvero, sul desktop nascosto, si chiude da sola come Non adesso allo scadere dell'attesa, e senza attesa aspetta la risposta. La suite passa da 45 a 48 prove.
+
 ## [2.11.5] - 2026-09-28
 
 Pubblicata su GitHub il 2026-09-28 come release `v2.11.5`, con il solo archivio `Dadillo.zip` in allegato, insieme alla 2.11.4 che non e' uscita da sola. Verificato che l'auto updater la riconosca e ne riceva le note. Issue 10, 11 e 12 chiuse. L'eseguibile e' stato provato su una copia, su un desktop di Windows nascosto: titolo, fuoco sulla lista dopo aver annullato tre finestre, chiusura. Aggiornamento vero riuscito dalla 2.11.2 e dalla 2.10.0, con il riavvio nella 2.11.5 e senza auto_updater_error.log; dalla 2.11.2 riesce solo se l'OK sul messaggio di esito arriva entro 30 secondi, difetto aperto come issue 13.

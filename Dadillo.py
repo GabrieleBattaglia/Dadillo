@@ -1,6 +1,7 @@
 """Dadillo, L'Altare del Sacrificio. Punto di ingresso dell'applicazione.
 Gestore di tornei con interfaccia wxPython, pensato per l'uso con screen reader.
-Autori: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto.
+Autori: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto;
+controllo aggiornamenti della 2.12 di ClaudIA, Claude Opus 5.5, UltraCode.
 """
 
 import sys
@@ -26,6 +27,15 @@ def check_updates_gui():
     GBUtils tace finche' non c'e' davvero qualcosa da aggiornare: qui restano
     la finestra e il ponte fra il thread del controllo e il thread della
     finestra, che e' l'unico che possa aprirla.
+    Dalla 2.12.0 la proposta riceve da GBUtils V172 il tempo massimo per
+    rispondere, due minuti, e allo scadere la finestra si chiude come non
+    adesso. Dalla 2.12.1 anche avvisa aspetta che l'utente chiuda il
+    messaggio: GBUtils dice che il programma si chiude prima di avviare lo
+    script che lo sostituisce, e l'attesa dell'OK non deve consumare i 30
+    secondi entro cui il programma deve uscire. Fino alla 2.11.5 il
+    messaggio si apriva e avvisa tornava subito: chi premeva OK dopo 30
+    secondi si ritrovava il programma chiuso e l'aggiornamento non
+    applicato (issue 13).
     """
     if not getattr(sys, "frozen", False):
         return
@@ -39,16 +49,16 @@ def check_updates_gui():
         return
 
     api_url = "https://api.github.com/repos/GabrieleBattaglia/dadillo/releases/latest"
-    # L'attesa dello scaricamento: nasce quando l'utente accetta e la rilascia
-    # l'esito, che arriva sempre. Sta in una lista perche' chi la apre e chi la
+    # L'avviso dello scaricamento: nasce quando l'utente accetta e lo rilascia
+    # l'esito, che arriva sempre. Sta in una lista perche' chi lo apre e chi lo
     # chiude sono due momenti diversi.
-    attesa = []
+    avviso_scarico = []
 
     def finestra_padre():
         app = wx.GetApp()
         return getattr(app, "frame", None) if app else None
 
-    def proponi(versione_attuale, versione_nuova, note):
+    def proponi(versione_attuale, versione_nuova, note, attesa=None):
         """La risposta dell'utente, che gestisci_aggiornamento aspetta.
         La domanda nasce nel thread del controllo, ma la finestra vive su
         quello principale: la si porta li' con CallAfter e si resta fermi
@@ -61,13 +71,17 @@ def check_updates_gui():
             try:
                 from dialogs import UpdateDialog
 
-                dlg = UpdateDialog(finestra_padre(), versione_attuale, versione_nuova, note)
+                dlg = UpdateDialog(
+                    finestra_padre(), versione_attuale, versione_nuova, note, attesa=attesa
+                )
                 scelta = dlg.ShowModal()
                 dlg.Destroy()
                 if scelta != wx.ID_YES:
                     return
                 risposta.append(True)
-                attesa.append(wx.BusyInfo("Scarico l'aggiornamento, aspetta.", parent=finestra_padre()))
+                avviso_scarico.append(
+                    wx.BusyInfo("Scarico l'aggiornamento, aspetta.", parent=finestra_padre())
+                )
             finally:
                 risposto.set()
 
@@ -75,14 +89,21 @@ def check_updates_gui():
         risposto.wait()
         return bool(risposta)
 
-    def mostra_esito(testo):
-        # Svuotare la lista rilascia l'attesa e la fa sparire; se non era
-        # aperta, non cambia niente.
-        attesa.clear()
-        wx.MessageBox(testo, "Aggiornamento", wx.OK | wx.ICON_INFORMATION, finestra_padre())
+    def mostra_esito(testo, letto):
+        try:
+            # Svuotare la lista rilascia l'avviso e lo fa sparire; se non era
+            # aperto, non cambia niente.
+            avviso_scarico.clear()
+            wx.MessageBox(testo, "Aggiornamento", wx.OK | wx.ICON_INFORMATION, finestra_padre())
+        finally:
+            letto.set()
 
     def avvisa(testo):
-        wx.CallAfter(mostra_esito, testo)
+        # Come proponi: il messaggio nasce sul thread della finestra, e qui si
+        # resta fermi finche' l'utente non lo chiude.
+        letto = threading.Event()
+        wx.CallAfter(mostra_esito, testo, letto)
+        letto.wait()
 
     def lavoro():
         if gestisci_aggiornamento(APP_NAME, VERSION, api_url, proponi=proponi, avvisa=avvisa):

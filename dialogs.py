@@ -1380,13 +1380,23 @@ class UpdateDialog(wx.Dialog):
     come non adesso. Fino alla 2.10.0 la domanda era un MessageDialog con si'
     e no, e le novita' della versione, che update_checker riceve da sempre,
     non si vedevano da nessuna parte.
+    Dalla 2.12.0, con attesa in secondi, la finestra aspetta una risposta al
+    massimo quel tempo, poi si chiude da sola come non adesso e il programma
+    prosegue: l'aggiornamento torna al prossimo avvio. Il tempo lo decide
+    gestisci_aggiornamento di GBUtils, due minuti di serie.
     """
 
-    def __init__(self, parent, versione_attuale, versione_nuova, note):
+    def __init__(self, parent, versione_attuale, versione_nuova, note, attesa=None):
         super().__init__(parent, title="Aggiornamento disponibile", style=STILE_ADATTABILE)
         panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
         testo = f"È disponibile la versione {versione_nuova}. Tu hai la {versione_attuale}."
+        if attesa:
+            testo += (
+                f"\nSe non rispondi entro {durata_attesa(attesa)},\n"
+                "la finestra si chiude da sola e\n"
+                "te lo ripropongo al prossimo avvio."
+            )
         vbox.Add(wx.StaticText(panel, label=testo), 0, wx.ALL, 10)
         vbox.Add(wx.StaticText(panel, label="Novità di questa versione:"), 0, wx.LEFT | wx.RIGHT, 10)
         contenuto = (note or "").strip() or "Nessuna nota per questa versione."
@@ -1405,3 +1415,19 @@ class UpdateDialog(wx.Dialog):
         self.SetAffirmativeId(wx.ID_YES)
         self.SetEscapeId(wx.ID_NO)
         self.txt_note.SetFocus()
+        if attesa:
+            wx.CallLater(int(attesa * 1000), self._scaduta)
+
+    def _scaduta(self):
+        # La finestra puo' essere gia' chiusa, e anche distrutta: allora il
+        # suo oggetto vale falso e non c'e' niente da fare.
+        if self and self.IsModal():
+            self.EndModal(wx.ID_NO)
+
+
+def durata_attesa(secondi):
+    """Il tempo dell'attesa a parole: 2 minuti, 1 minuto, 90 secondi."""
+    if secondi % 60:
+        return f"{int(secondi)} secondi"
+    minuti = int(secondi // 60)
+    return "1 minuto" if minuti == 1 else f"{minuti} minuti"
