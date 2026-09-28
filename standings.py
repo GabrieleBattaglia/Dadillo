@@ -831,12 +831,10 @@ class StandingsPanel(ScrolledPanel):
             for row in parita_in_medaglia
         )
         risposta = wx.MessageBox(
-            "Attenzione, ci sono parita' che\n"
-            "nessuno spareggio ha sciolto e che\n"
-            "toccano le prime quattro posizioni:\n"
+            "Attenzione, ci sono parita' che nessuno spareggio ha sciolto e che "
+            "toccano le prime quattro posizioni: "
             f"{elenco}.\n"
-            "Le medaglie verrebbero assegnate\n"
-            "in ordine alfabetico. Procedo?",
+            "Le medaglie verrebbero assegnate in ordine alfabetico. Procedo?",
             "Parita' non risolta",
             wx.YES_NO | wx.ICON_WARNING,
         )
@@ -918,11 +916,9 @@ class StandingsPanel(ScrolledPanel):
 
         if not save_or_warn(db.save, self):
             wx.MessageBox(
-                "Le medaglie non sono state\n"
-                "registrate: l'archivio dei\n"
-                "discepoli non e' stato salvato.\n"
-                "Risolvi il problema e premi di\n"
-                "nuovo il pulsante Avanti.",
+                "Le medaglie non sono state registrate: l'archivio dei discepoli "
+                "non e' stato salvato. Risolvi il problema e premi di nuovo il "
+                "pulsante Avanti.",
                 "Premiazione non registrata",
                 wx.OK | wx.ICON_ERROR,
             )
@@ -932,8 +928,7 @@ class StandingsPanel(ScrolledPanel):
     @staticmethod
     def _annuncia_premiazione(updates_done, skipped_count):
         msg = (
-            "Oh mio insuperabile dominatore!\n"
-            "I verdetti sono stati incisi nella\n"
+            "Oh mio insuperabile dominatore! I verdetti sono stati incisi nella "
             "Hall of Fame.\n"
             f"Discepoli aggiornati: {updates_done}.\n"
         )

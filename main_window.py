@@ -63,8 +63,7 @@ class MainFrame(wx.Frame):
             caricato = False
             wx.MessageBox(
                 f"{e}\n"
-                "Puoi chiudere ora e tentare il\n"
-                "recupero, oppure proseguire e\n"
+                "Puoi chiudere ora e tentare il recupero, oppure proseguire e "
                 "creare un nuovo torneo.",
                 "Torneo non leggibile",
                 wx.OK | wx.ICON_ERROR,
@@ -83,9 +82,8 @@ class MainFrame(wx.Frame):
         if self.player_db.load_error:
             wx.MessageBox(
                 f"{self.player_db.load_error}\n"
-                "Fino al ripristino non registrero'\n"
-                "nuove medaglie ne' esportero'\n"
-                "il file Giocatori.txt.",
+                "Fino al ripristino non registrero' nuove medaglie ne' "
+                "esportero' il file Giocatori.txt.",
                 "Archivio discepoli non leggibile",
                 wx.OK | wx.ICON_ERROR,
             )
@@ -354,8 +352,7 @@ class MainFrame(wx.Frame):
         if not save_or_warn(self.tourney.save, self) and event.CanVeto():
             risposta = wx.MessageBox(
                 "Il torneo non e' stato salvato.\n"
-                "Vuoi uscire lo stesso e perdere\n"
-                "le ultime modifiche?",
+                "Vuoi uscire lo stesso e perdere le ultime modifiche?",
                 "Uscita senza salvataggio",
                 wx.YES_NO | wx.ICON_WARNING,
             )
@@ -583,9 +580,8 @@ class MainFrame(wx.Frame):
             if mancanti:
                 wx.MessageBox(
                     "Non posso annullare questa partita.\n"
-                    f"{', '.join(mancanti)} non fa piu'\n"
-                    "parte del torneo, quindi i punteggi\n"
-                    "non tornerebbero al loro posto.",
+                    f"{', '.join(mancanti)} non fa piu' parte del torneo, "
+                    "quindi i punteggi non tornerebbero al loro posto.",
                     "Annullamento impossibile",
                     wx.OK | wx.ICON_WARNING,
                 )
@@ -933,9 +929,8 @@ class MainFrame(wx.Frame):
             # va chiesto invece di farlo in silenzio.
             if self.tourney and self.tourney.title:
                 risposta = wx.MessageBox(
-                    "Le nuove regole valgono per i\n"
-                    "prossimi tornei. Vuoi applicarle\n"
-                    f"anche al torneo in corso,\n{self.tourney.title}?\n"
+                    "Le nuove regole valgono per i prossimi tornei. Vuoi "
+                    f"applicarle anche al torneo in corso, {self.tourney.title}?\n"
                     "La classifica potrebbe cambiare.",
                     "Regole del torneo in corso",
                     wx.YES_NO | wx.ICON_QUESTION,
@@ -959,7 +954,7 @@ class MainFrame(wx.Frame):
         """
         if not self.tourney.title:
             wx.MessageBox(
-                "Non c'e' nessun torneo di cui\ncorreggere le date.",
+                "Non c'e' nessun torneo di cui correggere le date.",
                 "Nessun torneo",
                 wx.OK | wx.ICON_INFORMATION,
             )

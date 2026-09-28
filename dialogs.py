@@ -325,9 +325,8 @@ class SetupPlayersDialog(wx.Dialog):
             return
         if len(name) < 3:
             wx.MessageBox(
-                "Oh insondabile pozzo di saggezza,\n"
-                "un nome così corto è un insulto\n"
-                "alla tua grandezza!\n"
+                "Oh insondabile pozzo di saggezza, un nome così corto è un "
+                "insulto alla tua grandezza!\n"
                 "Servono almeno 3 caratteri.",
                 "Nome troppo corto",
                 wx.OK | wx.ICON_WARNING,
@@ -692,12 +691,14 @@ class EditDatesDialog(wx.Dialog):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         avviso = (
-            "Qui correggi le date registrate dal\n"
-            "programma. Lascia vuota la data di\n"
-            "fine se il torneo e' ancora in corso."
+            "Qui correggi le date registrate dal programma. Lascia vuota la "
+            "data di fine se il torneo e' ancora in corso."
         )
         if torneo_concluso:
-            avviso += "\nIl torneo e' concluso: cambiando le\ndate aggiorno anche lo storico dei\ndiscepoli che vi hanno partecipato."
+            avviso += (
+                "\nIl torneo e' concluso: cambiando le date aggiorno anche lo "
+                "storico dei discepoli che vi hanno partecipato."
+            )
         vbox.Add(wx.StaticText(panel, label=avviso), 0, wx.ALL | wx.EXPAND, 10)
 
         data_i, ora_i = timestamp_to_fields(start_date)
@@ -780,7 +781,7 @@ class EditDatesDialog(wx.Dialog):
                 return None
         elif self.torneo_concluso:
             wx.MessageBox(
-                "Il torneo e' concluso, quindi la\ndata di fine non puo' restare vuota.",
+                "Il torneo e' concluso, quindi la data di fine non puo' restare vuota.",
                 "Data mancante",
                 wx.OK | wx.ICON_WARNING,
             )
@@ -827,15 +828,12 @@ class TournamentFinalReviewChoiceDialog(wx.Dialog):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         msg_text = (
-            "Oh mio insigne monarca!\n"
-            "L'ultimo dado è stato tratto e tutte\n"
-            "le sfide sono concluse. Prima di\n"
-            "incidere medaglie e piazzamenti nella\n"
-            "Hall of Fame, come devo procedere?\n"
-            "Uno per uno: revisiona ogni discepolo\n"
-            "e decidi se aggiornarlo o saltarlo.\n"
-            "Tutti in massa: immortala subito\n"
-            "tutti i partecipanti."
+            "Oh mio insigne monarca! L'ultimo dado è stato tratto e tutte le "
+            "sfide sono concluse. Prima di incidere medaglie e piazzamenti "
+            "nella Hall of Fame, come devo procedere?\n"
+            "Uno per uno: revisiona ogni discepolo e decidi se aggiornarlo o "
+            "saltarlo.\n"
+            "Tutti in massa: immortala subito tutti i partecipanti."
         )
 
         self.txt_msg = wx.TextCtrl(
@@ -909,10 +907,10 @@ class SinglePlayerReviewDialog(wx.Dialog):
         )
         if tied_with:
             msg_text += (
-                f"Attenzione: a pari merito con\n{', '.join(tied_with)}.\n"
-                "La posizione dipende dall'ordine\nalfabetico.\n"
+                f"Attenzione: a pari merito con {', '.join(tied_with)}. "
+                "La posizione dipende dall'ordine alfabetico.\n"
             )
-        msg_text += "Confermi questo piazzamento nella\nsacra Hall of Fame?"
+        msg_text += "Confermi questo piazzamento nella sacra Hall of Fame?"
 
         self.txt_msg = wx.TextCtrl(
             panel, value=msg_text, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH
@@ -945,12 +943,10 @@ class MergeSimilarPlayerDialog(wx.Dialog):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         msg_text = (
-            "Mio onnisciente sovrano!\n"
-            "Nel file importato ho scovato il\n"
-            f"discepolo {ext_name}, che somiglia\n"
-            f"al seguace già registrato {local_name}.\n"
-            "Si tratta della stessa persona\n"
-            "in carne, ossa e dadi?"
+            "Mio onnisciente sovrano! Nel file importato ho scovato il "
+            f"discepolo {ext_name}, che somiglia al seguace già registrato "
+            f"{local_name}.\n"
+            "Si tratta della stessa persona in carne, ossa e dadi?"
         )
 
         self.txt_msg = wx.TextCtrl(
@@ -999,7 +995,7 @@ class UpdatePlayerDialog(wx.Dialog):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         msg_text = (
-            f"Il formidabile {player_name} è già\npresente negli archivi sacri.\n"
+            f"Il formidabile {player_name} è già presente negli archivi sacri.\n"
             f"Vuoi aggiornare il suo storico e il suo medagliere con il risultato di questo torneo (Posizione {position})?"
         )
 
@@ -1219,8 +1215,8 @@ class ManagePlayersDialog(wx.Dialog):
         name = self.list_players.GetString(sel)
         dlg = wx.MessageDialog(
             self,
-            f"Sei sicuro di voler eliminare {name}\n"
-            "e tutto il suo storico dal database?\n"
+            f"Sei sicuro di voler eliminare {name} e tutto il suo storico "
+            "dal database?\n"
             "L'azione non può essere annullata.",
             "Conferma Eliminazione",
             wx.YES_NO | wx.ICON_WARNING,
@@ -1388,8 +1384,9 @@ class HallOfFameDialog(wx.Dialog):
         lines.append("Classifica generale, Hall of Fame")
         lines.append(f"Ordinata per {order_by}, {len(flat)} discepoli")
         if order_by == "Punti":
-            lines.append("Ogni torneo da' 100 punti al primo,")
-            lines.append("agli altri in proporzione ai partecipanti.")
+            lines.append(
+                "Ogni torneo da' 100 punti al primo, agli altri in proporzione ai partecipanti."
+            )
 
         # Tre righe corte per discepolo, con l'etichetta accanto a ogni numero:
         # la tabella a colonne rendeva il significato dipendente dalla posizione.
@@ -1434,9 +1431,8 @@ class UpdateDialog(wx.Dialog):
         testo = f"È disponibile la versione {versione_nuova}. Tu hai la {versione_attuale}."
         if attesa:
             testo += (
-                f"\nSe non rispondi entro {durata_attesa(attesa)},\n"
-                "la finestra si chiude da sola e\n"
-                "te lo ripropongo al prossimo avvio."
+                f"\nSe non rispondi entro {durata_attesa(attesa)}, la finestra "
+                "si chiude da sola e te lo ripropongo al prossimo avvio."
             )
         vbox.Add(wx.StaticText(panel, label=testo), 0, wx.ALL, 10)
         vbox.Add(wx.StaticText(panel, label="Novità di questa versione:"), 0, wx.LEFT | wx.RIGHT, 10)

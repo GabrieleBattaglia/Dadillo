@@ -353,9 +353,8 @@ class SaveError(Exception):
             message
             or (
                 f"Non riesco a salvare il file {nome}.\n"
-                "Puo' essere aperto in un altro\n"
-                "programma, oppure il disco e' pieno\n"
-                "o protetto da scrittura.\n"
+                "Puo' essere aperto in un altro programma, oppure il disco e' "
+                "pieno o protetto da scrittura.\n"
                 f"Dettaglio tecnico: {cause}"
             )
         )
@@ -412,16 +411,15 @@ class DataFileError(Exception):
         self.quarantine_path = quarantine_path
         nome = os.path.basename(path)
         righe = [
-            f"Il file {nome} esiste ma non e'",
-            "leggibile: puo' essere danneggiato",
+            f"Il file {nome} esiste ma non e' leggibile: puo' essere danneggiato "
             "o scritto da un altro programma.",
         ]
         if quarantine_path:
-            righe.append("Ne ho messo da parte una copia:")
-            righe.append(os.path.basename(quarantine_path))
+            righe.append(
+                f"Ne ho messo da parte una copia: {os.path.basename(quarantine_path)}"
+            )
         else:
-            righe.append("Non sono riuscita a metterne")
-            righe.append("da parte una copia.")
+            righe.append("Non sono riuscita a metterne da parte una copia.")
         righe.append(f"Dettaglio tecnico: {cause}")
         super().__init__("\n".join(righe))
 
@@ -788,12 +786,10 @@ class PlayerDB:
                 self.filename,
                 self.load_error.cause,
                 message=(
-                    "Non salvo l'archivio dei discepoli.\n"
-                    "All'avvio non era leggibile e in\n"
-                    "memoria e' vuoto: salvarlo ora\n"
-                    "cancellerebbe la Hall of Fame.\n"
-                    "Ripristina prima il file, partendo\n"
-                    "dalla copia messa da parte."
+                    "Non salvo l'archivio dei discepoli. All'avvio non era "
+                    "leggibile e in memoria e' vuoto: salvarlo ora cancellerebbe "
+                    "la Hall of Fame.\n"
+                    "Ripristina prima il file, partendo dalla copia messa da parte."
                 ),
             )
         atomic_write_json(self.filename, self.players)
@@ -994,19 +990,16 @@ class PlayerDB:
                 self.txt_filename,
                 self.load_error.cause,
                 message=(
-                    "Non esporto la Hall of Fame.\n"
-                    "L'archivio dei discepoli non era\n"
-                    "leggibile all'avvio e in memoria\n"
-                    "e' vuoto: il file di testo\n"
-                    "risulterebbe cancellato.\n"
+                    "Non esporto la Hall of Fame. L'archivio dei discepoli non "
+                    "era leggibile all'avvio e in memoria e' vuoto: il file di "
+                    "testo risulterebbe cancellato.\n"
                     "Ripristina prima l'archivio."
                 ),
             )
         parts = [
             "Hall of Fame di Dadillo\n",
-            "Classifica per punti: ogni torneo\n",
-            "ne da' 100 al primo, agli altri in\n",
-            "proporzione ai partecipanti.\n",
+            "Classifica per punti: ogni torneo ne da' 100 al primo, agli altri "
+            "in proporzione ai partecipanti.\n",
         ]
 
         # Dalla 2.13.0 l'ordine e' quello della classifica a punti, con

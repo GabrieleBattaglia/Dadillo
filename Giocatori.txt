@@ -1,131 +1,134 @@
 Hall of Fame di Dadillo
-Selene157
-  Medagliere: Oro 1, Argento 1
-  Media piazzamenti 4.33, tornei giocati 3.
-  Storico Tornei:
-    2° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
-    1° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
-    10° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
-Peppe
-  Medagliere: Oro 1, Legno 1
-  Media piazzamenti 4.00, tornei giocati 4.
-  Storico Tornei:
-    1° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
-    6° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
-    4° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
-    5° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
-Ninfa81
-  Medagliere: Oro 1
-  Media piazzamenti 7.25, tornei giocati 4.
-  Storico Tornei:
-    10° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
-    7° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
-    1° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
-    11° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
-vero80
-  Medagliere: Oro 1
-  Media piazzamenti 9.75, tornei giocati 4.
-  Storico Tornei:
-    13° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
-    13° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
-    12° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
-    1° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
-Siddharta33
+Classifica per punti: ogni torneo
+ne da' 100 al primo, agli altri in
+proporzione ai partecipanti.
+1° Siddharta33
   Medagliere: Argento 2, Bronzo 1
-  Media piazzamenti 4.25, tornei giocati 4.
+  Punti 306.5, tornei 4, media 4.25.
   Storico Tornei:
     3° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
     10° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
     2° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
     2° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
-Geggè
-  Medagliere: Argento 1
-  Media piazzamenti 8.50, tornei giocati 2.
+2° Peppe
+  Medagliere: Oro 1, Legno 1
+  Punti 302.9, tornei 4, media 4.00.
   Storico Tornei:
-    15° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
-    2° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
-Manu1504
+    1° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
+    6° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
+    4° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
+    5° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
+3° Manu1504
   Medagliere: Bronzo 1
-  Media piazzamenti 5.75, tornei giocati 4.
+  Punti 249.3, tornei 4, media 5.75.
   Storico Tornei:
     5° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
     3° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
     8° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
     7° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
-Il Difetto88
-  Medagliere: Bronzo 1
-  Media piazzamenti 8.67, tornei giocati 3.
+4° Selene157
+  Medagliere: Oro 1, Argento 1
+  Punti 219.1, tornei 3, media 4.33.
   Storico Tornei:
-    14° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
-    9° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
-    3° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
-Dj Dany
-  Medagliere: Bronzo 1
-  Media piazzamenti 9.67, tornei giocati 3.
+    2° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
+    1° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
+    10° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
+5° Ninfa81
+  Medagliere: Oro 1
+  Punti 213.3, tornei 4, media 7.25.
   Storico Tornei:
-    12° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
-    14° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
-    3° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
-Geypi
-  Medagliere: Legno 1
-  Media piazzamenti 4.00, tornei giocati 1.
-  Storico Tornei:
-    4° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
-garruz88
-  Medagliere: Legno 1
-  Media piazzamenti 4.00, tornei giocati 1.
-  Storico Tornei:
-    4° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
-Tasmania94!
-  Medagliere: Legno 1
-  Media piazzamenti 7.33, tornei giocati 3.
-  Storico Tornei:
-    12° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
-    6° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
-    4° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
-Gas
+    10° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
+    7° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
+    1° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
+    11° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
+6° Anny.88
   Medagliere: Ancora nessuna medaglia
-  Media piazzamenti 6.00, tornei giocati 1.
-  Storico Tornei:
-    6° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
-Princi
-  Medagliere: Ancora nessuna medaglia
-  Media piazzamenti 7.00, tornei giocati 3.
-  Storico Tornei:
-    8° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
-    7° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
-    6° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
-Anny.88
-  Medagliere: Ancora nessuna medaglia
-  Media piazzamenti 7.50, tornei giocati 4.
+  Punti 206.5, tornei 4, media 7.50.
   Storico Tornei:
     11° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
     5° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
     5° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
     9° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
-Rinaldo
+7° Rinaldo
   Medagliere: Ancora nessuna medaglia
-  Media piazzamenti 8.00, tornei giocati 4.
+  Punti 184.4, tornei 4, media 8.00.
   Storico Tornei:
     7° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
     8° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
     9° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
     8° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
-Bazzi87
+8° Princi
   Medagliere: Ancora nessuna medaglia
-  Media piazzamenti 10.25, tornei giocati 4.
+  Punti 163.4, tornei 3, media 7.00.
+  Storico Tornei:
+    8° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
+    7° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
+    6° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
+9° Tasmania94!
+  Medagliere: Legno 1
+  Punti 152.5, tornei 3, media 7.33.
+  Storico Tornei:
+    12° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
+    6° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
+    4° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
+10° vero80
+  Medagliere: Oro 1
+  Punti 152.0, tornei 4, media 9.75.
+  Storico Tornei:
+    13° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
+    13° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
+    12° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
+    1° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
+11° Il Difetto88
+  Medagliere: Bronzo 1
+  Punti 149.7, tornei 3, media 8.67.
+  Storico Tornei:
+    14° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
+    9° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
+    3° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
+12° Dj Dany
+  Medagliere: Bronzo 1
+  Punti 124.3, tornei 3, media 9.67.
+  Storico Tornei:
+    12° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
+    14° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
+    3° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
+13° Bazzi87
+  Medagliere: Ancora nessuna medaglia
+  Punti 116.4, tornei 4, media 10.25.
   Storico Tornei:
     9° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
     11° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
     11° in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026
     10° in Panzetta no buona - giovedì 3 settembre 2026 - mercoledì 16 settembre 2026
-Piellino88
+14° Geggè
+  Medagliere: Argento 1
+  Punti 110.5, tornei 2, media 8.50.
+  Storico Tornei:
+    15° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
+    2° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
+15° Geypi
+  Medagliere: Legno 1
+  Punti 82.4, tornei 1, media 4.00.
+  Storico Tornei:
+    4° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
+16° garruz88
+  Medagliere: Legno 1
+  Punti 78.6, tornei 1, media 4.00.
+  Storico Tornei:
+    4° in Yatzee con Bonus - venerdì 1 maggio 2026 - sabato 30 maggio 2026
+17° Gas
   Medagliere: Ancora nessuna medaglia
-  Media piazzamenti 16.00, tornei giocati 1.
+  Punti 70.6, tornei 1, media 6.00.
+  Storico Tornei:
+    6° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
+18° Piellino88
+  Medagliere: Ancora nessuna medaglia
+  Punti 11.8, tornei 1, media 16.00.
   Storico Tornei:
     16° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
-Isotta2604
+19° Isotta2604
   Medagliere: Ancora nessuna medaglia
-  Media piazzamenti 17.00, tornei giocati 1.
+  Punti 5.9, tornei 1, media 17.00.
   Storico Tornei:
     17° in Farkle Bonus - martedì 17 marzo 2026 - lunedì 20 aprile 2026
