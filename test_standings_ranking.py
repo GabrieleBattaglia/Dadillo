@@ -489,7 +489,7 @@ def test_parita_irrisolta_viene_segnalata():
 def test_media_piazzamenti_conta_tutte_le_posizioni():
     from data import (
         MEDIA_NON_DISPONIBILE,
-        hall_of_fame_sort_key,
+        hall_of_fame_ranking,
         placement_stats,
     )
 
@@ -528,17 +528,117 @@ def test_media_piazzamenti_conta_tutte_le_posizioni():
     con_una_ignota = {"history": ["3° in A - a - b", "appunti presi a mano"]}
     assert placement_stats(con_una_ignota)[:3] == (2, 3, "3.00")
 
-    # A parita' di medaglie la media piu' bassa sta davanti, e uno storico
-    # illeggibile non deve scavalcare chi ha piazzamenti veri.
-    ordinati = sorted(
-        [
-            ("Ignoto", storico_illeggibile),
-            ("Piazzato", con_piazzamenti),
-            ("Podista", solo_podi),
-        ],
-        key=lambda item: hall_of_fame_sort_key(*item),
+    # Uno storico illeggibile non da' punti e finisce in fondo; dalla 2.13.0
+    # chi ha giocato un torneo in piu' ne ha i punti, e sta davanti.
+    classifica = hall_of_fame_ranking(
+        {"Ignoto": storico_illeggibile, "Piazzato": con_piazzamenti, "Podista": solo_podi}
     )
-    assert [nome for nome, _ in ordinati] == ["Podista", "Piazzato", "Ignoto"]
+    assert [nome for _, nome, _ in classifica] == ["Piazzato", "Podista", "Ignoto"]
+
+
+def test_classifica_generale_a_punti():
+    """Dalla 2.13.0: 100 punti al primo di ogni torneo, agli altri in
+    proporzione ai partecipanti, ricavati dall'archivio."""
+    from data import (
+        hall_of_fame_ranking,
+        placement_points,
+        ranking_points,
+        tournament_sizes,
+    )
+
+    assert placement_points(1, 17) == 100
+    assert placement_points(17, 17) == 100 / 17
+    assert placement_points(2, 4) == 75
+    # Un piazzamento oltre il numero contato vale come ultimo di quel numero.
+    assert placement_points(8, 5) == 100 / 8
+
+    def medaglie(oro=0, argento=0, bronzo=0):
+        return {"oro": oro, "argento": argento, "bronzo": bronzo, "legno": 0}
+
+    # Due tornei da quattro: due secondi posti valgono piu' di una vittoria
+    # seguita da un ultimo posto.
+    giocatori = {
+        "Oro": {"medals": medaglie(oro=1), "history": ["1° in A - x - y", "4° in B - x - y"]},
+        "Argento": {"medals": medaglie(argento=2), "history": ["2° in A - x - y", "2° in B - x - y"]},
+        "Bronzo": {"medals": medaglie(bronzo=1), "history": ["3° in A - x - y", "1° in B - x - y"]},
+        "Ultimo": {"medals": medaglie(), "history": ["4° in A - x - y", "3° in B - x - y"]},
+    }
+    giocatori["Bronzo"]["medals"] = medaglie(oro=1, bronzo=1)
+    assert tournament_sizes(giocatori) == {("A", "x"): 4, ("B", "x"): 4}
+    assert ranking_points(giocatori["Argento"], tournament_sizes(giocatori)) == 150
+    classifica = hall_of_fame_ranking(giocatori)
+    # Bronzo: 50 + 100; Argento: 75 + 75; Oro: 100 + 25; Ultimo: 25 + 50.
+    # Bronzo e Argento hanno 150 punti: decide l'oro di Bronzo.
+    assert [(o, n) for o, n, _ in classifica] == [
+        (1, "Bronzo"),
+        (2, "Argento"),
+        (3, "Oro"),
+        (4, "Ultimo"),
+    ]
+
+    # Pari su tutto: stesso ordinale, poi si salta, e fra loro l'alfabeto.
+    pari = {
+        "Bea": {"medals": medaglie(argento=1), "history": ["2° in C - x - y"]},
+        "Primo": {"medals": medaglie(oro=1), "history": ["1° in C - x - y"]},
+        "Ada": {"medals": medaglie(argento=1), "history": ["2° in D - x - y"]},
+        "Secondo": {"medals": medaglie(oro=1), "history": ["1° in D - x - y"]},
+    }
+    classifica = hall_of_fame_ranking(pari)
+    assert [(o, n) for o, n, _ in classifica] == [
+        (1, "Primo"),
+        (1, "Secondo"),
+        (3, "Ada"),
+        (3, "Bea"),
+    ]
+
+
+def test_hall_of_fame_in_giocatori_txt(tmp_path):
+    """Giocatori.txt porta l'ordinale davanti al nome e i punti."""
+    from data import PlayerDB
+
+    db = PlayerDB(base_dir=str(tmp_path))
+    db.players = {
+        "Anna": {"medals": {"oro": 1, "argento": 0, "bronzo": 0, "legno": 0}, "history": ["1° in A - x - y"], "placements_sum": 1},
+        "Bruno": {"medals": {"oro": 0, "argento": 1, "bronzo": 0, "legno": 0}, "history": ["2° in A - x - y"], "placements_sum": 2},
+    }
+    db.export_to_txt()
+    testo = (tmp_path / "Giocatori.txt").read_text(encoding="utf-8")
+    assert "1° Anna\n" in testo
+    assert "2° Bruno\n" in testo
+    assert "  Punti 100.0, tornei 1, media 1.00.\n" in testo
+    assert "  Punti 50.0, tornei 1, media 2.00.\n" in testo
+
+
+def test_finestra_hall_of_fame_per_punti(tmp_path):
+    """La finestra parte ordinata per punti, con gli ordinali, e regge
+    tutte le altre voci, media compresa."""
+    import wx
+
+    from data import PlayerDB
+    from dialogs import HallOfFameDialog
+
+    app = wx.App(False)
+    db = PlayerDB(base_dir=str(tmp_path))
+    db.players = {
+        "Anna": {"medals": {"oro": 1, "argento": 0, "bronzo": 0, "legno": 0}, "history": ["1° in A - x - y"], "placements_sum": 1},
+        "Bruno": {"medals": {"oro": 0, "argento": 1, "bronzo": 0, "legno": 0}, "history": ["2° in A - x - y"], "placements_sum": 2},
+    }
+    dlg = HallOfFameDialog(None, db=db)
+    testo = dlg.txt_display.GetValue()
+    assert dlg.cb_order.GetStringSelection() == "Punti"
+    assert "1° Anna." in testo and "2° Bruno." in testo
+    assert "Punti 100.0, tornei 1, media 1.00." in testo
+    for voce in dlg.cb_order.GetStrings():
+        for direzione in (0, 1):
+            dlg.cb_order.SetStringSelection(voce)
+            dlg.cb_dir.SetSelection(direzione)
+            dlg.update_display()
+    dlg.cb_order.SetStringSelection("Media piazzamenti")
+    dlg.cb_dir.SetSelection(0)
+    dlg.update_display()
+    assert dlg.txt_display.GetValue().index("Anna") < dlg.txt_display.GetValue().index("Bruno")
+    dlg.Destroy()
+    app.Destroy()
 
 
 def test_archivio_vecchio_ricalcola_la_somma(tmp_path):
@@ -1072,6 +1172,9 @@ if __name__ == "__main__":
     test_migrazione_record_partita_al_formato_completo(pathlib.Path(tempfile.mkdtemp()))
     test_parita_irrisolta_viene_segnalata()
     test_media_piazzamenti_conta_tutte_le_posizioni()
+    test_classifica_generale_a_punti()
+    test_hall_of_fame_in_giocatori_txt(pathlib.Path(tempfile.mkdtemp()))
+    test_finestra_hall_of_fame_per_punti(pathlib.Path(tempfile.mkdtemp()))
     test_archivio_vecchio_ricalcola_la_somma(pathlib.Path(tempfile.mkdtemp()))
     test_ricerca_coppia_in_entrambi_gli_ordini()
     test_duplicati_storico_con_titoli_simili(pathlib.Path(tempfile.mkdtemp()))

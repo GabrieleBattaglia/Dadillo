@@ -15,11 +15,14 @@ from data import (
     PlayerDB,
     fields_to_timestamp,
     format_date_extended,
+    hall_of_fame_ranking,
     normalize_choice,
     normalize_main_criterion,
     parse_timestamp,
     placement_stats,
+    ranking_points,
     timestamp_to_fields,
+    tournament_sizes,
 )
 from ui_utils import save_or_warn
 
@@ -1030,7 +1033,7 @@ class UpdatePlayerDialog(wx.Dialog):
 
 
 class PlayerDetailsDialog(wx.Dialog):
-    def __init__(self, parent, name, p_data):
+    def __init__(self, parent, name, p_data, punti=None):
         super().__init__(parent, title=f"Dettagli Discepolo: {name}", style=STILE_ADATTABILE)
 
         panel = pannello_scorrevole(self)
@@ -1044,6 +1047,8 @@ class PlayerDetailsDialog(wx.Dialog):
         lines.append(f"Medagliere: ori {m['oro']}, argenti {m['argento']},")
         lines.append(f"  bronzi {m['bronzo']}, legni {m['legno']}.")
         lines.append(f"Media piazzamenti {media_testo}, tornei {num_tornei}.")
+        if punti is not None:
+            lines.append(f"Punti in classifica generale {punti:.1f}.")
         lines.append("Storico tornei:")
         for h in p_data["history"]:
             lines.append(f"  {h}")
@@ -1114,7 +1119,10 @@ class ManagePlayersDialog(wx.Dialog):
             )
             return
         name = self.list_players.GetString(sel)
-        dlg = PlayerDetailsDialog(self, name, self.db.players[name])
+        # I punti dipendono da quanti erano in ogni torneo, quindi da tutto
+        # l'archivio, non dal solo discepolo.
+        punti = ranking_points(self.db.players[name], tournament_sizes(self.db.players))
+        dlg = PlayerDetailsDialog(self, name, self.db.players[name], punti=punti)
         dlg.ShowModal()
         dlg.Destroy()
 
@@ -1247,9 +1255,19 @@ class HallOfFameDialog(wx.Dialog):
         lbl_order = wx.StaticText(panel, label="Ordina per:")
         self.cb_order = wx.Choice(
             panel,
-            choices=["Nome", "Ori", "Argenti", "Bronzi", "Legni", "Numero Tornei"],
+            choices=[
+                "Punti",
+                "Media piazzamenti",
+                "Nome",
+                "Ori",
+                "Argenti",
+                "Bronzi",
+                "Legni",
+                "Numero Tornei",
+            ],
         )
-        self.cb_order.SetStringSelection("Ori")
+        # Dalla 2.13.0 la classifica generale e' quella a punti.
+        self.cb_order.SetStringSelection("Punti")
         self.cb_order.Bind(wx.EVT_CHOICE, self.on_update)
 
         lbl_dir = wx.StaticText(panel, label="Direzione:")
@@ -1295,13 +1313,17 @@ class HallOfFameDialog(wx.Dialog):
         reverse = self.cb_dir.GetSelection() == 0
 
         flat = []
-        for name, p_data in self.db.players.items():
+        classifica = hall_of_fame_ranking(self.db.players)
+        for ordinale, name, punti in classifica:
+            p_data = self.db.players[name]
             m = p_data["medals"]
             num_tornei, media, media_testo = placement_stats(p_data)
 
             flat.append(
                 {
                     "name": name,
+                    "ordinale": ordinale,
+                    "punti": punti,
                     "oro": m["oro"],
                     "argento": m["argento"],
                     "bronzo": m["bronzo"],
@@ -1317,6 +1339,10 @@ class HallOfFameDialog(wx.Dialog):
         def compare_hof(a, b):
             if order_by == "Nome":
                 val_a, val_b = a["name"].lower(), b["name"].lower()
+            elif order_by == "Media piazzamenti":
+                # La media migliore e' la piu' bassa: col segno cambiato vale
+                # la regola di tutte le altre voci, il valore alto in cima.
+                val_a, val_b = -a["media"], -b["media"]
             elif order_by == "Ori":
                 val_a, val_b = a["oro"], b["oro"]
             elif order_by == "Argenti":
@@ -1350,23 +1376,38 @@ class HallOfFameDialog(wx.Dialog):
                 return -name_cmp
             return name_cmp
 
-        flat.sort(key=functools.cmp_to_key(compare_hof), reverse=reverse)
+        if order_by == "Punti":
+            # L'ordine e i pari merito sono quelli della classifica generale,
+            # gia' calcolati: qui si sceglie soltanto da che parte leggerla.
+            if not reverse:
+                flat.reverse()
+        else:
+            flat.sort(key=functools.cmp_to_key(compare_hof), reverse=reverse)
 
         lines = []
         lines.append("Classifica generale, Hall of Fame")
         lines.append(f"Ordinata per {order_by}, {len(flat)} discepoli")
+        if order_by == "Punti":
+            lines.append("Ogni torneo da' 100 punti al primo,")
+            lines.append("agli altri in proporzione ai partecipanti.")
 
-        # Due righe corte per discepolo, con l'etichetta accanto a ogni numero:
+        # Tre righe corte per discepolo, con l'etichetta accanto a ogni numero:
         # la tabella a colonne rendeva il significato dipendente dalla posizione.
+        # Per punti l'ordinale e' quello della classifica, con i pari merito;
+        # per le altre voci e' il posto nell'elenco.
         for idx, row in enumerate(flat):
-            pos = idx + 1 if reverse else len(flat) - idx
-            lines.append(f"{pos}. {row['name']}.")
+            if order_by == "Punti":
+                pos = row["ordinale"]
+            else:
+                pos = idx + 1 if reverse else len(flat) - idx
+            lines.append(f"{pos}° {row['name']}.")
             lines.append(
                 f"  Ori {row['oro']}, argenti {row['argento']}, "
                 f"bronzi {row['bronzo']}, legni {row['legno']}."
             )
             lines.append(
-                f"  Tornei {row['tornei']}, media piazzamenti {row['media_testo']}."
+                f"  Punti {row['punti']:.1f}, tornei {row['tornei']}, "
+                f"media {row['media_testo']}."
             )
 
         self.txt_display.SetValue("\n".join(lines))

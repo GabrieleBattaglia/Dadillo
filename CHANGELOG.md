@@ -2,6 +2,22 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.13.1] - 2026-09-28
+
+### Modificato
+- **Gli ordinali davanti ai nomi**: nella Hall of Fame e in `Giocatori.txt` ogni discepolo e' preceduto dalla sua posizione, "1° Siddharta33", cosi' si capisce subito che e' una classifica. Chi e' pari merito su tutto divide lo stesso ordinale. Nella finestra c'era un numero con il punto, nel file niente.
+
+## [2.13.0] - 2026-09-28
+
+### Aggiunto
+- **La classifica generale a punti**: ogni torneo da' 100 punti al primo e agli altri in proporzione a quanti erano, fino all'ultimo, che ne prende 100 diviso il numero dei partecipanti; per esempio, in un torneo da 17 il secondo prende 94.1 e l'ultimo 5.9. La classifica e' la somma dei punti di tutti i tornei: conta dove sei arrivato rispetto a quanti erano, e ogni torneo giocato vale qualcosa. A parita' di punti decidono gli ori, poi gli argenti, poi i bronzi, poi la media piazzamenti. Scelta di Gabriele fra il medagliere, i punti della Formula 1 e della Coppa del Mondo di sci e tre formule proporzionali ai partecipanti.
+- Il numero dei partecipanti non e' scritto nello storico: si ricava contando nell'archivio i discepoli che hanno lo stesso torneo, con lo stesso titolo e la stessa data d'inizio, e non scende mai sotto il piazzamento piu' basso registrato. Sull'archivio di oggi i quattro tornei risultano da 17, 14, 12 e 11, completi.
+- Fino alla 2.12.1 `Giocatori.txt` seguiva il medagliere, ori, poi argenti, bronzi e legni, e la finestra partiva ordinata per ori: un oro stava davanti a qualunque numero di argenti, e i piazzamenti dal quinto in giu' contavano solo a medaglie identiche. Sull'archivio di oggi il primo passa da Selene157, un oro e un argento in tre tornei, a Siddharta33, due argenti e un bronzo in quattro.
+- Nella finestra della Hall of Fame due ordinamenti nuovi, Punti, che e' il predefinito, e Media piazzamenti; restano quelli di prima. Ogni discepolo porta i suoi punti, accanto a tornei e media, e li mostrano anche i dettagli del discepolo nella gestione dei giocatori.
+
+### Prove
+- Tre prove nuove: i punti e la classifica con le parita', `Giocatori.txt` con ordinali e punti, la finestra che parte per punti e regge ogni ordinamento. La suite passa da 48 a 51 prove.
+
 ## [2.12.1] - 2026-09-28
 
 ### Risolto

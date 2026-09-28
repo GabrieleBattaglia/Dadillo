@@ -241,22 +241,82 @@ def placement_stats(p_data):
     return len(storico), media, f"{media:.2f}"
 
 
-def hall_of_fame_sort_key(name, p_data):
-    """Chiave di ordinamento della Hall of Fame, dal migliore al peggiore.
-    Piu' medaglie prima, poi media piazzamenti piu' bassa, poi piu' tornei
-    giocati, infine ordine alfabetico.
+def tournament_sizes(players):
+    """Quanti erano in ogni torneo dell'archivio, per titolo e data d'inizio.
+    Lo storico non registra il numero dei partecipanti: si contano i
+    discepoli che hanno quel torneo. Se qualcuno non fosse stato registrato,
+    il numero non scende comunque sotto il piazzamento piu' basso annotato.
     """
-    m = p_data.get("medals", {}) or {}
-    tornei, media, _ = placement_stats(p_data)
-    return (
-        -m.get("oro", 0),
-        -m.get("argento", 0),
-        -m.get("bronzo", 0),
-        -m.get("legno", 0),
-        media,
-        -tornei,
-        name,
-    )
+    conteggi = {}
+    for p_data in players.values():
+        for voce in p_data.get("history", []) or []:
+            pos, titolo, inizio, _ = split_history_entry(voce)
+            if pos is None:
+                continue
+            quanti, ultimo = conteggi.get((titolo, inizio), (0, 0))
+            conteggi[(titolo, inizio)] = (quanti + 1, max(ultimo, pos))
+    return {torneo: max(quanti, ultimo) for torneo, (quanti, ultimo) in conteggi.items()}
+
+
+def placement_points(pos, partecipanti):
+    """I punti di un piazzamento, dalla 2.13.0: 100 al primo, e in proporzione
+    ai partecipanti per gli altri, fino all'ultimo, che ne prende 100 diviso
+    il loro numero. Ogni torneo vale uguale, grande o piccolo, e giocarlo vale
+    sempre qualcosa. Scelta di Gabriele del 28 settembre 2026, fra questa,
+    zero all'ultimo e un punto per ogni avversario battuto.
+    """
+    partecipanti = max(partecipanti, pos)
+    return 100 * (partecipanti - pos + 1) / partecipanti
+
+
+def ranking_points(p_data, sizes):
+    """I punti di un discepolo: la somma dei punti di ogni suo torneo.
+    sizes e' il risultato di tournament_sizes su tutto l'archivio."""
+    totale = 0.0
+    for voce in p_data.get("history", []) or []:
+        pos, titolo, inizio, _ = split_history_entry(voce)
+        if pos is not None:
+            totale += placement_points(pos, sizes.get((titolo, inizio), pos))
+    return totale
+
+
+def hall_of_fame_ranking(players):
+    """La classifica generale, dal migliore al peggiore: una lista di
+    (ordinale, nome, punti).
+    Dalla 2.13.0 conta la somma dei punti di tutti i tornei; a parita' di
+    punti decidono gli ori, poi gli argenti, poi i bronzi, poi la media
+    piazzamenti piu' bassa. Chi resta pari su tutto divide lo stesso
+    ordinale, e fra loro si va in ordine alfabetico. Fino alla 2.12.1 si
+    ordinava per medagliere: un oro stava davanti a qualunque numero di
+    argenti, e i piazzamenti dal quinto in giu' contavano solo a medaglie
+    identiche.
+    """
+    sizes = tournament_sizes(players)
+    righe = []
+    for name, p_data in players.items():
+        punti = ranking_points(p_data, sizes)
+        m = p_data.get("medals", {}) or {}
+        _, media, _ = placement_stats(p_data)
+        # I punti si arrotondano per il confronto: sommati in ordine diverso,
+        # due totali uguali possono differire nell'ultima cifra.
+        merito = (
+            -round(punti, 6),
+            -m.get("oro", 0),
+            -m.get("argento", 0),
+            -m.get("bronzo", 0),
+            media,
+        )
+        righe.append((merito, name, punti))
+    righe.sort(key=lambda riga: (riga[0], riga[1]))
+    classifica = []
+    precedente = None
+    ordinale = 0
+    for indice, (merito, name, punti) in enumerate(righe, 1):
+        if merito != precedente:
+            ordinale = indice
+            precedente = merito
+        classifica.append((ordinale, name, punti))
+    return classifica
 
 
 def get_app_dir():
@@ -942,21 +1002,21 @@ class PlayerDB:
                     "Ripristina prima l'archivio."
                 ),
             )
-        parts = ["Hall of Fame di Dadillo\n"]
+        parts = [
+            "Hall of Fame di Dadillo\n",
+            "Classifica per punti: ogni torneo\n",
+            "ne da' 100 al primo, agli altri in\n",
+            "proporzione ai partecipanti.\n",
+        ]
 
-        # Ordinamento: prima chi ha piu' ori, poi argenti, bronzi e legni; a pari
-        # medagliere vince la media piazzamenti piu' bassa, poi chi ha giocato
-        # piu' tornei, infine l'ordine alfabetico. Una sola chiave a tupla al
-        # posto della funzione di confronto scritta a mano.
-        sorted_players = sorted(
-            self.players.items(), key=lambda item: hall_of_fame_sort_key(*item)
-        )
-
-        for name, p in sorted_players:
+        # Dalla 2.13.0 l'ordine e' quello della classifica a punti, con
+        # l'ordinale davanti al nome; fino alla 2.12.1 era il medagliere.
+        for ordinale, name, punti in hall_of_fame_ranking(self.players):
+            p = self.players[name]
             m = p["medals"]
 
-            # Livello 0: Nome
-            parts.append(f"{name}\n")
+            # Livello 0: posizione e nome
+            parts.append(f"{ordinale}° {name}\n")
 
             # Livello 1: Medagliere e Intestazione Storico
             medals_str_parts = []
@@ -977,7 +1037,7 @@ class PlayerDB:
 
             num_tornei, _, media_testo = placement_stats(p)
             parts.append(
-                f"  Media piazzamenti {media_testo}, tornei giocati {num_tornei}.\n"
+                f"  Punti {punti:.1f}, tornei {num_tornei}, media {media_testo}.\n"
             )
 
             parts.append("  Storico Tornei:\n")
