@@ -86,6 +86,28 @@ pyinstaller Dadillo.spec
   6. **Consultazione Continua**: Il torneo concluso resta a video e consultabile per statistiche e filtri fino alla creazione di un nuovo torneo dal menu `File, Nuovo Torneo`.
 - **Menu dell'App**: Dal menu in alto puoi iniziare un Nuovo Torneo, Salvare, esportare le liste delle partite, aggiungere giocatori in corsa, ritirare un giocatore, modificare le Regole del Torneo, gestire i discepoli in archivio e unire database esterni.
 
+## La classifica generale
+
+La Hall of Fame e il file `Giocatori.txt` mettono in fila tutti i discepoli dell'archivio, dal migliore al peggiore, con la posizione davanti al nome: "1° Carla", "2° Bruno". Dalla 2.13.0 la classifica si fa a punti.
+
+**Come si contano i punti.** In ogni torneo il primo prende 100 punti. Gli altri prendono punti in proporzione alla posizione e al numero dei partecipanti, fino all'ultimo, che prende 100 diviso il numero dei partecipanti. La formula è 100 per (partecipanti meno posizione più uno) diviso partecipanti. In un torneo da 10 il primo prende 100, il secondo 90, il terzo 80, e così via fino al decimo, che prende 10. In un torneo da 5 si scende di 20 in 20: 100, 80, 60, 40, 20.
+
+**La classifica è la somma** dei punti di tutti i tornei giocati. Quindi contano due cose: dove sei arrivato rispetto a quanti eravate, e quanti tornei hai giocato, perché ognuno porta qualcosa, anche arrivando ultimi.
+
+**Un esempio.** Due tornei: il torneo A con 10 partecipanti, il torneo B con 5.
+- Anna vince il torneo A, 100 punti, e arriva quarta nel B, 40 punti: in tutto 140.
+- Bruno arriva secondo nel torneo A, 90 punti, e secondo nel B, 80 punti: in tutto 170.
+- Carla arriva terza nel torneo A, 80 punti, e vince il B, 100 punti: in tutto 180.
+- Dario gioca solo il torneo A e arriva quinto: 60 punti.
+
+La classifica generale è: 1° Carla con 180, 2° Bruno con 170, 3° Anna con 140, 4° Dario con 60. Bruno, con due secondi posti, sta davanti ad Anna, che ha un oro ma anche un quarto posto: la costanza conta quanto il colpo singolo. Si vede anche perché conta il numero dei partecipanti: il secondo posto di Bruno vale 90 nel torneo da 10 e 80 in quello da 5, perché nel primo ha lasciato dietro di sé otto avversari, nel secondo tre.
+
+**A parità di punti** decide chi ha più ori, poi più argenti, poi più bronzi, poi la media piazzamenti più bassa. Chi resta pari su tutto divide la stessa posizione: due discepoli al 3°, e il successivo al 5°.
+
+**Da dove viene il numero dei partecipanti.** Lo storico di un discepolo non lo scrive: Dadillo lo ricava contando nell'archivio i discepoli registrati in quel torneo, con lo stesso titolo e la stessa data d'inizio. Per questo conviene registrare alla premiazione tutti i partecipanti, anche gli ultimi: se nella revisione uno per uno salti qualcuno, il torneo risulta più piccolo e i punti degli altri cambiano. Il numero non scende comunque mai sotto il piazzamento più basso registrato.
+
+**Altri ordinamenti.** Nella finestra della Hall of Fame, con Ordina per, si può mettere in fila l'archivio anche per media piazzamenti, per ori, argenti, bronzi e legni, per nome e per numero di tornei, in un verso o nell'altro. Fino alla 2.12.1 l'ordine predefinito era il medagliere, dove un oro stava davanti a qualunque numero di argenti.
+
 ## File usati da Dadillo
 
 Vivono tutti nella cartella dell'applicazione.
