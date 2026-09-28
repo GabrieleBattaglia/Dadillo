@@ -6,6 +6,7 @@ import itertools
 import os
 
 import wx
+from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
 
 from data import (
     DATA_FILE,
@@ -31,12 +32,7 @@ from dialogs import (
     SetupTournamentDialog,
 )
 from standings import StandingsPanel
-from ui_utils import (
-    STILE_ADATTABILE,
-    adatta_finestra,
-    pannello_scorrevole,
-    save_or_warn,
-)
+from ui_utils import save_or_warn
 from version import VERSION
 
 

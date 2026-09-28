@@ -39,7 +39,7 @@ Serve Python 3 e la libreria `wxPython`. Tutte le dipendenze sono elencate in `r
 pip install -r requirements.txt
 ```
 
-Dadillo usa inoltre la libreria personale `GBUtils` per il controllo degli aggiornamenti, che serve solo all'eseguibile compilato: da sorgente il programma parte anche senza.
+Dadillo usa inoltre la libreria personale `GBUtils`, che deve stare nel percorso di Python anche per avviarlo da sorgente: dalla 2.11.4 le finestre prendono la misura e lo scorrimento da `GBwx.py`, il modulo di GBUtils per le applicazioni con le finestre. Il controllo degli aggiornamenti, che viene anch'esso da GBUtils, lavora solo nell'eseguibile compilato.
 
 ### Aggiornare dalla 2.7.0 o da una versione precedente
 

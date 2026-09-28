@@ -4,6 +4,7 @@ Autori: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto.
 """
 
 import wx
+from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
 
 from data import (
     DRAW_SPLITS,
@@ -20,12 +21,7 @@ from data import (
     placement_stats,
     timestamp_to_fields,
 )
-from ui_utils import (
-    STILE_ADATTABILE,
-    adatta_finestra,
-    pannello_scorrevole,
-    save_or_warn,
-)
+from ui_utils import save_or_warn
 
 
 class SetupTournamentDialog(wx.Dialog):

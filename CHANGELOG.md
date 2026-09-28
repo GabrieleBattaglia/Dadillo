@@ -2,6 +2,19 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.11.4] - 2026-09-28
+
+### Risolto
+- **Il fuoco torna dov'era quando si annulla una finestra** (issue 11): chiusa una finestra di dialogo con Escape o con il pulsante di annullamento, il fuoco restava sulla cornice della finestra principale, dove NVDA legge soltanto il titolo, e il controllo su cui si stava lavorando andava ritrovato con il Tab. Adesso torna al controllo che lo aveva prima che la finestra si aprisse, per esempio la lista delle partite da giocare. Il difetto stava nel pannello che raccoglie i controlli di ogni finestra, dalla 2.11.2: alla chiusura il fuoco passava dal controllo al pannello e dal pannello alla finestra che si stava chiudendo, e la finestra principale, credendo di averlo gia', non lo rimetteva. La correzione arriva da GBwx 1.0.1 di GBUtils, con l'adozione qui sotto.
+
+### Modificato
+- **Le finestre prendono misura e scorrimento da GBwx di GBUtils** (issue 10): le funzioni nate nella 2.11.2 in `ui_utils.py`, `pannello_scorrevole` e `adatta_finestra` con lo stile e la misura minima, sono passate in `GBwx.py` di GBUtils per servire a tutte le applicazioni con le finestre, e Dadillo adesso le importa da li' invece di tenerne una copia, cosi' una correzione fatta una volta arriva a tutti. In `ui_utils.py` resta `save_or_warn`, che e' di Dadillo. Un banco ha costruito le sedici finestre di dialogo con la copia vecchia e con GBwx, ai caratteri al 100, al 150 e al 250 per cento: misura, posizione, minimo e area da scorrere coincidono in tutti i 48 casi.
+- GBUtils serve adesso anche per avviare Dadillo da sorgente, non piu' soltanto per il controllo degli aggiornamenti dell'eseguibile.
+
+### Prove
+- Le prove automatiche girano su un desktop di Windows nascosto, creato da `conftest.py` prima di qualunque finestra, sul modello di Tornello: le finestre che creano non possono piu' prendere il primo piano sullo schermo di chi le lancia.
+- Nuova prova `test_fuoco_alla_chiusura.py`: apre davvero, sul desktop nascosto, la finestra del risultato con e senza punti, le regole del torneo, l'aggiunta e il ritiro di un giocatore, le chiude con Escape e con Annulla e controlla che il fuoco torni sulla lista delle partite. Con la copia vecchia fallisce in tutti e dieci i casi, con GBwx passa. La suite passa da 34 a 44 prove.
+
 ## [2.11.2] - 2026-09-23
 
 Pubblicata su GitHub il 2026-09-23 come release `v2.11.2`, con il solo archivio `Dadillo.zip` in allegato. Verificato che l'auto updater la riconosca e ne riceva le note. Issue 4, 5, 6, 7 e 8 chiuse; l'aggiornamento vero dalla 2.10.0 e la prova con NVDA dei riquadri restano nel collaudo, issue 9.
