@@ -2,6 +2,16 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.11.5] - 2026-09-28
+
+### Modificato
+- **La media piazzamenti conta tutte le posizioni, podi compresi** (issue 12): e' la media delle posizioni finali di tutti i tornei giocati, quindi 1 vuol dire sempre primo e 1.83 in media meglio del secondo posto. Fino alla 2.11.4 si sommavano solo le posizioni dal quinto posto in giu' e si divideva per tutti i tornei, cosi' ogni podio contava zero: chi era arrivato secondo, secondo, sesto e primo aveva 1.50, meglio di chi era arrivato sempre secondo, invece di 2.75. Sparisce anche la dicitura "solo podi": chi ha soltanto podi ha adesso il suo numero, per esempio 1.00 o 2.50. Resta "non disponibile" quando nessuna voce dello storico dice la posizione; una voce senza posizione non entra nella media ma conta fra i tornei giocati.
+- Sull'archivio di oggi, diciannove discepoli: per sette la media non cambia, per dieci sale, al massimo di 1.75, e i due che avevano "solo podi" hanno adesso 4.00, un legno nel loro unico torneo.
+- Nell'archivio dei discepoli la somma dei piazzamenti comprende adesso tutte le posizioni, e al primo avvio si ricalcola dallo storico per ogni discepolo: medaglie e storico non si toccano. Il file dei giocatori e `Giocatori.txt` si aggiornano al primo salvataggio.
+
+### Prove
+- La prova della media rifatta sulla nuova regola, con il caso della issue 12, e una prova nuova per il ricalcolo della somma negli archivi scritti fino alla 2.11.4. La suite passa da 44 a 45 prove.
+
 ## [2.11.4] - 2026-09-28
 
 ### Risolto

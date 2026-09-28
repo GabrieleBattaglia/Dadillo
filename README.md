@@ -1,8 +1,8 @@
-# Dadillo - L'Altare del Sacrificio (Versione 2.11.2)
+# Dadillo - L'Altare del Sacrificio (Versione 2.11.5)
 
 **Dadillo** è un gestore di tornei scritto in Python. Gestisce giocatori, abbinamenti, classifiche e record con una personalità... *molto devota* al suo utilizzatore.
 
-Le versioni dalla 2.8.1 alla 2.9.1 sono il risultato della revisione completa del codice, fase 1: salvataggi che non possono più lasciare i dati a metà, archivi danneggiati riconosciuti invece che sovrascritti, classifiche riscritte per la lettura con screen reader e display braille, regole del torneo coerenti fra tutte le finestre. Dalla 2.10.0 in poi sono arrivate la modifica delle date del torneo, la finestra di aggiornamento con le note della versione la pulizia dei residui dopo un aggiornamento e, con la 2.11.2, finestre che si adattano ai caratteri grandi. Il dettaglio è nel [CHANGELOG](CHANGELOG.md).
+Le versioni dalla 2.8.1 alla 2.9.1 sono il risultato della revisione completa del codice, fase 1: salvataggi che non possono più lasciare i dati a metà, archivi danneggiati riconosciuti invece che sovrascritti, classifiche riscritte per la lettura con screen reader e display braille, regole del torneo coerenti fra tutte le finestre. Dalla 2.10.0 in poi sono arrivate la modifica delle date del torneo, la finestra di aggiornamento con le note della versione la pulizia dei residui dopo un aggiornamento e, con la 2.11.2, finestre che si adattano ai caratteri grandi. La 2.11.4 riporta il fuoco dove era quando si annulla una finestra, e la 2.11.5 calcola la media piazzamenti su tutte le posizioni. Il dettaglio è nel [CHANGELOG](CHANGELOG.md).
 
 ## Caratteristiche
 
@@ -28,7 +28,7 @@ Le versioni dalla 2.8.1 alla 2.9.1 sono il risultato della revisione completa de
 - **Classifica Generale della Hall of Fame**: Visualizzazione e ordinamento flessibile della classifica globale, ordinabile per Nome, Ori, Argenti, Bronzi, Legni o Numero Tornei.
 - **Inserimento Rapido da DB**: Durante il setup del torneo puoi selezionare i partecipanti dal database storico con lo Spazio o il doppio clic, mantenendo comunque l'editor di testo per i nuovi iscritti.
 - **Case-Sensitivity per i Nickname**: Nessuna normalizzazione automatica dei caratteri, per rispettare i nickname originali case-sensitive usati su DiceWorld.
-- **Performance Score**: Dadillo calcola una "Media Piazzamenti" per ogni giocatore, sommando le posizioni fuori dal podio e dividendole per tutti i tornei disputati: chi gioca molto viene premiato. Dalla 2.8.4 la media distingue i casi particolari, indicando `solo podi` per chi non ha mai chiuso oltre il quarto posto e `non disponibile` quando lo storico non è interpretabile, così un'assenza di dati non viene più scambiata per un risultato eccellente.
+- **Media Piazzamenti (Modificata nella 2.11.5)**: per ogni giocatore Dadillo calcola la media delle posizioni finali di tutti i tornei disputati, podi compresi. Si legge come una posizione: 1 vuol dire sempre primo, 1.83 in media meglio del secondo posto, 7.50 a metà strada fra settimo e ottavo. Fino alla 2.11.4 contavano solo le posizioni dal quinto posto in giù, divise per tutti i tornei, e ogni podio valeva zero. Quando nessuna voce dello storico dice la posizione, la media è `non disponibile`, così un'assenza di dati non viene scambiata per un risultato eccellente.
 - **Recupero Errori**: Un match inserito per sbaglio? Basta premere `Canc` nella lista dei match giocati per ripristinare i punteggi e riportarlo tra le partite aperte. Se uno dei due giocatori è stato ritirato dal torneo l'operazione viene rifiutata, spiegandone il motivo, invece di lasciare i punteggi a metà.
 
 ## Requisiti e Installazione

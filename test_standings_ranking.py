@@ -395,7 +395,8 @@ def test_merge_db_fuzzy_matching_and_resolution(tmp_path):
     p = db.players["Siddharta33"]
     assert len(p["history"]) == 2
     assert p["medals"]["bronzo"] == 1
-    assert p["placements_sum"] == 10
+    # Dalla 2.11.5 la somma comprende anche il podio: 3 piu' 10.
+    assert p["placements_sum"] == 13
 
 
 def test_format_date_extended():
@@ -485,10 +486,9 @@ def test_parita_irrisolta_viene_segnalata():
     assert ranked[1]["tied_with"] == ["Anna"]
 
 
-def test_media_piazzamenti_distingue_i_casi_senza_dati():
+def test_media_piazzamenti_conta_tutte_le_posizioni():
     from data import (
         MEDIA_NON_DISPONIBILE,
-        SOLO_PODI,
         hall_of_fame_sort_key,
         placement_stats,
     )
@@ -509,14 +509,27 @@ def test_media_piazzamenti_distingue_i_casi_senza_dati():
         "placements_sum": 0,
     }
 
-    assert placement_stats(solo_podi)[1] == SOLO_PODI
-    assert placement_stats(solo_podi)[2] == "solo podi"
-    assert placement_stats(con_piazzamenti)[2] == "4.00"
+    # Dalla 2.11.5 (issue 12) la media e' quella di tutte le posizioni, podi
+    # compresi: sempre primo vale 1, primo e ottavo 4.50.
+    assert placement_stats(solo_podi)[1] == 1
+    assert placement_stats(solo_podi)[2] == "1.00"
+    assert placement_stats(con_piazzamenti)[2] == "4.50"
     assert placement_stats(storico_illeggibile)[1] == MEDIA_NON_DISPONIBILE
     assert placement_stats(storico_illeggibile)[2] == "non disponibile"
 
-    # A parita' di medaglie chi ha solo podi sta davanti, e uno storico
-    # illeggibile non deve piu' scavalcare chi ha piazzamenti veri.
+    # Il caso della issue 12: secondo, secondo, sesto e primo. Fino alla
+    # 2.11.4 i podi valevano zero e la media era 1.50, meglio di un secondo
+    # posto fisso.
+    misto = {"history": ["2° in A - a - b", "2° in B - c - d", "6° in C - e - f", "1° in D - g - h"]}
+    assert placement_stats(misto)[2] == "2.75"
+    assert placement_stats(misto)[0] == 4
+
+    # Una voce senza posizione non conta nella media, ma il torneo resta.
+    con_una_ignota = {"history": ["3° in A - a - b", "appunti presi a mano"]}
+    assert placement_stats(con_una_ignota)[:3] == (2, 3, "3.00")
+
+    # A parita' di medaglie la media piu' bassa sta davanti, e uno storico
+    # illeggibile non deve scavalcare chi ha piazzamenti veri.
     ordinati = sorted(
         [
             ("Ignoto", storico_illeggibile),
@@ -526,6 +539,31 @@ def test_media_piazzamenti_distingue_i_casi_senza_dati():
         key=lambda item: hall_of_fame_sort_key(*item),
     )
     assert [nome for nome, _ in ordinati] == ["Podista", "Piazzato", "Ignoto"]
+
+
+def test_archivio_vecchio_ricalcola_la_somma(tmp_path):
+    """Un archivio scritto fino alla 2.11.4 porta placements_sum con le sole
+    posizioni dal quinto in giu': al caricamento si ricalcola su tutte."""
+    import json
+
+    from data import PlayerDB
+
+    vecchio = {
+        "Anna": {
+            "medals": {"oro": 1, "argento": 1, "bronzo": 0, "legno": 0},
+            "history": [
+                "1° in A - lunedì 5 gennaio 2026 - martedì 6 gennaio 2026",
+                "2° in B - lunedì 12 gennaio 2026 - martedì 13 gennaio 2026",
+                "6° in C - lunedì 19 gennaio 2026 - martedì 20 gennaio 2026",
+            ],
+            "placements_sum": 6,
+        }
+    }
+    with open(tmp_path / "Dadillo_players.json", "w", encoding="utf-8") as f:
+        json.dump(vecchio, f)
+    db = PlayerDB(base_dir=str(tmp_path))
+    assert db.players["Anna"]["placements_sum"] == 9
+    assert db.players["Anna"]["medals"] == {"oro": 1, "argento": 1, "bronzo": 0, "legno": 0}
 
 
 def test_ricerca_coppia_in_entrambi_gli_ordini():
@@ -1033,7 +1071,8 @@ if __name__ == "__main__":
     test_regola_pareggi_unica_per_i_record_vecchi()
     test_migrazione_record_partita_al_formato_completo(pathlib.Path(tempfile.mkdtemp()))
     test_parita_irrisolta_viene_segnalata()
-    test_media_piazzamenti_distingue_i_casi_senza_dati()
+    test_media_piazzamenti_conta_tutte_le_posizioni()
+    test_archivio_vecchio_ricalcola_la_somma(pathlib.Path(tempfile.mkdtemp()))
     test_ricerca_coppia_in_entrambi_gli_ordini()
     test_duplicati_storico_con_titoli_simili(pathlib.Path(tempfile.mkdtemp()))
     test_classifica_leggibile_da_screen_reader(pathlib.Path(tempfile.mkdtemp()))

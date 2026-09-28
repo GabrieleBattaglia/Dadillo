@@ -205,39 +205,40 @@ def split_history_entry(entry):
     return pos, titolo, s_date, e_date
 
 
-# Chiavi di ordinamento per la media piazzamenti. Un giocatore che non ha mai
-# chiuso fuori dal podio non ha una media da confrontare: se ha solo podi vale
-# come il migliore possibile, se invece il suo storico non e' interpretabile
-# finisce in fondo, perche' uno zero per mancanza di dati non e' un merito.
-SOLO_PODI = float("-inf")
+# Chiave di ordinamento di chi non ha una media: se nessuna voce del suo
+# storico dice la posizione finisce in fondo, perche' uno zero per mancanza di
+# dati non e' un merito.
 MEDIA_NON_DISPONIBILE = float("inf")
+
+
+def known_positions(storico):
+    """Le posizioni finali che lo storico di un discepolo dichiara, nel suo
+    ordine; le voci che non la dicono restano fuori."""
+    posizioni = []
+    for voce in storico or []:
+        pos, _, _, _ = split_history_entry(voce)
+        if pos is not None:
+            posizioni.append(pos)
+    return posizioni
 
 
 def placement_stats(p_data):
     """Riepilogo dei piazzamenti di un discepolo.
     Restituisce numero di tornei, media piazzamenti come chiave di ordinamento
     e testo gia' pronto da mostrare.
+    Dalla 2.11.5 la media e' quella di tutte le posizioni finali, podi
+    compresi (issue 12): 1 vuol dire sempre primo, 1.83 in media meglio del
+    secondo posto. Fino alla 2.11.4 si sommavano le sole posizioni dal
+    quinto in giu' e si divideva per tutti i tornei, cosi' ogni podio valeva
+    zero: chi era arrivato secondo, secondo, sesto e primo aveva 1.50 invece
+    di 2.75, e chi aveva solo podi non aveva un numero ma "solo podi".
     """
     storico = p_data.get("history", []) or []
-    tornei = len(storico)
-    fuori_podio = 0
-    ignote = 0
-    for voce in storico:
-        pos, _, _, _ = split_history_entry(voce)
-        if pos is None:
-            ignote += 1
-        elif pos >= 5:
-            fuori_podio += 1
-
-    somma = p_data.get("placements_sum", 0)
-    if fuori_podio > 0:
-        # La media divide per tutti i tornei, non solo per quelli fuori dal
-        # podio: e' una scelta voluta, premia l'assiduita'.
-        media = somma / tornei if tornei > 0 else 0
-        return tornei, media, f"{media:.2f}"
-    if tornei > 0 and ignote == 0:
-        return tornei, SOLO_PODI, "solo podi"
-    return tornei, MEDIA_NON_DISPONIBILE, "non disponibile"
+    posizioni = known_positions(storico)
+    if not posizioni:
+        return len(storico), MEDIA_NON_DISPONIBILE, "non disponibile"
+    media = sum(posizioni) / len(posizioni)
+    return len(storico), media, f"{media:.2f}"
 
 
 def hall_of_fame_sort_key(name, p_data):
@@ -701,7 +702,9 @@ class PlayerDB:
                 )
                 return False
 
-        # Migrazione DB: aggiunge placements_sum e normalizza date in formato esteso
+        # Migrazione DB: normalizza le date in formato esteso e ricalcola
+        # placements_sum, che dalla 2.11.5 somma tutte le posizioni: negli
+        # archivi scritti fino alla 2.11.4 sommava solo quelle dal quinto in giu'.
         for data in self.players.values():
             if "history" in data:
                 new_hist = []
@@ -716,12 +719,7 @@ class PlayerDB:
                         new_hist.append(entry)
                 data["history"] = new_hist
 
-            if "placements_sum" not in data:
-                data["placements_sum"] = 0
-                for entry in data.get("history", []):
-                    pos, _, _, _ = split_history_entry(entry)
-                    if pos is not None and pos >= 5:
-                        data["placements_sum"] += pos
+            data["placements_sum"] = sum(known_positions(data.get("history", [])))
         return True
 
     def save(self):
@@ -742,7 +740,8 @@ class PlayerDB:
         self.export_to_txt()
 
     def recalculate_player_stats(self, name):
-        """Ricalcola in modo deterministico medaglie e somma piazzamenti a partire dallo storico effettivo."""
+        """Ricalcola in modo deterministico medaglie e somma piazzamenti a partire dallo storico effettivo.
+        La somma comprende tutte le posizioni, podi compresi, dalla 2.11.5."""
         if name not in self.players:
             return
         p = self.players[name]
@@ -756,8 +755,7 @@ class PlayerDB:
                 continue
             if pos in medaglia_per_posizione:
                 p["medals"][medaglia_per_posizione[pos]] += 1
-            elif pos >= 5:
-                p["placements_sum"] += pos
+            p["placements_sum"] += pos
 
     def add_or_update_player(
         self,
