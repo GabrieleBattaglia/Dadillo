@@ -20,6 +20,7 @@ from data import (
     format_date_extended,
     now_timestamp,
     split_match_points,
+    tournament_registered,
     update_history_dates,
 )
 from dialogs import (
@@ -34,6 +35,7 @@ from dialogs import (
     SetupPlayersDialog,
     SetupTournamentDialog,
 )
+from premiazione import finalizza_torneo
 from standings import StandingsPanel
 from ui_utils import save_or_warn
 from version import VERSION
@@ -203,8 +205,14 @@ class MainFrame(wx.Frame):
         self.Show()
 
     def check_state_and_show(self):
-        if not self.tourney.unplayed_matches and self.tourney.played_matches:
-            self.show_standings()
+        if self.tourney.concluso():
+            # La classifica finale si apre solo a torneo finalizzato (issue
+            # 16): prima viene la premiazione, riproposta a ogni avvio finche'
+            # non e' fatta.
+            if self.torneo_finalizzato():
+                self.show_standings()
+            else:
+                self.avvia_finalizzazione()
         elif (
             not self.tourney.unplayed_matches
             and not self.tourney.played_matches
@@ -311,7 +319,9 @@ class MainFrame(wx.Frame):
         item_exit = menu_file.Append(wx.ID_ANY, "Esci\tCtrl+Q")
 
         menu_view = wx.Menu()
-        item_standings = menu_view.Append(wx.ID_ANY, "Classifica Parziale\tCtrl+L")
+        # Dalla 2.16.0 la voce apre la classifica parziale a torneo in corso
+        # e quella finale a torneo finalizzato: il nome non dice piu' parziale.
+        item_standings = menu_view.Append(wx.ID_ANY, "Classifica\tCtrl+L")
 
         menu_players = wx.Menu()
         item_add = menu_players.Append(wx.ID_ANY, "Aggiungi Giocatore al Torneo")
@@ -434,7 +444,12 @@ class MainFrame(wx.Frame):
                 wx.OK | wx.ICON_INFORMATION,
             )
             return
-        self.show_standings(is_final=False)
+        # A torneo concluso la classifica e' quella finale, e si apre solo
+        # dopo la finalizzazione (issue 16).
+        if self.tourney.concluso() and not self.torneo_finalizzato():
+            self.avvia_finalizzazione()
+        else:
+            self.show_standings()
 
     def on_filter_change(self, event):
         # Si ricostruisce solo la lista del campo che e' stato modificato,
@@ -619,11 +634,11 @@ class MainFrame(wx.Frame):
             if len(self.tourney.unplayed_matches) == 0:
                 self.tourney.end_date = now_timestamp()
                 save_or_warn(self.tourney.save, self)
-                wx.MessageBox(
-                    "Oh insuperabile divinità, tutte le battaglie sono concluse! Ti accompagno alla sala delle classifiche.",
-                    "Torneo Concluso",
-                )
-                self.show_standings()
+                # Dalla 2.16.0 la finalizzazione viene subito, prima della
+                # classifica finale (issue 16): e' la sua finestra a dire che
+                # le battaglie sono concluse, e il messaggio che accompagnava
+                # alla sala delle classifiche non serve piu'.
+                self.avvia_finalizzazione()
 
         dlg.Destroy()
 
@@ -694,12 +709,38 @@ class MainFrame(wx.Frame):
         else:
             event.Skip()
 
-    def show_standings(self, is_final=True):
+    def torneo_finalizzato(self):
+        """Vero se il torneo concluso e' gia' stato premiato.
+        I tornei premiati fino alla 2.15.0 non hanno il segno nel file: si
+        riconoscono dallo storico dei discepoli, che li porta con titolo e
+        data d'inizio, e il segno si scrive adesso, cosi' la finalizzazione
+        non viene riproposta a chi l'ha gia' fatta.
+        """
+        if self.tourney.finalized:
+            return True
+        if tournament_registered(
+            self.player_db.players, self.tourney.title, self.tourney.start_date
+        ):
+            self.tourney.finalized = True
+            save_or_warn(self.tourney.save, self)
+            return True
+        return False
+
+    def avvia_finalizzazione(self):
+        """La premiazione prima della classifica finale (issue 16): se va in
+        fondo si apre la classifica, altrimenti si torna alle partite, e la
+        finalizzazione sara' riproposta al prossimo avvio e con Classifica
+        nel menu Visualizza.
+        """
+        if finalizza_torneo(self, self.tourney, self.settings, self.player_db):
+            self.show_standings()
+        else:
+            self.init_main_ui()
+
+    def show_standings(self):
         if self.panel:
             self.panel.Destroy()
-        self.panel = StandingsPanel(
-            self, self.tourney, self.settings, is_final=is_final
-        )
+        self.panel = StandingsPanel(self, self.tourney, self.settings)
         if not self.GetMenuBar():
             self.create_menu()
         self.Layout()
@@ -1025,9 +1066,7 @@ class MainFrame(wx.Frame):
             )
             return
 
-        concluso = not self.tourney.unplayed_matches and bool(
-            self.tourney.played_matches
-        )
+        concluso = self.tourney.concluso()
         vecchia_inizio = self.tourney.start_date
         dlg = EditDatesDialog(
             self, self.tourney.start_date, self.tourney.end_date, concluso

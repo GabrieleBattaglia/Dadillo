@@ -1,5 +1,9 @@
-"""Calcolo della classifica, schermata delle classifiche e premiazione.
+"""Calcolo della classifica e schermata delle classifiche.
 Autori: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto.
+Fino alla 2.15.0 qui stava anche la premiazione, dietro il pulsante Avanti
+della classifica finale: dalla 2.16.0 viene prima della classifica e vive in
+premiazione.py (issue 16). Restano qui, condivise con la premiazione, la
+classifica ufficiale, il salvataggio dei criteri e la regola dei pareggi.
 """
 
 import contextlib
@@ -614,12 +618,63 @@ def _righe_statistiche(tourney):
     return lines
 
 
+def draw_split_del_torneo(tourney, settings):
+    """Regola di ripartizione dei punti in caso di pareggio.
+    Vale quella del torneo, che ogni torneo salva nel proprio file; le
+    impostazioni generali servono solo ai tornei che non la hanno.
+    """
+    return getattr(tourney, "draw_points_split", None) or getattr(
+        settings, "draw_points_split", "Inserimento Manuale"
+    )
+
+
+def salva_criteri(tourney, criteri, parent=None):
+    """Scrive nel file del torneo i criteri ufficiali: criterio principale,
+    priorita' del punteggio e i due spareggi, nell'ordine di _criteri_scelti.
+    Il criterio principale si scrive solo se e' uno di quelli di classifica,
+    Vittorie o Punti: le altre voci della schermata sono viste.
+    Restituisce l'esito del salvataggio.
+    """
+    order_by, score_direction, tiebreaker_1, tiebreaker_2 = criteri
+    if order_by in MAIN_CRITERIA:
+        tourney.main_criterion = order_by
+    tourney.score_direction = score_direction
+    tourney.tiebreaker_1 = tiebreaker_1
+    tourney.tiebreaker_2 = tiebreaker_2
+    return save_or_warn(tourney.save, parent)
+
+
+def classifica_ufficiale(tourney, criteri, draw_split):
+    """La classifica con il migliore in cima secondo i criteri dati, la
+    stessa quaterna di salva_criteri: e' quella che decide medaglie e
+    piazzamenti alla finalizzazione.
+    """
+    order_by, score_direction, tiebreaker_1, tiebreaker_2 = criteri
+    return rank_tournament_players(
+        tourney.players,
+        tourney.played_matches,
+        order_by=order_by,
+        score_direction=score_direction,
+        tiebreaker_1=tiebreaker_1,
+        tiebreaker_2=tiebreaker_2,
+        unplayed_matches=tourney.unplayed_matches,
+        reverse=True,
+        draw_points_split=draw_split,
+    )
+
+
 class StandingsPanel(ScrolledPanel):
-    def __init__(self, parent, tourney, settings, is_final=True):
+    """La schermata della classifica, parziale o finale secondo lo stato del
+    torneo, con le scelte della vista sopra e il ritorno alle partite sotto.
+    Fino alla 2.15.0 portava anche il pulsante Avanti della premiazione, che
+    si apriva solo a torneo concluso: dalla 2.16.0 la premiazione viene prima
+    della classifica finale, che si apre soltanto a torneo finalizzato.
+    """
+
+    def __init__(self, parent, tourney, settings):
         super().__init__(parent)
         self.tourney = tourney
         self.settings = settings
-        self.is_final = is_final
 
         main_sizer = wx.BoxSizer(wx.VERTICAL)
         main_sizer.Add(self._crea_scelte(), 0, wx.EXPAND | wx.ALL, 5)
@@ -705,28 +760,30 @@ class StandingsPanel(ScrolledPanel):
         return self.txt_display
 
     def _crea_pulsanti(self):
-        """Il pulsante in fondo: la premiazione, oppure il ritorno al torneo."""
-        btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        if self.is_final:
-            self.btn_proceed = wx.Button(
-                self, label="Avanti: Conferma Criteri e Assegna Medaglie"
+        """In fondo il ritorno alle partite e, a torneo finalizzato, la riga
+        che lo dice. Fino alla 2.15.0 qui stava il pulsante Avanti della
+        premiazione: dalla 2.16.0 la premiazione viene prima della classifica
+        finale (issue 16), e qui non resta niente da premere.
+        """
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        if getattr(self.tourney, "finalized", False):
+            sizer.Add(
+                wx.StaticText(
+                    self,
+                    label="Torneo finalizzato: medaglie e piazzamenti sono incisi nella Hall of Fame.",
+                ),
+                0,
+                wx.ALIGN_CENTER | wx.ALL,
+                5,
             )
-            self.btn_proceed.Bind(wx.EVT_BUTTON, self.on_proceed)
-            btn_sizer.Add(self.btn_proceed, 0, wx.ALL, 5)
-        else:
-            self.btn_back = wx.Button(self, label="Torna alle Partite")
-            self.btn_back.Bind(wx.EVT_BUTTON, self.on_back_to_tourney)
-            btn_sizer.Add(self.btn_back, 0, wx.ALL, 5)
-        return btn_sizer
+        self.btn_back = wx.Button(self, label="Torna alle Partite")
+        self.btn_back.Bind(wx.EVT_BUTTON, self.on_back_to_tourney)
+        sizer.Add(self.btn_back, 0, wx.ALIGN_CENTER | wx.ALL, 5)
+        return sizer
 
     def draw_split(self):
-        """Regola di ripartizione dei punti in caso di pareggio.
-        Vale quella del torneo, che ogni torneo salva nel proprio file; le
-        impostazioni generali servono solo ai tornei che non la hanno.
-        """
-        return getattr(self.tourney, "draw_points_split", None) or getattr(
-            self.settings, "draw_points_split", "Inserimento Manuale"
-        )
+        """Regola di ripartizione dei punti in caso di pareggio."""
+        return draw_split_del_torneo(self.tourney, self.settings)
 
     def _criteri_scelti(self):
         """Criterio principale, priorita' del punteggio e i due spareggi,
@@ -741,13 +798,7 @@ class StandingsPanel(ScrolledPanel):
 
     def _salva_criteri(self):
         """Scrive nel file del torneo i criteri scelti nella schermata."""
-        order_by, score_direction, tiebreaker_1, tiebreaker_2 = self._criteri_scelti()
-        if order_by in ["Vittorie", "Punti"]:
-            self.tourney.main_criterion = order_by
-        self.tourney.score_direction = score_direction
-        self.tourney.tiebreaker_1 = tiebreaker_1
-        self.tourney.tiebreaker_2 = tiebreaker_2
-        save_or_warn(self.tourney.save, self)
+        salva_criteri(self.tourney, self._criteri_scelti(), self)
 
     def _classifica(self, reverse):
         """La classifica secondo i criteri scelti nella schermata."""
@@ -765,7 +816,12 @@ class StandingsPanel(ScrolledPanel):
         )
 
     def on_update(self, event):
-        self._salva_criteri()
+        # Le scelte della schermata restano i criteri del torneo finche' non
+        # e' finalizzato, e la finestra di finalizzazione parte da quelle.
+        # Dopo, i criteri ufficiali sono quelli confermati alla premiazione, e
+        # qui si cambia soltanto la vista.
+        if not getattr(self.tourney, "finalized", False):
+            self._salva_criteri()
         self.update_display()
 
     def update_display(self):
@@ -775,8 +831,7 @@ class StandingsPanel(ScrolledPanel):
         # Il contenuto della schermata dipende dallo stato del torneo, non da
         # come ci si e' arrivati: con Ctrl+L su un torneo gia' finito la
         # classifica e' finale a tutti gli effetti, e le partite giocate sono
-        # per forza tutte. Il parametro is_final decide solo quale pulsante
-        # mostrare in fondo.
+        # per forza tutte.
         concluso = not self.tourney.unplayed_matches
 
         lines = _righe_intestazione(self.tourney, concluso)
@@ -793,150 +848,3 @@ class StandingsPanel(ScrolledPanel):
 
     def on_back_to_tourney(self, event):
         self.GetParent().init_main_ui()
-
-    def on_proceed(self, event):
-        self._salva_criteri()
-
-        # Calcola la classifica ufficiale (sempre 1° posto al migliore, indipendentemente dalla vista temporanea)
-        official_standings = self._classifica(reverse=True)
-        if not self._conferma_parita_in_medaglia(official_standings):
-            return
-        choice = self._chiedi_modalita()
-        if choice is None:
-            return
-        esito = self._registra_medaglie(official_standings, choice)
-        if esito is None:
-            return
-        self._annuncia_premiazione(*esito)
-
-        if hasattr(self, "btn_proceed"):
-            self.btn_proceed.Disable()
-            self.btn_proceed.SetLabel("Medaglie e Storico già Assegnati")
-
-    @staticmethod
-    def _conferma_parita_in_medaglia(official_standings):
-        """Se una medaglia sta per essere assegnata solo per ordine alfabetico
-        l'utente deve saperlo prima, non scoprirlo a premiazione avvenuta.
-        Restituisce True se si puo' procedere.
-        """
-        parita_in_medaglia = [
-            row
-            for pos, row in enumerate(official_standings[: len(MEDAL_NAMES)], start=1)
-            if row.get("tied_with")
-        ]
-        if not parita_in_medaglia:
-            return True
-        elenco = "; ".join(
-            f"{row['name']} con {', '.join(row['tied_with'])}"
-            for row in parita_in_medaglia
-        )
-        risposta = wx.MessageBox(
-            "Attenzione, ci sono parita' che nessuno spareggio ha sciolto e che "
-            "toccano le prime quattro posizioni: "
-            f"{elenco}.\n"
-            "Le medaglie verrebbero assegnate in ordine alfabetico. Procedo?",
-            "Parita' non risolta",
-            wx.YES_NO | wx.ICON_WARNING,
-        )
-        return risposta == wx.YES
-
-    def _chiedi_modalita(self):
-        """Tutti in massa o uno per uno; None se si chiude senza scegliere,
-        che non deve valere come tutti in massa: la premiazione si ferma.
-        """
-        from dialogs import TournamentFinalReviewChoiceDialog
-
-        choice_dlg = TournamentFinalReviewChoiceDialog(self)
-        esito_scelta = choice_dlg.ShowModal()
-        choice = choice_dlg.choice
-        choice_dlg.Destroy()
-        if esito_scelta != wx.ID_OK:
-            return None
-        return choice
-
-    def _registra_medaglie(self, official_standings, choice):
-        """Scrive posizioni e medaglie nello storico dei discepoli.
-        Restituisce aggiornati e saltati, oppure None se l'archivio non si e'
-        potuto salvare, e allora la premiazione non e' registrata.
-        """
-        from data import PlayerDB
-        from dialogs import SinglePlayerReviewDialog
-
-        # L'archivio e' quello condiviso della finestra principale, quando c'e'
-        db = getattr(self.GetParent(), "player_db", None) or PlayerDB()
-        updates_done = 0
-        skipped_count = 0
-
-        start = (
-            format_date_extended(self.tourney.start_date)
-            if self.tourney.start_date
-            else "Sconosciuta"
-        )
-        end = (
-            format_date_extended(self.tourney.end_date)
-            if self.tourney.end_date
-            else "Sconosciuta"
-        )
-
-        for idx, row in enumerate(official_standings):
-            name = row["name"]
-            pos = idx + 1
-            med_str = MEDAL_NAMES.get(pos, "")
-
-            do_update = True
-            if choice == "individual":
-                rev_dlg = SinglePlayerReviewDialog(
-                    self,
-                    player_name=name,
-                    position=pos,
-                    medal_str=med_str,
-                    tourney_title=self.tourney.title,
-                    start_date=start,
-                    end_date=end,
-                    tied_with=row.get("tied_with"),
-                )
-                res = rev_dlg.ShowModal()
-                rev_dlg.Destroy()
-                if res != wx.ID_OK:
-                    do_update = False
-                    skipped_count += 1
-
-            if do_update:
-                success = db.add_or_update_player(
-                    name,
-                    pos,
-                    self.tourney.title,
-                    start,
-                    end,
-                )
-                if success:
-                    updates_done += 1
-                else:
-                    skipped_count += 1
-
-        if not save_or_warn(db.save, self):
-            wx.MessageBox(
-                "Le medaglie non sono state registrate: l'archivio dei discepoli "
-                "non e' stato salvato. Risolvi il problema e premi di nuovo il "
-                "pulsante Avanti.",
-                "Premiazione non registrata",
-                wx.OK | wx.ICON_ERROR,
-            )
-            return None
-        return updates_done, skipped_count
-
-    @staticmethod
-    def _annuncia_premiazione(updates_done, skipped_count):
-        msg = (
-            "Oh mio insuperabile dominatore! I verdetti sono stati incisi nella "
-            "Hall of Fame.\n"
-            f"Discepoli aggiornati: {updates_done}.\n"
-        )
-        if skipped_count > 0:
-            msg += f"Saltati o già registrati: {skipped_count}.\n"
-
-        msg += "Il file Giocatori.txt è aggiornato.\nGloria eterna!"
-
-        wx.MessageBox(
-            msg, "Premiazione e Registrazione Conclusa", wx.OK | wx.ICON_INFORMATION
-        )

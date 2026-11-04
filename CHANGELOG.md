@@ -2,6 +2,18 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.16.0] - 2026-11-04
+
+### Modificato
+- **La finalizzazione viene prima della classifica finale** (issue 16, richiesta di Gabriele del 4 novembre 2026): inserito l'ultimo risultato, Dadillo apre subito la finestra Finalizzazione del torneo, con i criteri ufficiali già compilati da confermare o correggere e i tre pulsanti Uno per uno, Tutti in massa e Non ora, rimando. La classifica finale si apre solo dopo che medaglie e piazzamenti sono stati incisi nella Hall of Fame, e il torneo porta il segno `finalized` nel suo file. Finché non lo è, la finalizzazione viene riproposta a ogni avvio e dalla voce Classifica del menu Visualizza, e la classifica finale resta chiusa. Fino alla 2.15.0 la classifica compariva subito e la premiazione stava dietro il pulsante Avanti, che gli utenti dimenticavano di premere: leggevano la classifica e l'archivio dei discepoli restava indietro.
+- Rimandare resta possibile, con Non ora o con Esc: una finestra senza uscita bloccherebbe chi deve prima correggere un risultato sbagliato, e la classifica chiusa con la finestra che torna sono l'obbligo. La conferma delle parità in zona medaglie, la revisione uno per uno con Salta Discepolo e l'annuncio finale sono quelli di prima.
+- I tornei premiati prima di questa versione non hanno il segno nel file: all'avvio Dadillo li riconosce dallo storico dei discepoli, che porta titolo e data d'inizio del torneo, e scrive il segno, così a chi ha già premiato non ripropone niente.
+- La voce Classifica Parziale del menu Visualizza si chiama Classifica: a torneo in corso apre la classifica parziale, a torneo concluso e finalizzato quella finale, a torneo concluso e non finalizzato la finalizzazione. Nella schermata della classifica finale non c'è più il pulsante Avanti: c'è la riga Torneo finalizzato e il pulsante Torna alle Partite, che prima mancava a torneo concluso. Le scelte sopra la classifica si salvano come criteri del torneo finché non è finalizzato, e la finestra di finalizzazione parte da quelle; dopo cambiano soltanto la vista.
+- La premiazione è passata da `standings.py` al nuovo modulo `premiazione.py`, con lo stesso comportamento. La finestra Destino della Hall of Fame è sostituita da quella di finalizzazione, e il messaggio che accompagnava alla sala delle classifiche non c'è più: lo dice la finestra.
+
+### Prove
+- Otto prove nuove: il segno di finalizzazione salvato, riletto e assente nei file vecchi; il riconoscimento di un torneo premiato dallo storico; la finestra di finalizzazione che parte dai criteri del torneo e si chiude con Esc senza scelta, e che risponde ai due pulsanti; la finalizzazione intera, con la finestra sostituita da una copia che risponde da sola, in massa, rimandata e uno per uno con un discepolo saltato, con l'archivio su una cartella di prova; la classifica finale con la riga Torneo finalizzato e il solo pulsante Torna alle Partite. La suite passa da 62 a 70 prove.
+
 ## [2.15.0] - 2026-11-04
 
 ### Aggiunto

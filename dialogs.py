@@ -13,6 +13,7 @@ from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
 from data import (
     DRAW_SPLITS,
     MAIN_CRITERIA,
+    SCORE_DIRECTION_LABELS,
     SEARCH_PAIR_MODES,
     TIEBREAKERS_1,
     TIEBREAKERS_2,
@@ -824,53 +825,125 @@ class RetirePlayerDialog(wx.Dialog):
         return self.cb_players.GetStringSelection()
 
 
-class TournamentFinalReviewChoiceDialog(wx.Dialog):
-    def __init__(self, parent):
-        super().__init__(parent, title="Destino della Hall of Fame", style=STILE_ADATTABILE)
+def _scelta_con_etichetta(genitore, sizer, etichetta, scelte, selezione):
+    """Un'etichetta e sotto la sua scelta, larga quanto la finestra, gia' su
+    selezione, o sulla prima voce se selezione non e' fra quelle possibili.
+    NVDA associa la scelta all'etichetta creata subito prima.
+    """
+    sizer.Add(wx.StaticText(genitore, label=etichetta), 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
+    scelta = wx.Choice(genitore, choices=scelte)
+    if selezione in scelte:
+        scelta.SetStringSelection(selezione)
+    else:
+        scelta.SetSelection(0)
+    sizer.Add(scelta, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+    return scelta
 
+
+class FinalizeTournamentDialog(wx.Dialog):
+    """La finalizzazione del torneo (issue 16, richiesta di Gabriele del 4
+    novembre 2026): la finestra che si apre dopo l'ultimo risultato, e a ogni
+    avvio finche' il torneo concluso non e' finalizzato, prima della
+    classifica finale. Mostra i criteri ufficiali, gia' compilati con quelli
+    del torneo, da confermare o correggere, e chiede come incidere medaglie e
+    piazzamenti nella Hall of Fame: uno per uno, tutti in massa, oppure non
+    ora. Fino alla 2.15.0 i criteri si confermavano nella schermata della
+    classifica finale, con il pulsante Avanti che molti dimenticavano di
+    premere: la classifica si leggeva e l'archivio dei discepoli restava
+    indietro. Sostituisce la finestra Destino della Hall of Fame.
+    Il fuoco parte dal testo, che si rilegge con le frecce. Esc e la chiusura
+    della finestra valgono Non ora: la premiazione non parte mai da sola.
+    ShowModal da' wx.ID_OK con choice in individual o mass, altrimenti
+    wx.ID_CANCEL con choice None.
+    """
+
+    def __init__(self, parent, tourney, settings):
+        super().__init__(parent, title="Finalizzazione del torneo", style=STILE_ADATTABILE)
         panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         msg_text = (
             "Oh mio insigne monarca! L'ultimo dado è stato tratto e tutte le "
-            "sfide sono concluse. Prima di incidere medaglie e piazzamenti "
-            "nella Hall of Fame, come devo procedere?\n"
+            "sfide sono concluse. Prima di mostrarti la classifica finale, "
+            "conferma qui sotto i criteri ufficiali del torneo e scegli come "
+            "incidere medaglie e piazzamenti nella Hall of Fame.\n"
             "Uno per uno: revisiona ogni discepolo e decidi se aggiornarlo o "
             "saltarlo.\n"
-            "Tutti in massa: immortala subito tutti i partecipanti."
+            "Tutti in massa: immortala subito tutti i partecipanti.\n"
+            "Non ora, rimando: la classifica finale resta chiusa finché il "
+            "torneo non è finalizzato, e te lo riproporrò al prossimo avvio e "
+            "con Classifica nel menu Visualizza."
         )
-
         self.txt_msg = wx.TextCtrl(
             panel, value=msg_text, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH
         )
         vbox.Add(self.txt_msg, 1, wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND, 10)
 
-        btn_box = wx.BoxSizer(wx.HORIZONTAL)
-        self.btn_individual = wx.Button(
-            panel, label="Uno per uno (Revisiona discepoli)"
+        # I criteri del torneo, normalizzati come fa il caricamento: un file
+        # vecchio puo' portare etichette diverse per lo stesso criterio.
+        self.cb_main = _scelta_con_etichetta(
+            panel,
+            vbox,
+            "Criterio Principale:",
+            list(MAIN_CRITERIA),
+            normalize_main_criterion(tourney.main_criterion),
         )
+        self.cb_score_dir = _scelta_con_etichetta(
+            panel,
+            vbox,
+            "Priorità Punteggio:",
+            list(SCORE_DIRECTION_LABELS),
+            SCORE_DIRECTION_LABELS[int(tourney.score_direction == "Basso")],
+        )
+        self.cb_tie1 = _scelta_con_etichetta(
+            panel,
+            vbox,
+            "Primo Spareggio (Scontri Diretti):",
+            list(TIEBREAKERS_1),
+            normalize_choice(tourney.tiebreaker_1, TIEBREAKERS_1),
+        )
+        self.cb_tie2 = _scelta_con_etichetta(
+            panel,
+            vbox,
+            "Secondo Spareggio (Totale nel Torneo):",
+            list(TIEBREAKERS_2),
+            normalize_choice(tourney.tiebreaker_2, TIEBREAKERS_2),
+        )
+
+        btn_box = wx.BoxSizer(wx.HORIZONTAL)
+        self.btn_individual = wx.Button(panel, label="Uno per uno (Revisiona discepoli)")
         self.btn_mass = wx.Button(panel, label="Tutti in massa (Aggiorna tutto subito)")
         # Senza un pulsante con identificativo Annulla, wxPython non chiude la
         # finestra con Esc e l'utente resta bloccato: qui c'e' anche la via
         # d'uscita per rinviare la premiazione.
         self.btn_cancel = wx.Button(panel, wx.ID_CANCEL, "Non ora, rimando")
-
         btn_box.Add(self.btn_individual, 0, wx.ALL, 5)
         btn_box.Add(self.btn_mass, 0, wx.ALL, 5)
         btn_box.Add(self.btn_cancel, 0, wx.ALL, 5)
-
         vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
-        panel.SetSizer(vbox)
-        adatta_finestra(self, panel, (540, 360))
-        self.SetEscapeId(wx.ID_CANCEL)
 
+        panel.SetSizer(vbox)
+        adatta_finestra(self, panel, (560, 560))
+        self.SetEscapeId(wx.ID_CANCEL)
         self.btn_individual.Bind(wx.EVT_BUTTON, self.on_individual)
         self.btn_mass.Bind(wx.EVT_BUTTON, self.on_mass)
 
         # Nessuna scelta predefinita: chiudere la finestra con Esc deve
-        # annullare la premiazione, non farla partire in massa.
+        # rimandare la premiazione, non farla partire in massa.
         self.choice = None
         wx.CallAfter(self.txt_msg.SetFocus)
+
+    def criteri(self):
+        """Criterio principale, priorita' del punteggio e i due spareggi come
+        sono scelti adesso: la quaterna che salva_criteri e la classifica
+        ufficiale di standings si aspettano.
+        """
+        return (
+            self.cb_main.GetStringSelection(),
+            "Alto" if self.cb_score_dir.GetSelection() == 0 else "Basso",
+            self.cb_tie1.GetStringSelection(),
+            self.cb_tie2.GetStringSelection(),
+        )
 
     def on_individual(self, event):
         self.choice = "individual"

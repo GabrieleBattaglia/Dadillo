@@ -722,7 +722,7 @@ def test_classifica_leggibile_da_screen_reader(tmp_path):
 
     app = wx.App(False)
     frame = wx.Frame(None)
-    panel = StandingsPanel(frame, t, SettingsData(base_dir=base), is_final=True)
+    panel = StandingsPanel(frame, t, SettingsData(base_dir=base))
     testo = panel.txt_display.GetValue()
     righe = testo.split("\n")
     frame.Destroy()
@@ -889,7 +889,7 @@ def test_giocate_solo_se_il_torneo_non_e_concluso(tmp_path):
     base = str(tmp_path)
     settings = SettingsData(base_dir=base)
 
-    def testo_classifica(unplayed, is_final):
+    def testo_classifica(unplayed):
         t = TournamentData(base_dir=base)
         t.title = "Torneo di prova"
         t.start_date = "2026-09-01T10:00:00+02:00"
@@ -897,7 +897,7 @@ def test_giocate_solo_se_il_torneo_non_e_concluso(tmp_path):
         t.played_matches = {1: ["Marco", "Anna", "1", 3, 3, 0]}
         t.unplayed_matches = unplayed
         frame = wx.Frame(None)
-        panel = StandingsPanel(frame, t, settings, is_final=is_final)
+        panel = StandingsPanel(frame, t, settings)
         testo = panel.txt_display.GetValue()
         frame.Destroy()
         return testo
@@ -906,14 +906,14 @@ def test_giocate_solo_se_il_torneo_non_e_concluso(tmp_path):
 
     # Torneo concluso aperto con Ctrl+L, che chiede la classifica parziale:
     # le partite giocate sono per forza tutte, non vanno ripetute su ogni riga
-    testo = testo_classifica({}, is_final=False)
+    testo = testo_classifica({})
     assert "Classifica finale" in testo
     assert "giocate(G)" not in testo
     assert "G1/1" not in testo
     assert "(Provvisoria)" not in testo
 
     # Torneo ancora in corso: le giocate servono e la durata e' provvisoria
-    testo = testo_classifica({2: ["Anna", "Marco"]}, is_final=False)
+    testo = testo_classifica({2: ["Anna", "Marco"]})
     assert "Classifica parziale" in testo
     assert "giocate(G)" in testo
     assert "G1/2" in testo

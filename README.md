@@ -1,4 +1,4 @@
-# Dadillo - L'Altare del Sacrificio (Versione 2.15.0)
+# Dadillo - L'Altare del Sacrificio (Versione 2.16.0)
 
 **Dadillo** è un gestore di tornei scritto in Python. Gestisce giocatori, abbinamenti, classifiche e record con una personalità... *molto devota* al suo utilizzatore.
 
@@ -6,6 +6,7 @@ Le versioni dalla 2.8.1 alla 2.9.1 sono il risultato della revisione completa de
 
 ## Caratteristiche
 
+- **La finalizzazione prima della classifica finale (Novità 2.16.0)**: inserito l'ultimo risultato, Dadillo apre subito la finestra Finalizzazione del torneo, con i criteri ufficiali da confermare e la scelta fra Uno per uno e Tutti in massa. La classifica finale si apre solo dopo che medaglie e piazzamenti sono incisi nella Hall of Fame; se rimandi, la finestra torna al prossimo avvio e con Classifica nel menu Visualizza. Così l'archivio dei discepoli non resta più indietro per una premiazione dimenticata.
 - **Il PUB, il gruppo di supporto (Novità 2.15.0)**: nel menu Aiuto, Entra al PUB prepara la mail che ti iscrive alla lista di posta dei programmi di Gabriele, e Chiedi aiuto al PUB prepara una mail al gruppo con la tua domanda e le informazioni sul tuo computer utili a chi risponde. La sezione Il PUB, qui sotto, spiega come funzionano.
 - **Offrimi un caffè (Novità 2.14.0)**: nel menu Aiuto, in fondo alla barra, la voce apre l'invito a offrire un caffè all'autore: il testo si legge con le frecce, e i pulsanti sono Dona con PayPal, che apre la pagina nel browser, e Chiudi, il predefinito. Esc chiude. L'invito compare solo da questa voce, mai alla chiusura del programma.
 - **Date del torneo modificabili (Novità 2.10.0)**: dal menu Opzioni, la voce "Modifica date del torneo" apre una finestra con data e ora di inizio e di fine, già compilate, nel formato giorno/mese/anno e ore:minuti. La data di fine si può lasciare vuota se il torneo è in corso. La voce resta disponibile anche a torneo concluso, e se le medaglie sono già state assegnate le nuove date vengono riscritte anche nello storico di tutti i discepoli che hanno partecipato, con `Giocatori.txt` rigenerato di conseguenza. Se la data non esiste sul calendario, o la fine viene prima dell'inizio, Dadillo lo dice con un messaggio parlante.
@@ -19,7 +20,7 @@ Le versioni dalla 2.8.1 alla 2.9.1 sono il risultato della revisione completa de
 - **Criteri di Classifica e Spareggi per Torneo**: Ogni torneo salva nel proprio file JSON le regole di ordinamento e di spareggio, compresa la regola di ripartizione dei punti in caso di pareggio. Supportata la scelta tra "Punteggio più alto" e "Punteggio più basso" (ideale per tornei a penalità, golf, minis) preservando l'ordinamento naturale delle vittorie.
 - **Parità dichiarate (Novità 2.8.4)**: Quando nessuno spareggio riesce a separare due discepoli, la classifica lo dice apertamente e la posizione finale, decisa dall'ordine alfabetico, non passa più inosservata. Se la parità tocca le prime quattro posizioni, prima della premiazione viene chiesta conferma.
 - **Regole del torneo in corso al riparo (Novità 2.8.4)**: Cambiando le regole dal menu Opzioni ti viene chiesto se applicarle anche al torneo già avviato, avvisandoti che la classifica potrebbe cambiare. I tornei futuri le adottano comunque.
-- **Salvataggio Istantaneo**: Qualsiasi variazione ai criteri apportata nella schermata delle classifiche (Ctrl+L) viene subito registrata nel file `.json` del torneo e riflessa nell'esportazione testo.
+- **Salvataggio Istantaneo**: Qualsiasi variazione ai criteri apportata nella schermata delle classifiche (Ctrl+L) viene subito registrata nel file `.json` del torneo e riflessa nell'esportazione testo, finché il torneo non è finalizzato: dopo, i criteri ufficiali restano quelli confermati alla finalizzazione e le scelte cambiano soltanto la vista.
 - **Salvataggi sicuri (Novità 2.8.1)**: Ogni scrittura passa da un file temporaneo e sostituisce l'originale solo a operazione riuscita, conservando la versione precedente in un file con estensione `.bak`. Se il salvataggio non riesce, per esempio perché il file è aperto in un altro programma, Dadillo lo dice con un messaggio comprensibile invece di lasciarti credere che sia andato tutto bene.
 - **Archivi danneggiati riconosciuti (Novità 2.8.1)**: Se `Dadillo.json` o `Dadillo_players.json` esistono ma non sono leggibili, Dadillo avvisa all'avvio, ne mette da parte una copia datata e si rifiuta di sovrascriverli. Un archivio rovinato non viene più scambiato per un archivio assente.
 - **Dati sempre accanto al programma (Novità 2.8.1)**: Torneo, impostazioni e Hall of Fame vivono nella cartella dell'applicazione, non in quella da cui viene lanciata: Dadillo ritrova i tuoi archivi da qualunque posto lo avvii.
@@ -76,16 +77,17 @@ pyinstaller Dadillo.spec
 
 - **Fase 1: Creazione**: Fornisci il nome del torneo, l'Editto, la tipologia di girone, i punteggi predefiniti e imposta i criteri di classifica e di spareggio (Vittorie o Punti, priorità punteggio alto o basso, primo e secondo spareggio).
 - **Fase 2: Le Battaglie**: La finestra principale si divide in due. A sinistra le partite da giocare, a destra quelle completate. Fai doppio clic, o premi Invio, su una partita non giocata per decretarne l'esito. Usa le caselle di ricerca per filtrare le sfide di un giocatore o di una coppia.
-- **Fase 3: Conclusione del Torneo e Premiazioni**:
-  1. **Apertura Classifica Finale**: Non appena l'ultima partita viene disputata, o se l'app viene avviata con un torneo già completato, Dadillo registra l'orario di fine e apre la Classifica Finale.
-  2. **Verifica dei Criteri**: Nella parte superiore puoi verificare o regolare i criteri ufficiali del torneo (*Ordina per*, *Priorità Punteggio*, *primo e secondo spareggio*).
-  3. **Pulsante "Avanti"**: Quando i criteri sono quelli desiderati, attiva **"Avanti: Conferma Criteri e Assegna Medaglie"** in basso. Se restano parità non risolte nelle prime quattro posizioni, Dadillo te lo dice e chiede conferma.
-  4. **Scelta della Modalità di Revisione**: Si apre la finestra *"Destino della Hall of Fame"*, con tre possibilità:
+- **Fase 3: Finalizzazione e Classifica Finale**:
+  1. **La finestra di finalizzazione**: Non appena l'ultima partita viene disputata, Dadillo registra l'orario di fine e apre la finestra *Finalizzazione del torneo*. La stessa finestra si apre all'avvio, se il torneo è concluso ma non ancora finalizzato, e con `Visualizza, Classifica` (Ctrl+L). Fino alla 2.15.0 la classifica finale compariva subito, con un pulsante Avanti per la premiazione che era facile dimenticare: l'archivio dei discepoli restava indietro.
+  2. **Verifica dei Criteri**: Nella finestra trovi i criteri ufficiali del torneo, già compilati con quelli in vigore (*Criterio Principale*, *Priorità Punteggio*, *primo e secondo spareggio*): confermali o correggili. Vengono salvati nel file del torneo.
+  3. **Scelta della Modalità**: Tre pulsanti:
      - **Uno per uno**: una finestra per ciascun discepolo con la posizione conquistata e la medaglia. Per ognuno puoi premere **"Sì, Aggiorna Discepolo!"** oppure **"Salta Discepolo"**.
      - **Tutti in massa**: registra all'istante medaglie e piazzamenti di tutti i partecipanti.
-     - **Non ora, rimando**: chiude senza registrare nulla, e il pulsante Avanti resta disponibile per riprovare più tardi. Lo stesso effetto si ottiene con Esc.
-  5. **Salvataggio ed Esportazione Automatica**: Al termine i risultati vengono salvati in `Dadillo_players.json` e il file testuale `Giocatori.txt` viene rigenerato. Se il salvataggio non riesce, le medaglie non vengono date per assegnate: Dadillo lo dice e puoi ritentare.
-  6. **Consultazione Continua**: Il torneo concluso resta a video e consultabile per statistiche e filtri fino alla creazione di un nuovo torneo dal menu `File, Nuovo Torneo`.
+     - **Non ora, rimando**: chiude senza registrare nulla e torna alle partite. La classifica finale resta chiusa finché il torneo non è finalizzato, e la finestra torna al prossimo avvio e con `Visualizza, Classifica`. Lo stesso effetto si ottiene con Esc.
+     Se restano parità non risolte nelle prime quattro posizioni, Dadillo te lo dice e chiede conferma prima di procedere.
+  4. **Salvataggio ed Esportazione Automatica**: Al termine i risultati vengono salvati in `Dadillo_players.json`, il file testuale `Giocatori.txt` viene rigenerato e il torneo è segnato come finalizzato. Se il salvataggio non riesce, le medaglie non vengono date per assegnate: Dadillo lo dice e la finalizzazione ti verrà riproposta.
+  5. **La Classifica Finale**: Solo adesso si apre, con la riga che dice che il torneo è finalizzato e il pulsante *Torna alle Partite*. Le scelte sopra la classifica cambiano soltanto la vista.
+  6. **Consultazione Continua**: Il torneo concluso resta a video e consultabile per statistiche e filtri fino alla creazione di un nuovo torneo dal menu `File, Nuovo Torneo`. I tornei premiati con le versioni precedenti vengono riconosciuti dallo storico dei discepoli e non ti viene chiesto di finalizzarli di nuovo.
 - **Menu dell'App**: Dal menu in alto puoi iniziare un Nuovo Torneo, Salvare, esportare le liste delle partite, aggiungere giocatori in corsa, ritirare un giocatore, modificare le Regole del Torneo, gestire i discepoli in archivio e unire database esterni. Il menu Aiuto, in fondo alla barra, ha le voci Entra al PUB, Chiedi aiuto al PUB e Offrimi un caffè.
 
 ## Il PUB, il gruppo di supporto

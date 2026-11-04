@@ -26,6 +26,9 @@ DRAW_SPLITS = (
     "Metà ciascuno",
 )
 SCORE_DIRECTIONS = ("Alto", "Basso")
+# Le etichette delle due direzioni nelle finestre, nell'ordine di
+# SCORE_DIRECTIONS
+SCORE_DIRECTION_LABELS = ("Punteggio più alto (Migliore)", "Punteggio più basso (Migliore)")
 
 # Come interpretare due nomi scritti nelle caselle di ricerca delle partite
 SEARCH_PAIR_MODES = (
@@ -166,6 +169,24 @@ def update_history_dates(players, tourney_title, old_start, new_start, new_end):
         if cambiato:
             toccati.append(nome)
     return toccati
+
+
+def tournament_registered(players, tourney_title, start_date):
+    """Vero se almeno un discepolo dell'archivio ha nello storico questo
+    torneo, riconosciuto da titolo e data d'inizio come fa
+    add_or_update_player. Serve a riconoscere i tornei premiati fino alla
+    2.15.0, che non portano il segno finalized nel loro file (issue 16).
+    """
+    titolo = str(tourney_title).strip()
+    if not titolo:
+        return False
+    attese = {format_date_extended(start_date), str(start_date).strip()}
+    for dati in players.values():
+        for voce in dati.get("history", []) or []:
+            pos, voce_titolo, voce_inizio, _ = split_history_entry(voce)
+            if pos is not None and voce_titolo == titolo and voce_inizio in attese:
+                return True
+    return False
 
 
 def split_match_points(res, pts, draw_split="Metà ciascuno"):
@@ -582,6 +603,17 @@ class TournamentData:
         self.tiebreaker_2 = "Punti Totali"
         self.draw_points_split = "Inserimento Manuale"
 
+        # Dalla 2.16.0 (issue 16): vero quando medaglie e piazzamenti sono
+        # stati incisi nella Hall of Fame. Finche' e' falso la classifica
+        # finale non si apre e la finalizzazione viene riproposta.
+        self.finalized = False
+
+    def concluso(self):
+        """Vero se tutte le partite sono state giocate: almeno una giocata e
+        nessuna da giocare.
+        """
+        return bool(self.played_matches) and not self.unplayed_matches
+
     def save(self):
         data = {
             "title": self.title,
@@ -600,6 +632,7 @@ class TournamentData:
             "tiebreaker_1": self.tiebreaker_1,
             "tiebreaker_2": self.tiebreaker_2,
             "draw_points_split": self.draw_points_split,
+            "finalized": self.finalized,
         }
         atomic_write_json(self.filename, data)
 
@@ -648,6 +681,10 @@ class TournamentData:
             self.pts_win = data.get("pts_win", None)
             self.pts_draw = data.get("pts_draw", None)
             self.pts_loss = data.get("pts_loss", None)
+            # I file scritti fino alla 2.15.0 non hanno il segno: vale falso,
+            # e un torneo gia' premiato lo riconosce la finestra principale
+            # dallo storico dei discepoli, con tournament_registered.
+            self.finalized = bool(data.get("finalized", False))
             # Normalizzazione: i file salvati da versioni precedenti possono
             # contenere etichette diverse per lo stesso criterio, o valori vuoti.
             self.main_criterion = normalize_main_criterion(data.get("main_criterion"))
