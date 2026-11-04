@@ -1,0 +1,11 @@
+Collaudo di Dadillo 2.16.0, 4 novembre 2026. Una riga per prova: cancella quelle superate e scrivi sotto quelle che non vanno. Quando il file e' vuoto si cancella.
+1. Menu Aiuto, in fondo alla barra: con NVDA si sentono le tre voci Entra al PUB (gruppo di supporto), Chiedi aiuto al PUB e Offrimi un caffe', in quest'ordine, con il separatore prima del caffe'?
+2. Offrimi un caffe': all'apertura il fuoco e' sul testo dell'invito e si rilegge con le frecce; Esc chiude; Invio sul testo chiude; Tab porta su Dona con PayPal e poi su Chiudi; Dona apre PayPal nel browser e chiude la finestra.
+3. Entra al PUB: la finestra spiega cosa fa; Apri nel programma di posta apre in Thunderbird la bozza all'indirizzo dell'iscrizione; Invio chiude la finestra. Non spedire la bozza, che tu sei gia' iscritto.
+4. Chiedi aiuto al PUB: la bozza ha l'oggetto Chiedo per Dadillo 2.16.0, la prima riga da sostituire e le informazioni sotto; leggile e dimmi se c'e' qualcosa di troppo o che manca, e se le etichette si capiscono.
+5. Chiedi aiuto al PUB, Passo per passo: i quattro passi copiano negli appunti indirizzo, oggetto e testo, e l'ultimo chiude con OK.
+6. Finalizzazione: un torneo breve, due o tre discepoli; all'ultimo risultato si apre subito Finalizzazione del torneo, il fuoco e' sul testo, i quattro criteri sono quelli del torneo e con NVDA ogni scelta dice la sua etichetta.
+7. Finalizzazione, Non ora: si torna alle partite, la lista delle non giocate e' vuota; Ctrl+L riapre la finestra; Esc fa lo stesso di Non ora.
+8. Finalizzazione, Tutti in massa: l'annuncio dice i discepoli aggiornati; poi la classifica finale con la riga Torneo finalizzato e il pulsante Torna alle Partite; Giocatori.txt e la Hall of Fame hanno il torneo.
+9. Riavvio con il torneo finalizzato: si apre direttamente la classifica finale, senza la finestra di finalizzazione.
+10. Il tuo archivio vero: se hai un torneo concluso e gia' premiato con una versione precedente, al primo avvio della 2.16.0 non deve comparire la finestra di finalizzazione.
