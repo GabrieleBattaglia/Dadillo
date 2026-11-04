@@ -64,7 +64,7 @@ def normalize_choice(value, valid_values, default=None):
 
 def now_local():
     """Momento attuale come datetime con il fuso orario locale."""
-    return datetime.datetime.now(datetime.timezone.utc).astimezone()
+    return datetime.datetime.now(datetime.UTC).astimezone()
 
 
 def now_timestamp():
@@ -430,7 +430,7 @@ def quarantine_file(path):
     None se nemmeno la copia e' riuscita.
     """
     stamp = (
-        datetime.datetime.now(datetime.timezone.utc)
+        datetime.datetime.now(datetime.UTC)
         .astimezone()
         .strftime("%Y%m%d_%H%M%S")
     )

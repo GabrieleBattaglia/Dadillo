@@ -1,6 +1,6 @@
 """Versione e metadati di Dadillo, dichiarati in un punto unico."""
 
-VERSION = "2.13.2"
-DATE = "lunedì 28 settembre 2026"
-AUTHORS = "Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5.5, UltraCode"
+VERSION = "2.14.0"
+DATE = "mercoledì 4 novembre 2026"
+AUTHORS = "Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Fable 5.1, modalità auto"
 APP_NAME = "Dadillo"

@@ -2,6 +2,18 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.14.0] - 2026-11-04
+
+### Aggiunto
+- **Offrimi un caffè** (issue 14, decisione di Gabriele del 6 ottobre 2026 per tutti i programmi con una finestra): nel nuovo menu Aiuto, in fondo alla barra, la voce apre l'invito a offrire un caffè all'autore, con il testo di Donazione di GBUtils in un campo che si rilegge con le frecce, dove arriva il fuoco, e i pulsanti Dona con PayPal, che apre la pagina paypal.me nel browser, e Chiudi, il predefinito. Esc e Invio nel testo chiudono; un Invio tenuto giù dalla voce di menu non chiude la finestra appena aperta. L'invito compare solo da questa voce, mai alla chiusura del programma, che prima non lo aveva da nessuna parte. Modello: la finestra del dono di MeTeOra.
+
+### Modificato
+- `datetime.UTC` al posto di `datetime.timezone.utc` nei tre punti che ruff segnalava: nessun cambiamento di comportamento.
+- L'archivio dei discepoli nel repository porta le somme dei piazzamenti ricalcolate dalla 2.11.5 su tutte le posizioni.
+
+### Prove
+- Quattro prove nuove per la finestra del caffè, aperta davvero sul desktop nascosto: Chiudi predefinito ed Esc che vale no, Dona che apre l'indirizzo giusto e chiude, un browser che non parte e non tiene aperto l'invito, Invio nel testo che chiude solo dopo la grazia dall'apertura. La suite passa da 51 a 55 prove.
+
 ## [2.13.2] - 2026-09-28
 
 Pubblicata su GitHub il 2026-09-28 come release `v2.13.2`, con il solo archivio `Dadillo.zip` in allegato. Verificato che l'auto updater la riconosca e ne riceva le note. L'eseguibile e' stato provato su una copia, su un desktop di Windows nascosto, Hall of Fame compresa. Aggiornamento vero dalla 2.13.1 pubblicata con l'OK sull'esito premuto dopo 40 secondi: si applica e riparte la 2.13.2, senza auto_updater_error.log. E' la prima verifica della issue 13 fra due versioni pubblicate.

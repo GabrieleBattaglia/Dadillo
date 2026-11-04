@@ -1,7 +1,11 @@
 """Finestre di dialogo di Dadillo, pensate per la navigazione da tastiera
 e per la lettura con screen reader.
-Autori: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto.
+Autori: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto;
+l'invito al caffe' della 2.14 di ClaudIA, Claude Fable 5.1, modalita' auto.
 """
+
+import contextlib
+import time
 
 import wx
 from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
@@ -1468,3 +1472,76 @@ def durata_attesa(secondi):
         return f"{int(secondi)} secondi"
     minuti = int(secondi // 60)
     return "1 minuto" if minuti == 1 else f"{minuti} minuti"
+
+
+# L'indirizzo del dono, lo stesso di MeTeOra e di Tornello.
+INDIRIZZO_PAYPAL = "https://paypal.me/GabrieleBattaglia780"
+# Un Invio che arriva entro questo tempo dall'apertura vale come tasto tenuto
+# giu' dalla voce di menu che ha aperto la finestra, e non la chiude: NVDA
+# rimanda ogni ripetizione come una pressione nuova, e IsAutoRepeat non la
+# vede. Poco piu' dell'attesa prima della ripetizione impostata di serie in
+# Windows, che e' di mezzo secondo.
+GRAZIA_INVIO = 0.7
+
+
+def premuto_invio(event):
+    """Vero se il tasto dell'evento e' Invio, anche quello del tastierino,
+    senza modificatori."""
+    return event.GetKeyCode() in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER) and not event.HasAnyModifiers()
+
+
+class DonationDialog(wx.Dialog):
+    """L'invito a offrire un caffe' (issue 14, decisione di Gabriele del 6
+    ottobre 2026 per tutti i programmi con una finestra): il testo di
+    Donazione di GBUtils in un campo di sola lettura, dove arriva il fuoco e
+    che si rilegge con le frecce, e i pulsanti Dona con PayPal, che apre
+    PayPal nel browser, e Chiudi, il predefinito. Esc e Invio nel testo
+    chiudono. Modello: DialogoDonazione di MeTeOra 1.102.4.
+    ShowModal da' wx.ID_YES se si e' aperto PayPal, wx.ID_NO altrimenti.
+    """
+
+    def __init__(self, parent, testo):
+        super().__init__(parent, title="Offrimi un caffè", style=STILE_ADATTABILE)
+        panel = pannello_scorrevole(self)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        self.txt_msg = wx.TextCtrl(
+            panel, value=testo, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2
+        )
+        self.txt_msg.SetName("Offrimi un caffè")
+        vbox.Add(self.txt_msg, 1, wx.EXPAND | wx.ALL, 10)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        self.btn_dona = wx.Button(panel, wx.ID_YES, "&Dona con PayPal")
+        self.btn_chiudi = wx.Button(panel, wx.ID_NO, "&Chiudi")
+        hbox.Add(self.btn_dona, 0, wx.RIGHT, 10)
+        hbox.Add(self.btn_chiudi, 0)
+        vbox.Add(hbox, 0, wx.ALIGN_CENTER | wx.ALL, 10)
+        panel.SetSizer(vbox)
+        adatta_finestra(self, panel, (480, 260))
+        self.SetEscapeId(wx.ID_NO)
+        self.btn_chiudi.SetDefault()
+        self.btn_dona.Bind(wx.EVT_BUTTON, self.on_dona)
+        self.btn_chiudi.Bind(wx.EVT_BUTTON, lambda e: self.EndModal(wx.ID_NO))
+        self.Bind(wx.EVT_CHAR_HOOK, self.on_char_hook)
+        self._aperta = time.monotonic()
+        self.txt_msg.SetFocus()
+
+    def on_char_hook(self, event):
+        """Invio nel testo, un campo su piu' righe che se lo terrebbe, preme
+        Chiudi come nelle finestre di messaggio; sui pulsanti Invio resta
+        loro. Un Invio tenuto giu', o arrivato subito dopo l'apertura, non fa
+        niente.
+        """
+        if premuto_invio(event) and event.GetEventObject() is self.txt_msg:
+            if event.IsAutoRepeat() or time.monotonic() - self._aperta < GRAZIA_INVIO:
+                return
+            self.EndModal(wx.ID_NO)
+            return
+        event.Skip()
+
+    def on_dona(self, event):
+        import webbrowser
+
+        # Un browser che non parte non deve tenere aperto l'invito.
+        with contextlib.suppress(Exception):
+            webbrowser.open(INDIRIZZO_PAYPAL)
+        self.EndModal(wx.ID_YES)

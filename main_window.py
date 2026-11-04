@@ -22,6 +22,7 @@ from data import (
 )
 from dialogs import (
     AddPlayerDialog,
+    DonationDialog,
     EditDatesDialog,
     HallOfFameDialog,
     ManagePlayersDialog,
@@ -325,10 +326,16 @@ class MainFrame(wx.Frame):
         item_dates = menu_options.Append(wx.ID_ANY, "Modifica date del torneo")
         item_merge = menu_options.Append(wx.ID_ANY, "Unisci Database Giocatori")
 
+        # Il menu Aiuto, dalla 2.14.0: l'invito al caffe' sta solo qui, mai
+        # alla chiusura (issue 14, decisione di Gabriele del 6 ottobre 2026).
+        menu_help = wx.Menu()
+        item_coffee = menu_help.Append(wx.ID_ANY, "Offrimi un caffè")
+
         menubar.Append(menu_file, "File")
         menubar.Append(menu_view, "Visualizza")
         menubar.Append(menu_players, "Giocatori")
         menubar.Append(menu_options, "Opzioni")
+        menubar.Append(menu_help, "Aiuto")
 
         self.SetMenuBar(menubar)
 
@@ -346,7 +353,23 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_menu_merge_db, item_merge)
         self.Bind(wx.EVT_MENU, self.on_menu_rules, item_rules)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_dates, item_dates)
+        self.Bind(wx.EVT_MENU, self.on_menu_coffee, item_coffee)
         self.Bind(wx.EVT_CLOSE, self.on_close)
+
+    def on_menu_coffee(self, event):
+        """Offrimi un caffe' (issue 14): l'invito di Donazione di GBUtils,
+        che con la probabilita' piena arriva sempre, nella finestra con il
+        testo e i pulsanti Dona con PayPal e Chiudi. Il programma non lo
+        propone mai da solo, ne' alla chiusura ne' altrove.
+        """
+        from GBUtils import Donazione
+
+        testo = Donazione(lang="it", probabilita=100, stampa=False)
+        if not testo:
+            return
+        dlg = DonationDialog(self, testo)
+        dlg.ShowModal()
+        dlg.Destroy()
 
     def on_close(self, event):
         if not save_or_warn(self.tourney.save, self) and event.CanVeto():

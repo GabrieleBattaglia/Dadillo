@@ -1,4 +1,4 @@
-# Dadillo - L'Altare del Sacrificio (Versione 2.13.2)
+# Dadillo - L'Altare del Sacrificio (Versione 2.14.0)
 
 **Dadillo** è un gestore di tornei scritto in Python. Gestisce giocatori, abbinamenti, classifiche e record con una personalità... *molto devota* al suo utilizzatore.
 
@@ -6,6 +6,7 @@ Le versioni dalla 2.8.1 alla 2.9.1 sono il risultato della revisione completa de
 
 ## Caratteristiche
 
+- **Offrimi un caffè (Novità 2.14.0)**: nel menu Aiuto, in fondo alla barra, la voce apre l'invito a offrire un caffè all'autore: il testo si legge con le frecce, e i pulsanti sono Dona con PayPal, che apre la pagina nel browser, e Chiudi, il predefinito. Esc chiude. L'invito compare solo da questa voce, mai alla chiusura del programma.
 - **Date del torneo modificabili (Novità 2.10.0)**: dal menu Opzioni, la voce "Modifica date del torneo" apre una finestra con data e ora di inizio e di fine, già compilate, nel formato giorno/mese/anno e ore:minuti. La data di fine si può lasciare vuota se il torneo è in corso. La voce resta disponibile anche a torneo concluso, e se le medaglie sono già state assegnate le nuove date vengono riscritte anche nello storico di tutti i discepoli che hanno partecipato, con `Giocatori.txt` rigenerato di conseguenza. Se la data non esiste sul calendario, o la fine viene prima dell'inizio, Dadillo lo dice con un messaggio parlante.
 - **Le novità della versione sotto gli occhi (Novità 2.11.0)**: quando c'è un aggiornamento, la finestra mostra la versione disponibile, quella in uso e le note della release in un campo che si scorre e si rilegge con le frecce, con i pulsanti Aggiorna adesso e Non adesso; Escape vale come Non adesso. Fino alla 2.10.0 la domanda era un sì o no secco e le note non si vedevano da nessuna parte. Mentre scarica compare l'avviso di attesa, che prima mancava.
 - **Proposta di aggiornamento a tempo (Novità 2.12.0)**: se nessuno risponde entro due minuti, la finestra dell'aggiornamento si chiude da sola come Non adesso, il programma prosegue e l'aggiornamento viene riproposto al prossimo avvio. Dalla 2.12.1 il messaggio "il programma si chiude per applicarlo" si può leggere con calma: lo script che sostituisce il programma parte solo dopo l'OK. Fino alla 2.11.5, con l'OK premuto dopo 30 secondi, l'aggiornamento non si applicava.
@@ -84,7 +85,7 @@ pyinstaller Dadillo.spec
      - **Non ora, rimando**: chiude senza registrare nulla, e il pulsante Avanti resta disponibile per riprovare più tardi. Lo stesso effetto si ottiene con Esc.
   5. **Salvataggio ed Esportazione Automatica**: Al termine i risultati vengono salvati in `Dadillo_players.json` e il file testuale `Giocatori.txt` viene rigenerato. Se il salvataggio non riesce, le medaglie non vengono date per assegnate: Dadillo lo dice e puoi ritentare.
   6. **Consultazione Continua**: Il torneo concluso resta a video e consultabile per statistiche e filtri fino alla creazione di un nuovo torneo dal menu `File, Nuovo Torneo`.
-- **Menu dell'App**: Dal menu in alto puoi iniziare un Nuovo Torneo, Salvare, esportare le liste delle partite, aggiungere giocatori in corsa, ritirare un giocatore, modificare le Regole del Torneo, gestire i discepoli in archivio e unire database esterni.
+- **Menu dell'App**: Dal menu in alto puoi iniziare un Nuovo Torneo, Salvare, esportare le liste delle partite, aggiungere giocatori in corsa, ritirare un giocatore, modificare le Regole del Torneo, gestire i discepoli in archivio e unire database esterni. Il menu Aiuto, in fondo alla barra, ha la voce Offrimi un caffè.
 
 ## La classifica generale
 

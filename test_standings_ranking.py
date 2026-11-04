@@ -992,7 +992,7 @@ def test_durata_torneo_con_fuso_orario():
     from data import now_timestamp, parse_timestamp
 
     # Formato nuovo, con fuso: la durata deve essere quella reale
-    adesso = datetime.datetime.now(datetime.timezone.utc).astimezone()
+    adesso = datetime.datetime.now(datetime.UTC).astimezone()
     inizio = (adesso - datetime.timedelta(minutes=10)).replace(microsecond=0)
     dt_inizio = parse_timestamp(inizio.isoformat())
     assert dt_inizio is not None
