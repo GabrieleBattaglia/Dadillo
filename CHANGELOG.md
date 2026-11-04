@@ -2,6 +2,15 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.15.0] - 2026-11-04
+
+### Aggiunto
+- **Entra al PUB e Chiedi aiuto al PUB** (issue 15, richiesta di Gabriele del 21 ottobre 2026 per tutti i programmi con una finestra): due voci nuove nel menu Aiuto. La prima prepara nel programma di posta la mail che iscrive al PUB, il gruppo di supporto dei programmi di Gabriele su Google Groups: si spedisce così com'è, e Google risponde chiedendo di confermare. La seconda prepara una mail al gruppo con l'oggetto "Chiedo per Dadillo" e la versione, una prima riga da sostituire con la domanda e, sotto, le informazioni utili a chi risponde: il programma, con la versione e se gira compilato o dai sorgenti, poi Windows con versione e build, architettura, processore e nuclei, memoria totale e libera, lingua di sistema, screen reader in uso, schermo e scala, versione di Python. Niente nome utente, nome del computer o indirizzi, e tutto sta sotto gli occhi di chi scrive, che può cancellarlo prima di spedire. Dadillo non spedisce niente da solo.
+- La finestra che prepara la mail è `finestra_mail` di GBwx, la stessa di MeTeOra e di MESS; indirizzi, informazioni sul computer e composizione del mailto vengono da GBUtils, come chiede la issue 57 di GBUtils. Qui ci sono soltanto le parole di Dadillo, nel nuovo modulo `pub.py`. La finestra si apre sempre, anche quando il programma di posta c'è, perché il nuovo Outlook di Windows 11 è spesso associato a mailto anche per chi non lo usa: il pulsante Apri nel programma di posta prepara la bozza, e se non compare Passo per passo guida a scriverla nella webmail, copiando negli appunti un campo alla volta. Il mailto della mail d'aiuto, con le informazioni di una macchina vera, resta sotto i mille caratteri: certi programmi di posta tagliano oltre i duemila.
+
+### Prove
+- Sette prove nuove su `pub.py`: le parole della mail d'iscrizione, la mail d'aiuto dal pacchetto compilato e dai sorgenti con le righe delle informazioni nell'ordine giusto, i quattro passi, i pulsanti, le etichette che corrispondono alle chiavi di `informazioni_di_sistema` di GBUtils, il mailto con le informazioni vere della macchina che resta corto, e la finestra di GBwx aperta davvero sul desktop nascosto con le parole di Dadillo, chiusa da sola. Il programma di posta e gli appunti non si toccano mai. La suite passa da 55 a 62 prove.
+
 ## [2.14.0] - 2026-11-04
 
 ### Aggiunto

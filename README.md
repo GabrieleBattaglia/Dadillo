@@ -1,4 +1,4 @@
-# Dadillo - L'Altare del Sacrificio (Versione 2.14.0)
+# Dadillo - L'Altare del Sacrificio (Versione 2.15.0)
 
 **Dadillo** è un gestore di tornei scritto in Python. Gestisce giocatori, abbinamenti, classifiche e record con una personalità... *molto devota* al suo utilizzatore.
 
@@ -6,6 +6,7 @@ Le versioni dalla 2.8.1 alla 2.9.1 sono il risultato della revisione completa de
 
 ## Caratteristiche
 
+- **Il PUB, il gruppo di supporto (Novità 2.15.0)**: nel menu Aiuto, Entra al PUB prepara la mail che ti iscrive alla lista di posta dei programmi di Gabriele, e Chiedi aiuto al PUB prepara una mail al gruppo con la tua domanda e le informazioni sul tuo computer utili a chi risponde. La sezione Il PUB, qui sotto, spiega come funzionano.
 - **Offrimi un caffè (Novità 2.14.0)**: nel menu Aiuto, in fondo alla barra, la voce apre l'invito a offrire un caffè all'autore: il testo si legge con le frecce, e i pulsanti sono Dona con PayPal, che apre la pagina nel browser, e Chiudi, il predefinito. Esc chiude. L'invito compare solo da questa voce, mai alla chiusura del programma.
 - **Date del torneo modificabili (Novità 2.10.0)**: dal menu Opzioni, la voce "Modifica date del torneo" apre una finestra con data e ora di inizio e di fine, già compilate, nel formato giorno/mese/anno e ore:minuti. La data di fine si può lasciare vuota se il torneo è in corso. La voce resta disponibile anche a torneo concluso, e se le medaglie sono già state assegnate le nuove date vengono riscritte anche nello storico di tutti i discepoli che hanno partecipato, con `Giocatori.txt` rigenerato di conseguenza. Se la data non esiste sul calendario, o la fine viene prima dell'inizio, Dadillo lo dice con un messaggio parlante.
 - **Le novità della versione sotto gli occhi (Novità 2.11.0)**: quando c'è un aggiornamento, la finestra mostra la versione disponibile, quella in uso e le note della release in un campo che si scorre e si rilegge con le frecce, con i pulsanti Aggiorna adesso e Non adesso; Escape vale come Non adesso. Fino alla 2.10.0 la domanda era un sì o no secco e le note non si vedevano da nessuna parte. Mentre scarica compare l'avviso di attesa, che prima mancava.
@@ -85,7 +86,16 @@ pyinstaller Dadillo.spec
      - **Non ora, rimando**: chiude senza registrare nulla, e il pulsante Avanti resta disponibile per riprovare più tardi. Lo stesso effetto si ottiene con Esc.
   5. **Salvataggio ed Esportazione Automatica**: Al termine i risultati vengono salvati in `Dadillo_players.json` e il file testuale `Giocatori.txt` viene rigenerato. Se il salvataggio non riesce, le medaglie non vengono date per assegnate: Dadillo lo dice e puoi ritentare.
   6. **Consultazione Continua**: Il torneo concluso resta a video e consultabile per statistiche e filtri fino alla creazione di un nuovo torneo dal menu `File, Nuovo Torneo`.
-- **Menu dell'App**: Dal menu in alto puoi iniziare un Nuovo Torneo, Salvare, esportare le liste delle partite, aggiungere giocatori in corsa, ritirare un giocatore, modificare le Regole del Torneo, gestire i discepoli in archivio e unire database esterni. Il menu Aiuto, in fondo alla barra, ha la voce Offrimi un caffè.
+- **Menu dell'App**: Dal menu in alto puoi iniziare un Nuovo Torneo, Salvare, esportare le liste delle partite, aggiungere giocatori in corsa, ritirare un giocatore, modificare le Regole del Torneo, gestire i discepoli in archivio e unire database esterni. Il menu Aiuto, in fondo alla barra, ha le voci Entra al PUB, Chiedi aiuto al PUB e Offrimi un caffè.
+
+## Il PUB, il gruppo di supporto
+
+Il PUB è la lista di posta su Google Groups dove si chiede aiuto, si segnalano i problemi e si propongono idee sui programmi di Gabriele Battaglia. Dal menu Aiuto:
+
+- **Entra al PUB (gruppo di supporto)** prepara nel tuo programma di posta la mail che ti iscrive: spediscila così com'è, e Google ti scriverà per chiederti di confermare l'iscrizione.
+- **Chiedi aiuto al PUB** prepara una mail al gruppo con l'oggetto "Chiedo per Dadillo" e la versione. Scrivi la domanda al posto della prima riga. Sotto ci sono le informazioni su Dadillo e sul tuo computer, utili a chi ti risponde: Windows con versione e build, processore e memoria, lingua di sistema, screen reader in uso, schermo e scala, versione di Python. Niente nome utente, nome del computer o indirizzi, e puoi cancellare quello che preferisci prima di spedire.
+
+In entrambi i casi la finestra ti dice che cosa sta per fare, e il pulsante Apri nel programma di posta prepara la bozza: Dadillo non spedisce nulla da solo. Se il programma di posta non c'è, o la bozza non compare, Passo per passo ti guida a scriverla nella webmail del browser, copiando negli appunti un campo alla volta: indirizzo, oggetto e testo.
 
 ## La classifica generale
 

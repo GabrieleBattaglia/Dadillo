@@ -4,10 +4,12 @@ Autori: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto.
 
 import itertools
 import os
+import sys
 
 import wx
-from GBwx import STILE_ADATTABILE, adatta_finestra, pannello_scorrevole
+from GBwx import STILE_ADATTABILE, adatta_finestra, finestra_mail, pannello_scorrevole
 
+import pub
 from data import (
     DATA_FILE,
     SEARCH_PAIR_MODES,
@@ -328,7 +330,11 @@ class MainFrame(wx.Frame):
 
         # Il menu Aiuto, dalla 2.14.0: l'invito al caffe' sta solo qui, mai
         # alla chiusura (issue 14, decisione di Gabriele del 6 ottobre 2026).
+        # Dalla 2.15.0 le due voci del PUB, il gruppo di supporto (issue 15).
         menu_help = wx.Menu()
+        item_pub_join = menu_help.Append(wx.ID_ANY, "Entra al PUB (gruppo di supporto)")
+        item_pub_ask = menu_help.Append(wx.ID_ANY, "Chiedi aiuto al PUB")
+        menu_help.AppendSeparator()
         item_coffee = menu_help.Append(wx.ID_ANY, "Offrimi un caffè")
 
         menubar.Append(menu_file, "File")
@@ -353,8 +359,44 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_menu_merge_db, item_merge)
         self.Bind(wx.EVT_MENU, self.on_menu_rules, item_rules)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_dates, item_dates)
+        self.Bind(wx.EVT_MENU, self.on_menu_pub_join, item_pub_join)
+        self.Bind(wx.EVT_MENU, self.on_menu_pub_ask, item_pub_ask)
         self.Bind(wx.EVT_MENU, self.on_menu_coffee, item_coffee)
         self.Bind(wx.EVT_CLOSE, self.on_close)
+
+    def on_menu_pub_join(self, event):
+        """Entra al PUB (issue 15): la finestra di GBwx che prepara la mail
+        d'iscrizione al gruppo di supporto, con le parole di pub.py.
+        """
+        self._mail_al_pub(pub.mail_d_iscrizione())
+
+    def on_menu_pub_ask(self, event):
+        """Chiedi aiuto al PUB (issue 15): la mail al gruppo con l'oggetto che
+        dice la versione, la riga da sostituire con la domanda e le
+        informazioni su Dadillo e sul computer, che l'utente vede e puo'
+        cancellare prima di spedire.
+        """
+        from GBUtils import informazioni_di_sistema
+
+        compilato = bool(getattr(sys, "frozen", False))
+        self._mail_al_pub(pub.mail_d_aiuto(VERSION, compilato, informazioni_di_sistema()))
+
+    def _mail_al_pub(self, mail):
+        """La finestra di GBwx che prepara la mail: si apre sempre, e senza
+        programma di posta accompagna un passo alla volta. Dadillo non
+        spedisce niente: spedisce l'utente, se vuole.
+        """
+        finestra_mail(
+            self,
+            mail["titolo"],
+            mail["destinatario"],
+            mail["oggetto"],
+            mail["corpo"],
+            mail["spiegazione"],
+            mail["passi"],
+            pub.PULSANTI,
+            pub.SENZA_POSTA,
+        )
 
     def on_menu_coffee(self, event):
         """Offrimi un caffe' (issue 14): l'invito di Donazione di GBUtils,
