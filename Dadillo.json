@@ -14,5 +14,6 @@
     "score_direction": "Alto",
     "tiebreaker_1": "Scontro Diretto (Punti)",
     "tiebreaker_2": "Punti Totali",
-    "draw_points_split": "Inserimento Manuale"
+    "draw_points_split": "Inserimento Manuale",
+    "finalized": false
 }
