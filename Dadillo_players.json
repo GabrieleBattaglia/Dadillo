@@ -10,23 +10,27 @@
             "1\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
             "6\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
             "4\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026",
-            "5\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026"
+            "5\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026",
+            "9\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026",
+            "6\u00b0 in Farkle con Bonus - gioved\u00ec 29 ottobre 2026 - sabato 14 novembre 2026"
         ],
-        "placements_sum": 16
+        "placements_sum": 31
     },
     "Selene157": {
         "medals": {
-            "oro": 1,
-            "argento": 1,
+            "oro": 2,
+            "argento": 2,
             "bronzo": 0,
             "legno": 0
         },
         "history": [
             "2\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
             "1\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
-            "10\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026"
+            "10\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026",
+            "1\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026",
+            "2\u00b0 in Farkle con Bonus - gioved\u00ec 29 ottobre 2026 - sabato 14 novembre 2026"
         ],
-        "placements_sum": 13
+        "placements_sum": 16
     },
     "Siddharta33": {
         "medals": {
@@ -39,9 +43,11 @@
             "3\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
             "10\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
             "2\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026",
-            "2\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026"
+            "2\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026",
+            "10\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026",
+            "14\u00b0 in Farkle con Bonus - gioved\u00ec 29 ottobre 2026 - sabato 14 novembre 2026"
         ],
-        "placements_sum": 17
+        "placements_sum": 41
     },
     "Geypi": {
         "medals": {
@@ -57,7 +63,7 @@
     },
     "Manu1504": {
         "medals": {
-            "oro": 0,
+            "oro": 1,
             "argento": 0,
             "bronzo": 1,
             "legno": 0
@@ -66,9 +72,11 @@
             "5\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
             "3\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
             "8\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026",
-            "7\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026"
+            "7\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026",
+            "6\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026",
+            "1\u00b0 in Farkle con Bonus - gioved\u00ec 29 ottobre 2026 - sabato 14 novembre 2026"
         ],
-        "placements_sum": 23
+        "placements_sum": 30
     },
     "Gas": {
         "medals": {
@@ -93,23 +101,26 @@
             "7\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
             "8\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
             "9\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026",
-            "8\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026"
+            "8\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026",
+            "8\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026",
+            "12\u00b0 in Farkle con Bonus - gioved\u00ec 29 ottobre 2026 - sabato 14 novembre 2026"
         ],
-        "placements_sum": 32
+        "placements_sum": 52
     },
     "Princi": {
         "medals": {
             "oro": 0,
             "argento": 0,
-            "bronzo": 0,
+            "bronzo": 1,
             "legno": 0
         },
         "history": [
             "8\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
             "7\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026",
-            "6\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026"
+            "6\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026",
+            "3\u00b0 in Farkle con Bonus - gioved\u00ec 29 ottobre 2026 - sabato 14 novembre 2026"
         ],
-        "placements_sum": 21
+        "placements_sum": 24
     },
     "Bazzi87": {
         "medals": {
@@ -122,14 +133,16 @@
             "9\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
             "11\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
             "11\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026",
-            "10\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026"
+            "10\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026",
+            "14\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026",
+            "15\u00b0 in Farkle con Bonus - gioved\u00ec 29 ottobre 2026 - sabato 14 novembre 2026"
         ],
-        "placements_sum": 41
+        "placements_sum": 70
     },
     "Ninfa81": {
         "medals": {
             "oro": 1,
-            "argento": 0,
+            "argento": 1,
             "bronzo": 0,
             "legno": 0
         },
@@ -137,24 +150,28 @@
             "10\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
             "7\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
             "1\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026",
-            "11\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026"
+            "11\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026",
+            "2\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026",
+            "11\u00b0 in Farkle con Bonus - gioved\u00ec 29 ottobre 2026 - sabato 14 novembre 2026"
         ],
-        "placements_sum": 29
+        "placements_sum": 42
     },
     "Anny.88": {
         "medals": {
             "oro": 0,
             "argento": 0,
             "bronzo": 0,
-            "legno": 0
+            "legno": 1
         },
         "history": [
             "11\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
             "5\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
             "5\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026",
-            "9\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026"
+            "9\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026",
+            "12\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026",
+            "4\u00b0 in Farkle con Bonus - gioved\u00ec 29 ottobre 2026 - sabato 14 novembre 2026"
         ],
-        "placements_sum": 30
+        "placements_sum": 46
     },
     "Dj Dany": {
         "medals": {
@@ -166,9 +183,10 @@
         "history": [
             "12\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
             "14\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
-            "3\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026"
+            "3\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026",
+            "17\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026"
         ],
-        "placements_sum": 29
+        "placements_sum": 46
     },
     "Il Difetto88": {
         "medals": {
@@ -180,9 +198,11 @@
         "history": [
             "14\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
             "9\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
-            "3\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026"
+            "3\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026",
+            "11\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026",
+            "9\u00b0 in Farkle con Bonus - gioved\u00ec 29 ottobre 2026 - sabato 14 novembre 2026"
         ],
-        "placements_sum": 26
+        "placements_sum": 46
     },
     "Gegg\u00e8": {
         "medals": {
@@ -193,9 +213,11 @@
         },
         "history": [
             "15\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
-            "2\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026"
+            "2\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
+            "5\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026",
+            "10\u00b0 in Farkle con Bonus - gioved\u00ec 29 ottobre 2026 - sabato 14 novembre 2026"
         ],
-        "placements_sum": 17
+        "placements_sum": 32
     },
     "Piellino88": {
         "medals": {
@@ -231,21 +253,24 @@
         "history": [
             "12\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
             "6\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026",
-            "4\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026"
+            "4\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026",
+            "7\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026",
+            "7\u00b0 in Farkle con Bonus - gioved\u00ec 29 ottobre 2026 - sabato 14 novembre 2026"
         ],
-        "placements_sum": 22
+        "placements_sum": 36
     },
     "garruz88": {
         "medals": {
             "oro": 0,
             "argento": 0,
-            "bronzo": 0,
+            "bronzo": 1,
             "legno": 1
         },
         "history": [
-            "4\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026"
+            "4\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
+            "3\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026"
         ],
-        "placements_sum": 4
+        "placements_sum": 7
     },
     "vero80": {
         "medals": {
@@ -258,8 +283,49 @@
             "13\u00b0 in Farkle Bonus - marted\u00ec 17 marzo 2026 - luned\u00ec 20 aprile 2026",
             "13\u00b0 in Yatzee con Bonus - venerd\u00ec 1 maggio 2026 - sabato 30 maggio 2026",
             "12\u00b0 in Agostino1-4-24-Bonus - sabato 1 agosto 2026 - sabato 15 agosto 2026",
-            "1\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026"
+            "1\u00b0 in Panzetta no buona - gioved\u00ec 3 settembre 2026 - mercoled\u00ec 16 settembre 2026",
+            "16\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026",
+            "5\u00b0 in Farkle con Bonus - gioved\u00ec 29 ottobre 2026 - sabato 14 novembre 2026"
         ],
-        "placements_sum": 39
+        "placements_sum": 60
+    },
+    "broccolino": {
+        "medals": {
+            "oro": 0,
+            "argento": 0,
+            "bronzo": 0,
+            "legno": 0
+        },
+        "history": [
+            "15\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026",
+            "13\u00b0 in Farkle con Bonus - gioved\u00ec 29 ottobre 2026 - sabato 14 novembre 2026"
+        ],
+        "placements_sum": 28
+    },
+    "claudgaran": {
+        "medals": {
+            "oro": 0,
+            "argento": 0,
+            "bronzo": 0,
+            "legno": 0
+        },
+        "history": [
+            "13\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026",
+            "16\u00b0 in Farkle con Bonus - gioved\u00ec 29 ottobre 2026 - sabato 14 novembre 2026"
+        ],
+        "placements_sum": 29
+    },
+    "pollicino": {
+        "medals": {
+            "oro": 0,
+            "argento": 0,
+            "bronzo": 0,
+            "legno": 1
+        },
+        "history": [
+            "4\u00b0 in Yahtzee con Bonus - marted\u00ec 22 settembre 2026 - luned\u00ec 26 ottobre 2026",
+            "8\u00b0 in Farkle con Bonus - gioved\u00ec 29 ottobre 2026 - sabato 14 novembre 2026"
+        ],
+        "placements_sum": 12
     }
 }
