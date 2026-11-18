@@ -1,4 +1,4 @@
-# Dadillo - L'Altare del Sacrificio (Versione 2.17.0)
+# Dadillo - L'Altare del Sacrificio (Versione 2.17.1)
 
 **Dadillo** è un gestore di tornei scritto in Python. Gestisce giocatori, abbinamenti, classifiche e record con una personalità... *molto devota* al suo utilizzatore.
 
@@ -33,7 +33,7 @@ Le versioni dalla 2.8.1 alla 2.9.1 sono il risultato della revisione completa de
 - **Classifica Generale della Hall of Fame**: Visualizzazione e ordinamento flessibile della classifica globale, ordinabile per Nome, Ori, Argenti, Bronzi, Legni o Numero Tornei.
 - **Inserimento Rapido da DB**: Durante il setup del torneo puoi selezionare i partecipanti dal database storico con lo Spazio o il doppio clic, mantenendo comunque l'editor di testo per i nuovi iscritti.
 - **Case-Sensitivity per i Nickname**: Nessuna normalizzazione automatica dei caratteri, per rispettare i nickname originali case-sensitive usati su DiceWorld.
-- **Classifica generale a punti (Novità 2.13.0)**: la Hall of Fame e `Giocatori.txt` ordinano i discepoli per punti, con la posizione davanti al nome, per esempio "1° Siddharta33". Ogni torneo dà 100 punti al primo e agli altri in proporzione a quanti erano, fino all'ultimo, che ne prende 100 diviso il numero dei partecipanti: in un torneo da 17 il secondo prende 94.1 e l'ultimo 5.9. Si sommano i punti di tutti i tornei giocati. A parità di punti decidono gli ori, poi gli argenti, poi i bronzi, poi la media piazzamenti; chi resta pari su tutto divide la stessa posizione. Il numero dei partecipanti si ricava dall'archivio, contando i discepoli registrati in quel torneo. Nella finestra della Hall of Fame si può ordinare anche per media piazzamenti, per medaglie, per nome e per numero di tornei.
+- **Classifica generale a punti (Novità 2.13.0, podio pesato dalla 2.17.1)**: la Hall of Fame e `Giocatori.txt` ordinano i discepoli per punti, con la posizione davanti al nome, per esempio "1° Siddharta33". In ogni torneo il primo prende 100 punti; gli altri prendono 100 per il quadrato della quota dei partecipanti dal proprio posto in giù, così in un torneo da 17 il secondo prende 88.6, il quarto 67.8 e l'ultimo 0.3. Si sommano i punti di tutti i tornei giocati: pesano la posizione, quanti erano e quanti tornei hai giocato, ma un torneo in più non copre un podio. A parità di punti decidono gli ori, poi gli argenti, poi i bronzi, poi la media piazzamenti; chi resta pari su tutto divide la stessa posizione. Il numero dei partecipanti si ricava dall'archivio, contando i discepoli registrati in quel torneo. Nella finestra della Hall of Fame si può ordinare anche per media piazzamenti, per medaglie, per nome e per numero di tornei.
 - **Media Piazzamenti (Modificata nella 2.11.5)**: per ogni giocatore Dadillo calcola la media delle posizioni finali di tutti i tornei disputati, podi compresi. Si legge come una posizione: 1 vuol dire sempre primo, 1.83 in media meglio del secondo posto, 7.50 a metà strada fra settimo e ottavo. Fino alla 2.11.4 contavano solo le posizioni dal quinto posto in giù, divise per tutti i tornei, e ogni podio valeva zero. Quando nessuna voce dello storico dice la posizione, la media è `non disponibile`, così un'assenza di dati non viene scambiata per un risultato eccellente.
 - **Recupero Errori**: Un match inserito per sbaglio? Basta premere `Canc` nella lista dei match giocati per ripristinare i punteggi e riportarlo tra le partite aperte. Se uno dei due giocatori è stato ritirato dal torneo l'operazione viene rifiutata, spiegandone il motivo, invece di lasciare i punteggi a metà.
 
@@ -110,19 +110,19 @@ In entrambi i casi la finestra ti dice che cosa sta per fare, e il pulsante Apri
 
 ## La classifica generale
 
-La Hall of Fame e il file `Giocatori.txt` mettono in fila tutti i discepoli dell'archivio, dal migliore al peggiore, con la posizione davanti al nome: "1° Carla", "2° Bruno". Dalla 2.13.0 la classifica si fa a punti.
+La Hall of Fame e il file `Giocatori.txt` mettono in fila tutti i discepoli dell'archivio, dal migliore al peggiore, con la posizione davanti al nome: "1° Carla", "2° Bruno". Dalla 2.13.0 la classifica si fa a punti, e dalla 2.17.1 il podio pesa più della coda.
 
-**Come si contano i punti.** In ogni torneo il primo prende 100 punti. Gli altri prendono punti in proporzione alla posizione e al numero dei partecipanti, fino all'ultimo, che prende 100 diviso il numero dei partecipanti. La formula è 100 per (partecipanti meno posizione più uno) diviso partecipanti. In un torneo da 10 il primo prende 100, il secondo 90, il terzo 80, e così via fino al decimo, che prende 10. In un torneo da 5 si scende di 20 in 20: 100, 80, 60, 40, 20.
+**Come si contano i punti.** In ogni torneo il primo prende 100 punti. Per gli altri si prende la quota dei partecipanti dal proprio posto in giù, cioè partecipanti meno posizione più uno, diviso i partecipanti, e se ne fa il quadrato: i punti sono 100 per quel quadrato. In un torneo da 10 il secondo ha quota 9 su 10 e prende 81, il terzo 64, poi 49, 36, 25, 16, 9, 4, e il decimo 1. In un torneo da 5 i punti sono 100, 64, 36, 16 e 4. Fino alla 2.17.0 la quota contava semplice, senza quadrato, 100, 90, 80 e così via: un oro valeva poco più di un quarto posto, e chi aveva più medaglie finiva dietro a chi aveva giocato un torneo in più.
 
-**La classifica è la somma** dei punti di tutti i tornei giocati. Quindi contano due cose: dove sei arrivato rispetto a quanti eravate, e quanti tornei hai giocato, perché ognuno porta qualcosa, anche arrivando ultimi.
+**La classifica è la somma** dei punti di tutti i tornei giocati. Quindi contano tre cose: dove sei arrivato, quanti eravate, perché la quota si calcola sui partecipanti, e quanti tornei hai giocato, perché ognuno porta qualcosa. Il quadrato fa pesare il podio: un gradino in alto vale una decina di punti, la coda quasi niente, e un torneo in più a metà classifica non basta a coprire un podio.
 
 **Un esempio.** Due tornei: il torneo A con 10 partecipanti, il torneo B con 5.
-- Anna vince il torneo A, 100 punti, e arriva quarta nel B, 40 punti: in tutto 140.
-- Bruno arriva secondo nel torneo A, 90 punti, e secondo nel B, 80 punti: in tutto 170.
-- Carla arriva terza nel torneo A, 80 punti, e vince il B, 100 punti: in tutto 180.
-- Dario gioca solo il torneo A e arriva quinto: 60 punti.
+- Anna vince il torneo A, 100 punti, e arriva quarta nel B, 16 punti: in tutto 116.
+- Bruno arriva secondo nel torneo A, 81 punti, e secondo nel B, 64 punti: in tutto 145.
+- Carla arriva terza nel torneo A, 64 punti, e vince il B, 100 punti: in tutto 164.
+- Dario gioca solo il torneo A e arriva quinto: 36 punti.
 
-La classifica generale è: 1° Carla con 180, 2° Bruno con 170, 3° Anna con 140, 4° Dario con 60. Bruno, con due secondi posti, sta davanti ad Anna, che ha un oro ma anche un quarto posto: la costanza conta quanto il colpo singolo. Si vede anche perché conta il numero dei partecipanti: il secondo posto di Bruno vale 90 nel torneo da 10 e 80 in quello da 5, perché nel primo ha lasciato dietro di sé otto avversari, nel secondo tre.
+La classifica generale è: 1° Carla con 164, 2° Bruno con 145, 3° Anna con 116, 4° Dario con 36. Bruno, con due secondi posti, sta davanti ad Anna, che ha un oro ma anche un quarto posto: la costanza conta quanto il colpo singolo. Si vede anche perché conta il numero dei partecipanti: il secondo posto di Bruno vale 81 nel torneo da 10 e 64 in quello da 5, perché nel primo ha lasciato dietro di sé otto avversari, nel secondo tre.
 
 **A parità di punti** decide chi ha più ori, poi più argenti, poi più bronzi, poi la media piazzamenti più bassa. Chi resta pari su tutto divide la stessa posizione: due discepoli al 3°, e il successivo al 5°.
 

@@ -2,6 +2,15 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.17.1] - 2026-11-18
+
+### Modificato
+- **Il podio pesa di più nella classifica generale** (richiesta di Gabriele del 18 novembre 2026, su obiezione dei giocatori): i punti di un piazzamento sono 100 per il quadrato della quota dei partecipanti dal proprio posto in giù, dove fino alla 2.17.0 erano 100 per la quota semplice. In un torneo da 10 i punti sono i quadrati, 100, 81, 64, 49, 36, 25, 16, 9, 4, 1; in uno da 17 il secondo prende 88.6 invece di 94.1, il quarto 67.8 invece di 82.4, l'ultimo 0.3 invece di 5.9. Restano i tre pesi: la posizione, il numero dei partecipanti, perché la quota si calcola su quanti erano, e il numero dei tornei giocati, perché ogni torneo aggiunge punti. Cambia il rapporto fra loro: un gradino del podio vale una decina di punti, la coda quasi niente, e un torneo in più a metà classifica non copre più un podio. Con la formula lineare, in un torneo da 17, un oro valeva 17.6 punti più di un quarto posto e un torneo giocato a metà classifica ne dava una cinquantina: chi aveva più medaglie finiva dietro a chi aveva giocato un torneo in più, e i giocatori lo hanno fatto notare. Sull'archivio di oggi, 22 discepoli e 6 tornei, le coppie con più medaglie dietro erano 21 su 231; Selene157, due ori e due argenti, passa da terza a prima, vero80 col suo oro dall'undicesimo all'ottavo posto, Rinaldo, sei tornei senza medaglie, dall'ottavo al dodicesimo, davanti a chi ha giocato un torneo solo.
+- La riga che spiega i punti in Giocatori.txt e nella finestra della Hall of Fame dice la formula nuova; gli spareggi a pari punti restano ori, argenti, bronzi e media piazzamenti. Il README rifà l'esempio con i numeri nuovi.
+
+### Prove
+- La prova dei punti segue la formula nuova: i quadrati del torneo da 10, i due tornei da quattro dove due secondi posti valgono ancora più di una vittoria e un ultimo posto, e un caso nuovo a pari punti, dove un primo da solo batte un secondo e un terzo di un torneo da 5 grazie all'oro. Giocatori.txt porta 25 punti al secondo di un torneo da due. La suite resta a 79 prove.
+
 ## [2.17.0] - 2026-11-18
 
 ### Aggiunto

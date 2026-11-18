@@ -1639,7 +1639,8 @@ class HallOfFameDialog(wx.Dialog):
         lines.append(f"Ordinata per {order_by}, {len(flat)} discepoli")
         if order_by == "Punti":
             lines.append(
-                "Ogni torneo da' 100 punti al primo, agli altri in proporzione ai partecipanti."
+                "In ogni torneo 100 punti al primo; agli altri 100 per il quadrato della "
+                "quota dei partecipanti dal proprio posto in giu'."
             )
 
         # Tre righe corte per discepolo, con l'etichetta accanto a ogni numero:

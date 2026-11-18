@@ -537,8 +537,9 @@ def test_media_piazzamenti_conta_tutte_le_posizioni():
 
 
 def test_classifica_generale_a_punti():
-    """Dalla 2.13.0: 100 punti al primo di ogni torneo, agli altri in
-    proporzione ai partecipanti, ricavati dall'archivio."""
+    """Dalla 2.13.0 la classifica e' a punti; dalla 2.17.1 sono 100 per il
+    quadrato della quota dei partecipanti dal proprio posto in giu', con i
+    partecipanti ricavati dall'archivio."""
     from data import (
         hall_of_fame_ranking,
         placement_points,
@@ -547,10 +548,12 @@ def test_classifica_generale_a_punti():
     )
 
     assert placement_points(1, 17) == 100
-    assert placement_points(17, 17) == 100 / 17
-    assert placement_points(2, 4) == 75
+    assert round(placement_points(17, 17), 9) == round(100 / 289, 9)
+    assert placement_points(2, 4) == 56.25
+    # In un torneo da 10 i punti sono i quadrati, da 100 a 1.
+    assert [round(placement_points(p, 10), 9) for p in (2, 3, 10)] == [81, 64, 1]
     # Un piazzamento oltre il numero contato vale come ultimo di quel numero.
-    assert placement_points(8, 5) == 100 / 8
+    assert placement_points(8, 5) == 100 / 64
 
     def medaglie(oro=0, argento=0, bronzo=0):
         return {"oro": oro, "argento": argento, "bronzo": bronzo, "legno": 0}
@@ -565,15 +568,28 @@ def test_classifica_generale_a_punti():
     }
     giocatori["Bronzo"]["medals"] = medaglie(oro=1, bronzo=1)
     assert tournament_sizes(giocatori) == {("A", "x"): 4, ("B", "x"): 4}
-    assert ranking_points(giocatori["Argento"], tournament_sizes(giocatori)) == 150
+    assert ranking_points(giocatori["Argento"], tournament_sizes(giocatori)) == 112.5
     classifica = hall_of_fame_ranking(giocatori)
-    # Bronzo: 50 + 100; Argento: 75 + 75; Oro: 100 + 25; Ultimo: 25 + 50.
-    # Bronzo e Argento hanno 150 punti: decide l'oro di Bronzo.
+    # Bronzo: 25 + 100; Argento: 56.25 + 56.25; Oro: 100 + 6.25; Ultimo: 6.25 + 25.
     assert [(o, n) for o, n, _ in classifica] == [
         (1, "Bronzo"),
         (2, "Argento"),
         (3, "Oro"),
         (4, "Ultimo"),
+    ]
+
+    # A pari punti decidono le medaglie: in un torneo da 5 il secondo e il
+    # terzo, 64 e 36, fanno i 100 di un primo da solo, e vince l'oro.
+    pari_punti = {
+        "Coppia": {"medals": medaglie(argento=1, bronzo=1), "history": ["2° in E - x - y", "3° in F - x - y"]},
+        "Solo": {"medals": medaglie(oro=1), "history": ["1° in G - x - y"]},
+        "Quinto": {"medals": medaglie(), "history": ["5° in E - x - y", "5° in F - x - y"]},
+    }
+    classifica = hall_of_fame_ranking(pari_punti)
+    assert [(o, n, round(p, 6)) for o, n, p in classifica] == [
+        (1, "Solo", 100),
+        (2, "Coppia", 100),
+        (3, "Quinto", 8),
     ]
 
     # Pari su tutto: stesso ordinale, poi si salta, e fra loro l'alfabeto.
@@ -606,7 +622,8 @@ def test_hall_of_fame_in_giocatori_txt(tmp_path):
     assert "1° Anna\n" in testo
     assert "2° Bruno\n" in testo
     assert "  Punti 100.0, tornei 1, media 1.00.\n" in testo
-    assert "  Punti 50.0, tornei 1, media 2.00.\n" in testo
+    # Il secondo di un torneo da due ha quota un mezzo: al quadrato, 25.
+    assert "  Punti 25.0, tornei 1, media 2.00.\n" in testo
 
 
 def test_finestra_hall_of_fame_per_punti(tmp_path):

@@ -280,14 +280,21 @@ def tournament_sizes(players):
 
 
 def placement_points(pos, partecipanti):
-    """I punti di un piazzamento, dalla 2.13.0: 100 al primo, e in proporzione
-    ai partecipanti per gli altri, fino all'ultimo, che ne prende 100 diviso
-    il loro numero. Ogni torneo vale uguale, grande o piccolo, e giocarlo vale
-    sempre qualcosa. Scelta di Gabriele del 28 settembre 2026, fra questa,
-    zero all'ultimo e un punto per ogni avversario battuto.
+    """I punti di un piazzamento: 100 per il quadrato della quota dei
+    partecipanti dal proprio posto in giu', cioe' (partecipanti - pos + 1)
+    diviso partecipanti. Il primo prende 100 in ogni torneo, grande o
+    piccolo; in uno da 10 gli altri prendono 81, 64, 49, 36, 25, 16, 9, 4 e
+    1. Pesano la posizione, quanti erano e, con la somma dei tornei, quanti
+    se ne sono giocati; il quadrato fa pesare il podio piu' della coda.
+    Dalla 2.13.0 alla 2.17.0 la quota contava semplice, 100, 90, 80: un oro
+    valeva poco piu' di un quarto posto e chi aveva piu' medaglie finiva
+    dietro a chi aveva giocato un torneo in piu'. Scelta di Gabriele del 18
+    novembre 2026, su obiezione dei giocatori; la formula lineare era la sua
+    scelta del 28 settembre 2026 fra questa, zero all'ultimo e un punto per
+    ogni avversario battuto.
     """
     partecipanti = max(partecipanti, pos)
-    return 100 * (partecipanti - pos + 1) / partecipanti
+    return 100 * ((partecipanti - pos + 1) / partecipanti) ** 2
 
 
 def ranking_points(p_data, sizes):
@@ -1035,8 +1042,9 @@ class PlayerDB:
             )
         parts = [
             "Hall of Fame di Dadillo\n",
-            "Classifica per punti: ogni torneo ne da' 100 al primo, agli altri "
-            "in proporzione ai partecipanti.\n",
+            "Classifica per punti: in ogni torneo 100 al primo; agli altri 100 "
+            "per il quadrato della quota dei partecipanti dal proprio posto in "
+            "giu', cosi' il podio pesa e la coda poco.\n",
         ]
 
         # Dalla 2.13.0 l'ordine e' quello della classifica a punti, con
