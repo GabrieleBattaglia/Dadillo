@@ -2,6 +2,20 @@
 
 Tutti i cambiamenti e le novità introdotte nelle versioni di Dadillo.
 
+## [2.18.0] - 2026-11-18
+
+### Aggiunto
+- **Il Riepilogo** (richiesta di Gabriele del 18 novembre 2026): quando non c'è niente da fare, Dadillo mostra una schermata di testo in sola lettura, che si legge con le frecce da capo, invece della finestra vuota o di una finestra aperta da sola. Dice nome e versione del programma, data e ora, lo stato del torneo e le cose che si possono fare adesso, voce di menu per voce, e poi le statistiche dell'archivio dei discepoli: quanti sono, quanti tornei e quante partecipazioni; il torneo più affollato e il più intimo con la media dei partecipanti; il primo torneo, l'ultimo con il suo podio e il più lungo in giorni; i primi cinque della Hall of Fame per punti, con medaglie, tornei e media; i primi cinque del medagliere; e le curiosità: chi ha giocato tutti i tornei o i più assidui, quanti hanno un torneo solo, a quanti discepoli diversi sono andati gli ori e il più vincente, la media piazzamenti migliore con almeno due tornei, il re del legno e il fanalino di coda più fedele. Sotto il testo i pulsanti dello stato: Nuovo Torneo ad altare libero; Scegli i discepoli e Nuovo Torneo a torneo in preparazione; Torna alle Partite a torneo in corso; Finalizza il torneo e Torna alle Partite a torneo concluso; Classifica finale e Nuovo Torneo a torneo finalizzato. Il modulo nuovo è `riepilogo.py`.
+- La voce Riepilogo e statistiche nel menu Visualizza, Ctrl+R, apre la schermata in qualunque momento, anche a torneo in corso; Torna alle Partite riporta alle sfide.
+
+### Modificato
+- All'avvio senza un torneo Dadillo non apre più da solo la finestra Nuovo Torneo: compare il Riepilogo, e il torneo si crea da File, Nuovo Torneo, Ctrl+N, o col pulsante sotto il testo. Chi entra solo per guardare l'archivio non si trova più a creare un torneo. Lo stesso a torneo in preparazione, con i discepoli ancora da scegliere: il Riepilogo lo dice, e Scegli i discepoli riprende da lì, invece della finestra dei discepoli aperta da sola.
+- A torneo concluso e finalizzato, all'avvio compare il Riepilogo con il podio dell'ultimo torneo, invece della classifica finale, che resta a un passo: Classifica finale nel riepilogo, o Ctrl+L. Subito dopo la finalizzazione la classifica finale si apre come prima.
+- Nuovo Torneo non chiede conferma quando non c'è nessun torneo da azzerare. La riga "L'Altare è vuoto", che restava dopo un Nuovo Torneo annullato, è sostituita dal Riepilogo. Modifica date del torneo ridisegna la vista in cui si è, classifica o partite, invece di cambiarla.
+
+### Prove
+- Nove prove nuove: lo stato del torneo nei cinque casi; la data letta dalla forma estesa dello storico; il testo del riepilogo su un archivio di prova, con intestazione, tornei, vetta, medagliere e curiosità, e sugli archivi vuoti; le frasi e le azioni dei cinque stati; il pannello vero sul desktop nascosto, con il testo in sola lettura e i pulsanti che chiamano i metodi della finestra principale; la scelta della vista all'avvio nei cinque stati; la voce del menu Visualizza che arriva al riepilogo; la finestra principale vera, costruita su una cartella di prova, che all'avvio senza torneo mostra il riepilogo e con Nuovo Torneo annullato ci torna. La suite passa da 79 a 88 prove.
+
 ## [2.17.1] - 2026-11-18
 
 ### Modificato

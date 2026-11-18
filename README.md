@@ -1,4 +1,4 @@
-# Dadillo - L'Altare del Sacrificio (Versione 2.17.1)
+# Dadillo - L'Altare del Sacrificio (Versione 2.18.0)
 
 **Dadillo** è un gestore di tornei scritto in Python. Gestisce giocatori, abbinamenti, classifiche e record con una personalità... *molto devota* al suo utilizzatore.
 
@@ -6,6 +6,7 @@ Le versioni dalla 2.8.1 alla 2.9.1 sono il risultato della revisione completa de
 
 ## Caratteristiche
 
+- **Il Riepilogo (Novità 2.18.0)**: quando non c'è niente da fare, all'avvio senza un torneo o con l'ultimo torneo finalizzato, Dadillo mostra un testo in sola lettura, da leggere con le frecce: nome e versione, data e ora, lo stato del torneo con le cose che puoi fare adesso, e le statistiche dell'archivio, dai primi cinque della Hall of Fame e del medagliere fino al re del legno. Sotto, i pulsanti per la cosa da fare, a cominciare da Nuovo Torneo. Si apre anche a torneo in corso con `Visualizza, Riepilogo e statistiche`, Ctrl+R. La finestra Nuovo Torneo non si apre più da sola all'avvio.
 - **Unione manuale (Novità 2.17.0)**: nel menu Opzioni, sotto Unisci Database Giocatori, incide nella Hall of Fame un torneo giocato fuori da questo Dadillo, senza il suo file: titolo e date in una finestra, poi i partecipanti nell'ordine della classifica finale, presi dall'archivio o scritti, con Ctrl e le frecce verticali per spostarli. Inserisci torneo nello storico registra posizioni e medaglie, salva l'archivio e rigenera `Giocatori.txt`. La sezione L'unione manuale, qui sotto, spiega i passi.
 - **La finalizzazione prima della classifica finale (Novità 2.16.0)**: inserito l'ultimo risultato, Dadillo apre subito la finestra Finalizzazione del torneo, con i criteri ufficiali da confermare e la scelta fra Uno per uno e Tutti in massa. La classifica finale si apre solo dopo che medaglie e piazzamenti sono incisi nella Hall of Fame; se rimandi, la finestra torna al prossimo avvio e con Classifica nel menu Visualizza. Così l'archivio dei discepoli non resta più indietro per una premiazione dimenticata.
 - **Il PUB, il gruppo di supporto (Novità 2.15.0)**: nel menu Aiuto, Entra al PUB prepara la mail che ti iscrive alla lista di posta dei programmi di Gabriele, e Chiedi aiuto al PUB prepara una mail al gruppo con la tua domanda e le informazioni sul tuo computer utili a chi risponde. La sezione Il PUB, qui sotto, spiega come funzionano.
@@ -68,6 +69,8 @@ python Dadillo.py
 
 *(Nota: all'apertura, per gli utenti screen reader, la finestra parte ingrandita e il focus viene sempre portato dove serve.)*
 
+All'avvio Dadillo riprende il torneo in corso. Se non c'è un torneo, o l'ultimo è concluso e finalizzato, mostra il Riepilogo: lo stato, le cose da fare adesso e le statistiche dell'archivio, in un testo da leggere con le frecce. Il torneo nuovo si crea da `File, Nuovo Torneo`, Ctrl+N, o col pulsante sotto il testo.
+
 Se preferisci un eseguibile, compila con `pyinstaller` usando il file di build incluso, che contiene già le dipendenze necessarie all'aggiornatore:
 
 ```bash
@@ -76,7 +79,7 @@ pyinstaller Dadillo.spec
 
 ## Funzionamento
 
-- **Fase 1: Creazione**: Fornisci il nome del torneo, l'Editto, la tipologia di girone, i punteggi predefiniti e imposta i criteri di classifica e di spareggio (Vittorie o Punti, priorità punteggio alto o basso, primo e secondo spareggio).
+- **Fase 1: Creazione**: Da `File, Nuovo Torneo` fornisci il nome del torneo, l'Editto, la tipologia di girone, i punteggi predefiniti e imposta i criteri di classifica e di spareggio (Vittorie o Punti, priorità punteggio alto o basso, primo e secondo spareggio).
 - **Fase 2: Le Battaglie**: La finestra principale si divide in due. A sinistra le partite da giocare, a destra quelle completate. Fai doppio clic, o premi Invio, su una partita non giocata per decretarne l'esito. Usa le caselle di ricerca per filtrare le sfide di un giocatore o di una coppia.
 - **Fase 3: Finalizzazione e Classifica Finale**:
   1. **La finestra di finalizzazione**: Non appena l'ultima partita viene disputata, Dadillo registra l'orario di fine e apre la finestra *Finalizzazione del torneo*. La stessa finestra si apre all'avvio, se il torneo è concluso ma non ancora finalizzato, e con `Visualizza, Classifica` (Ctrl+L). Fino alla 2.15.0 la classifica finale compariva subito, con un pulsante Avanti per la premiazione che era facile dimenticare: l'archivio dei discepoli restava indietro.
@@ -88,8 +91,8 @@ pyinstaller Dadillo.spec
      Se restano parità non risolte nelle prime quattro posizioni, Dadillo te lo dice e chiede conferma prima di procedere.
   4. **Salvataggio ed Esportazione Automatica**: Al termine i risultati vengono salvati in `Dadillo_players.json`, il file testuale `Giocatori.txt` viene rigenerato e il torneo è segnato come finalizzato. Se il salvataggio non riesce, le medaglie non vengono date per assegnate: Dadillo lo dice e la finalizzazione ti verrà riproposta.
   5. **La Classifica Finale**: Solo adesso si apre, con la riga che dice che il torneo è finalizzato e il pulsante *Torna alle Partite*. Le scelte sopra la classifica cambiano soltanto la vista.
-  6. **Consultazione Continua**: Il torneo concluso resta a video e consultabile per statistiche e filtri fino alla creazione di un nuovo torneo dal menu `File, Nuovo Torneo`. I tornei premiati con le versioni precedenti vengono riconosciuti dallo storico dei discepoli e non ti viene chiesto di finalizzarli di nuovo.
-- **Menu dell'App**: Dal menu in alto puoi iniziare un Nuovo Torneo, Salvare, esportare le liste delle partite, aggiungere giocatori in corsa, ritirare un giocatore, modificare le Regole del Torneo, gestire i discepoli in archivio, unire database esterni e inserire a mano un torneo giocato altrove. Il menu Aiuto, in fondo alla barra, ha le voci Entra al PUB, Chiedi aiuto al PUB e Offrimi un caffè.
+  6. **Consultazione Continua**: Il torneo concluso resta consultabile, con `Visualizza, Classifica` e con il pulsante Classifica finale del Riepilogo, che all'avvio successivo prende il posto della classifica, fino alla creazione di un nuovo torneo dal menu `File, Nuovo Torneo`. I tornei premiati con le versioni precedenti vengono riconosciuti dallo storico dei discepoli e non ti viene chiesto di finalizzarli di nuovo.
+- **Menu dell'App**: Dal menu in alto puoi iniziare un Nuovo Torneo, Salvare, esportare le liste delle partite, aggiungere giocatori in corsa, ritirare un giocatore, modificare le Regole del Torneo, gestire i discepoli in archivio, unire database esterni e inserire a mano un torneo giocato altrove. Il menu Visualizza ha Classifica, Ctrl+L, e Riepilogo e statistiche, Ctrl+R. Il menu Aiuto, in fondo alla barra, ha le voci Entra al PUB, Chiedi aiuto al PUB e Offrimi un caffè.
 
 ## L'unione manuale
 

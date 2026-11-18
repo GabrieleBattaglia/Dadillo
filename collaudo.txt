@@ -1,4 +1,6 @@
-Collaudo di Dadillo 2.17.1, l'Unione manuale e il podio pesato: cancella le righe superate, annota accanto quelle con problemi.
+Collaudo di Dadillo 2.18.0, Unione manuale, podio pesato e Riepilogo: cancella le righe superate, annota accanto quelle con problemi.
+All'avvio senza torneo in corso: il Riepilogo, col fuoco sul testo che NVDA legge con le frecce da capo, e i pulsanti sotto; Nuovo Torneo dal pulsante apre la creazione senza domande.
+Ctrl+R a torneo in corso apre il Riepilogo con la riga Torneo in corso e le statistiche; Torna alle Partite riporta alle sfide.
 Giocatori, Classifica Generale: Selene157 prima con 382.7 punti, Manu1504 e Peppe dietro, e la riga sopra l'elenco spiega la formula nuova.
 Opzioni, Unione manuale: NVDA legge il testo, le etichette dei tre campi e i due pulsanti; Invio in un campo vale Avanti; Esc chiude; con una data sbagliata il messaggio e il fuoco sul campo da correggere.
 Nella finestra dei partecipanti, con un nome selezionato nella classifica, Ctrl+Freccia giù lo sposta e NVDA annuncia la riga con la posizione nuova; ai bordi non succede niente; Canc toglie e il fuoco resta nell'elenco.

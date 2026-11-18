@@ -36,6 +36,7 @@ from dialogs import (
     SetupTournamentDialog,
 )
 from premiazione import finalizza_torneo
+from riepilogo import RiepilogoPanel
 from standings import StandingsPanel
 from ui_utils import save_or_warn
 from unione_manuale import unione_manuale
@@ -61,12 +62,11 @@ class MainFrame(wx.Frame):
         self.check_players_archive()
 
         try:
-            caricato = self.tourney.load()
+            self.tourney.load()
         except DataFileError as e:
             # Il file del torneo esiste ma non e' leggibile. Una copia e' gia'
             # stata messa da parte: avvisiamo invece di creare un torneo nuovo
             # sopra dati che potrebbero essere ancora recuperabili.
-            caricato = False
             wx.MessageBox(
                 f"{e}\n"
                 "Puoi chiudere ora e tentare il recupero, oppure proseguire e "
@@ -75,10 +75,9 @@ class MainFrame(wx.Frame):
                 wx.OK | wx.ICON_ERROR,
             )
 
-        if not caricato or not self.tourney.title:
-            wx.CallAfter(self.startup_sequence)
-        else:
-            wx.CallAfter(self.check_state_and_show)
+        # Dalla 2.18.0 senza un torneo compare il riepilogo, non la finestra
+        # Nuovo Torneo aperta da sola: la vista la sceglie check_state_and_show.
+        wx.CallAfter(self.check_state_and_show)
 
     def check_players_archive(self):
         """Avvisa subito se l'archivio dei discepoli non e' leggibile.
@@ -126,7 +125,7 @@ class MainFrame(wx.Frame):
             wx.CallAfter(self.resume_setup_players)
         else:
             dlg1.Destroy()
-            self._show_empty_state()
+            self.show_riepilogo()
 
     def resume_setup_players(self):
         existing_names = list(self.tourney.players.keys())
@@ -177,51 +176,49 @@ class MainFrame(wx.Frame):
                 if os.path.exists(DATA_FILE):
                     os.remove(DATA_FILE)
                 self.tourney = TournamentData()
-                self._show_empty_state()
+                self.show_riepilogo()
             else:
                 wx.CallAfter(self.resume_setup_players)
 
-    def _show_empty_state(self):
+    def show_riepilogo(self):
+        """La schermata del riepilogo, dalla 2.18.0: quando non c'e' niente da
+        fare, all'avvio senza torneo o con l'ultimo finalizzato, e su richiesta
+        con Ctrl+R. Fino alla 2.17.1 senza torneo restava la riga L'Altare e'
+        vuoto, dopo un Nuovo Torneo annullato."""
         if self.panel:
             self.panel.Destroy()
-            self.panel = None
-        self.panel = wx.Panel(self)
         if not self.GetMenuBar():
             self.create_menu()
         self.SetTitle(f"Dadillo v{VERSION} - L'Altare del Sacrificio")
-        msg = wx.StaticText(
-            self.panel,
-            label="L'Altare è vuoto. Usa il menu File per creare un Nuovo Torneo.",
-        )
-        font = wx.Font(
-            14, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD
-        )
-        msg.SetFont(font)
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.AddStretchSpacer()
-        sizer.Add(msg, 0, wx.ALIGN_CENTER)
-        sizer.AddStretchSpacer()
-        self.panel.SetSizer(sizer)
+        self.panel = RiepilogoPanel(self, self.tourney, self.player_db)
         self.Layout()
         self.Show()
 
     def check_state_and_show(self):
+        """La vista giusta per lo stato del torneo: le partite a torneo in
+        corso; a torneo concluso la finalizzazione finche' non e' fatta (issue
+        16), poi il riepilogo; il riepilogo anche senza torneo e a torneo in
+        preparazione, dove fino alla 2.17.1 si aprivano da sole Nuovo Torneo
+        e la scelta dei discepoli."""
         if self.tourney.concluso():
-            # La classifica finale si apre solo a torneo finalizzato (issue
-            # 16): prima viene la premiazione, riproposta a ogni avvio finche'
-            # non e' fatta.
             if self.torneo_finalizzato():
-                self.show_standings()
+                self.show_riepilogo()
             else:
                 self.avvia_finalizzazione()
-        elif (
-            not self.tourney.unplayed_matches
-            and not self.tourney.played_matches
-            and self.tourney.title
+        elif self.tourney.title and (
+            self.tourney.unplayed_matches or self.tourney.played_matches
         ):
-            self.resume_setup_players()
-        else:
             self.init_main_ui()
+        else:
+            self.show_riepilogo()
+
+    def _ridisegna(self):
+        """Ricostruisce la vista in cui si e', con i dati aggiornati: la
+        classifica resta classifica, le altre seguono lo stato del torneo."""
+        if isinstance(self.panel, StandingsPanel):
+            self.show_standings()
+        else:
+            self.check_state_and_show()
 
     def init_main_ui(self):
         self.SetTitle(f"Dadillo v{VERSION} - {self.tourney.title}")
@@ -323,6 +320,9 @@ class MainFrame(wx.Frame):
         # Dalla 2.16.0 la voce apre la classifica parziale a torneo in corso
         # e quella finale a torneo finalizzato: il nome non dice piu' parziale.
         item_standings = menu_view.Append(wx.ID_ANY, "Classifica\tCtrl+L")
+        # Dalla 2.18.0: la schermata del riepilogo, con le statistiche
+        # dell'archivio, anche a torneo in corso.
+        item_riepilogo = menu_view.Append(wx.ID_ANY, "Riepilogo e statistiche\tCtrl+R")
 
         menu_players = wx.Menu()
         item_add = menu_players.Append(wx.ID_ANY, "Aggiungi Giocatore al Torneo")
@@ -365,6 +365,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_menu_save_played, item_save_played)
         self.Bind(wx.EVT_MENU, self.on_menu_exit, item_exit)
         self.Bind(wx.EVT_MENU, self.on_menu_standings, item_standings)
+        self.Bind(wx.EVT_MENU, self.on_menu_riepilogo, item_riepilogo)
         self.Bind(wx.EVT_MENU, self.on_menu_add_player, item_add)
         self.Bind(wx.EVT_MENU, self.on_menu_retire_player, item_retire)
         self.Bind(wx.EVT_MENU, self.on_menu_manage_db, item_manage_db)
@@ -440,6 +441,10 @@ class MainFrame(wx.Frame):
                 event.Veto()
                 return
         event.Skip()
+
+    def on_menu_riepilogo(self, event):
+        """La schermata del riepilogo su richiesta, in qualunque stato."""
+        self.show_riepilogo()
 
     def on_menu_standings(self, event):
         if not self.tourney.played_matches:
@@ -753,20 +758,24 @@ class MainFrame(wx.Frame):
         # Forza il focus per lo screen reader dopo aver costruito l'interfaccia
         wx.CallAfter(self.panel.txt_display.SetFocus)
 
-    def on_menu_new(self, event):
-        if (
+    def on_menu_new(self, event=None):
+        # Senza un torneo non c'e' niente da azzerare: la domanda si salta,
+        # dalla 2.18.0, anche dal pulsante del riepilogo.
+        if self.tourney.title and (
             wx.MessageBox(
                 "Mio incommensurabile sovrano, azzerare tutto e iniziare un nuovo torneo?",
                 "Nuovo Torneo",
                 wx.YES_NO | wx.ICON_WARNING,
             )
-            == wx.YES
+            != wx.YES
         ):
-            if os.path.exists(DATA_FILE):
-                os.remove(DATA_FILE)
-            self.tourney = TournamentData()
+            return
+        if os.path.exists(DATA_FILE):
+            os.remove(DATA_FILE)
+        self.tourney = TournamentData()
+        if self.panel:
             self.panel.Destroy()
-            self.startup_sequence()
+        self.startup_sequence()
 
     def on_menu_save(self, event):
         if save_or_warn(self.tourney.save, self):
@@ -1106,7 +1115,7 @@ class MainFrame(wx.Frame):
                         )
                     wx.MessageBox(messaggio, "Date del torneo", wx.OK)
                     # La classifica mostra le date e la durata: va ridisegnata
-                    self.check_state_and_show()
+                    self._ridisegna()
         dlg.Destroy()
 
     def aggiorna_storici_con_nuove_date(self, vecchia_inizio, inizio, fine):
