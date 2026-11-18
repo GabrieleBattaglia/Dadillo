@@ -1,0 +1,4 @@
+Collaudo di Dadillo 2.17.0, l'Unione manuale: cancella le righe superate, annota accanto quelle con problemi.
+Opzioni, Unione manuale: NVDA legge il testo, le etichette dei tre campi e i due pulsanti; Invio in un campo vale Avanti; Esc chiude; con una data sbagliata il messaggio e il fuoco sul campo da correggere.
+Nella finestra dei partecipanti, con un nome selezionato nella classifica, Ctrl+Freccia giù lo sposta e NVDA annuncia la riga con la posizione nuova; ai bordi non succede niente; Canc toglie e il fuoco resta nell'elenco.
+Inserisci torneo nello storico, con un torneo vero da inserire o con nomi di prova da togliere poi da Gestione Giocatori DB: messaggio finale con podio e conti, poi Classifica Generale e Giocatori.txt aggiornati.

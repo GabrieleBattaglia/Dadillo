@@ -38,6 +38,7 @@ from dialogs import (
 from premiazione import finalizza_torneo
 from standings import StandingsPanel
 from ui_utils import save_or_warn
+from unione_manuale import unione_manuale
 from version import VERSION
 
 
@@ -337,6 +338,9 @@ class MainFrame(wx.Frame):
         item_rules = menu_options.Append(wx.ID_ANY, "Regole Torneo")
         item_dates = menu_options.Append(wx.ID_ANY, "Modifica date del torneo")
         item_merge = menu_options.Append(wx.ID_ANY, "Unisci Database Giocatori")
+        # Dalla 2.17.0: un torneo giocato altrove entra nella Hall of Fame a
+        # mano, con titolo, date e classifica, senza il suo file.
+        item_manual = menu_options.Append(wx.ID_ANY, "Unione manuale")
 
         # Il menu Aiuto, dalla 2.14.0: l'invito al caffe' sta solo qui, mai
         # alla chiusura (issue 14, decisione di Gabriele del 6 ottobre 2026).
@@ -367,6 +371,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.on_menu_hof, item_hof)
         self.Bind(wx.EVT_MENU, self.on_menu_export_hof, item_export_hof)
         self.Bind(wx.EVT_MENU, self.on_menu_merge_db, item_merge)
+        self.Bind(wx.EVT_MENU, self.on_menu_manual_union, item_manual)
         self.Bind(wx.EVT_MENU, self.on_menu_rules, item_rules)
         self.Bind(wx.EVT_MENU, self.on_menu_edit_dates, item_dates)
         self.Bind(wx.EVT_MENU, self.on_menu_pub_join, item_pub_join)
@@ -914,6 +919,12 @@ class MainFrame(wx.Frame):
 
         dlg.ShowModal()
         dlg.Destroy()
+
+    def on_menu_manual_union(self, event):
+        """Un torneo giocato fuori da questo Dadillo entra nella Hall of Fame
+        a mano: titolo, date e partecipanti in ordine di classifica
+        (richiesta di Gabriele del 18 novembre 2026)."""
+        unione_manuale(self, self.player_db)
 
     def on_menu_add_player(self, event):
         if not self.tourney.unplayed_matches and self.tourney.played_matches:

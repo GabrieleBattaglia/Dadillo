@@ -1,7 +1,8 @@
 """Finestre di dialogo di Dadillo, pensate per la navigazione da tastiera
 e per la lettura con screen reader.
 Autori: Gabriele Battaglia (IZ4APU) & ClaudIA, Claude Opus 5 in modalita' auto;
-l'invito al caffe' della 2.14 di ClaudIA, Claude Fable 5.1, modalita' auto.
+l'invito al caffe' della 2.14 e l'unione manuale della 2.17 di ClaudIA, Claude
+Fable 5.1, modalita' auto.
 """
 
 import contextlib
@@ -208,19 +209,31 @@ class SetupTournamentDialog(wx.Dialog):
 
 
 class SetupPlayersDialog(wx.Dialog):
+    """La scelta dei partecipanti: dall'archivio con Spazio o doppio clic,
+    oppure scritti nel campo del nome. Dalla 2.17.0 e' anche la base della
+    finestra dei partecipanti dell'unione manuale, che eredita la raccolta
+    dei nomi e cambia titolo, testi, pulsanti e l'ordine dell'elenco: qui
+    alfabetico, la' quello della classifica finale.
+    """
+
+    TITOLO = "Raduna i Tuoi Discepoli"
+    MESSAGGIO = "Mia estremitudine immortale, inserisci i nomi dei tuoi seguaci."
+    ETICHETTA_ELENCO = "Lista Discepoli partecipanti (Premi Canc per sopprimere l'eretico):"
+    MISURA = (500, 650)
+    # Vero nell'unione manuale: l'elenco tiene l'ordine di inserimento, ogni
+    # riga porta la posizione e Ctrl con le frecce verticali la cambia.
+    IN_CLASSIFICA = False
+
     def __init__(self, parent, existing_players=None, db=None):
-        super().__init__(parent, title="Raduna i Tuoi Discepoli", style=STILE_ADATTABILE)
+        super().__init__(parent, title=self.TITOLO, style=STILE_ADATTABILE)
 
         self.players = existing_players[:] if existing_players else []
 
         panel = pannello_scorrevole(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        msg = wx.StaticText(
-            panel,
-            label="Mia estremitudine immortale, inserisci i nomi dei tuoi seguaci.",
-        )
-        vbox.Add(msg, 0, wx.ALL | wx.EXPAND, 10)
+        self.lbl_msg = wx.StaticText(panel, label=self.MESSAGGIO)
+        vbox.Add(self.lbl_msg, 0, wx.ALL | wx.EXPAND, 10)
 
         # Listbox per i giocatori del DB
         self.db = db if db is not None else PlayerDB()
@@ -250,34 +263,53 @@ class SetupPlayersDialog(wx.Dialog):
         vbox.Add(self.lbl_player, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
         vbox.Add(self.txt_player, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
 
-        lbl_list = wx.StaticText(
-            panel,
-            label="Lista Discepoli partecipanti (Premi Canc per sopprimere l'eretico):",
-        )
-        self.list_players = wx.ListBox(panel, style=wx.LB_SORT | wx.LB_SINGLE)
+        lbl_list = wx.StaticText(panel, label=self.ETICHETTA_ELENCO)
+        stile_elenco = wx.LB_SINGLE if self.IN_CLASSIFICA else wx.LB_SORT | wx.LB_SINGLE
+        self.list_players = wx.ListBox(panel, style=stile_elenco)
         self.list_players.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
-
-        for p in self.players:
-            self.list_players.Append(p)
+        self._rinfresca_partecipanti()
 
         vbox.Add(lbl_list, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
         vbox.Add(self.list_players, 1, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
 
+        vbox.Add(self._pulsanti(panel), 0, wx.ALIGN_CENTER | wx.ALL, 10)
+
+        panel.SetSizer(vbox)
+        adatta_finestra(self, panel, self.MISURA)
+
+    def _pulsanti(self, panel):
+        """I pulsanti in fondo alla finestra, in un sizer orizzontale."""
         btn_box = wx.BoxSizer(wx.HORIZONTAL)
-        btn_ok = wx.Button(panel, wx.ID_OK, "Tutti pronti al massacro!")
-        btn_ok.Bind(wx.EVT_BUTTON, self.on_ok)
+        self.btn_ok = wx.Button(panel, wx.ID_OK, "Tutti pronti al massacro!")
+        self.btn_ok.Bind(wx.EVT_BUTTON, self.on_ok)
         btn_wait = wx.Button(panel, wx.ID_APPLY, "Resta in attesa...")
         btn_wait.Bind(wx.EVT_BUTTON, self.on_wait)
         btn_cancel = wx.Button(panel, wx.ID_CANCEL, "Annulla tutto, mio sole!")
 
-        btn_box.Add(btn_ok, 0, wx.ALL, 5)
+        btn_box.Add(self.btn_ok, 0, wx.ALL, 5)
         btn_box.Add(btn_wait, 0, wx.ALL, 5)
         btn_box.Add(btn_cancel, 0, wx.ALL, 5)
+        return btn_box
 
-        vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
+    def _voce(self, indice):
+        """Il testo della riga di self.players[indice]: il solo nome, oppure
+        posizione e nome nell'unione manuale."""
+        nome = self.players[indice]
+        return f"{indice + 1}° {nome}" if self.IN_CLASSIFICA else nome
 
-        panel.SetSizer(vbox)
-        adatta_finestra(self, panel, (500, 650))
+    def _nome_alla_riga(self, riga):
+        """Il discepolo di una riga dell'elenco: in ordine alfabetico la riga
+        e' il nome stesso, in classifica segue self.players."""
+        if self.IN_CLASSIFICA:
+            return self.players[riga]
+        return self.list_players.GetString(riga)
+
+    def _rinfresca_partecipanti(self, selezione=None):
+        """Riscrive l'elenco dei partecipanti da self.players e, se chiesto,
+        seleziona una riga."""
+        self.list_players.Set([self._voce(i) for i in range(len(self.players))])
+        if selezione is not None and 0 <= selezione < self.list_players.GetCount():
+            self.list_players.SetSelection(selezione)
 
     def update_db_label(self):
         count = self.list_db_players.GetCount()
@@ -310,7 +342,7 @@ class SetupPlayersDialog(wx.Dialog):
             return
 
         self.players.append(name)
-        self.list_players.Append(name)
+        self.list_players.Append(self._voce(len(self.players) - 1))
         self.lbl_player.SetLabel(f"Giocatore {len(self.players) + 1}:")
 
         self.list_db_players.Delete(sel)
@@ -348,7 +380,7 @@ class SetupPlayersDialog(wx.Dialog):
             return
 
         self.players.append(name)
-        self.list_players.Append(name)
+        self.list_players.Append(self._voce(len(self.players) - 1))
         self.txt_player.SetValue("")
         self.lbl_player.SetLabel(f"Giocatore {len(self.players) + 1}:")
 
@@ -368,12 +400,17 @@ class SetupPlayersDialog(wx.Dialog):
         self.txt_player.SetFocus()
 
     def on_key_down(self, event):
-        if event.GetKeyCode() == wx.WXK_DELETE:
+        codice = event.GetKeyCode()
+        if self.IN_CLASSIFICA and event.ControlDown() and codice in (wx.WXK_UP, wx.WXK_DOWN):
+            self._sposta(-1 if codice == wx.WXK_UP else 1)
+        elif codice == wx.WXK_DELETE:
             sel = self.list_players.GetSelection()
             if sel != wx.NOT_FOUND:
-                name = self.list_players.GetString(sel)
+                name = self._nome_alla_riga(sel)
                 self.players.remove(name)
-                self.list_players.Delete(sel)
+                # In classifica le posizioni di chi segue scalano di uno:
+                # l'elenco si riscrive tutto.
+                self._rinfresca_partecipanti()
                 self.lbl_player.SetLabel(f"Giocatore {len(self.players) + 1}:")
 
                 if hasattr(self, "all_db_players") and name in self.all_db_players:
@@ -402,6 +439,21 @@ class SetupPlayersDialog(wx.Dialog):
         else:
             event.Skip()
 
+    def _sposta(self, passo):
+        """Sposta il discepolo selezionato di una riga in su o in giu', e con
+        lui la posizione in classifica: l'elenco segue self.players. Ai bordi
+        non succede niente."""
+        sel = self.list_players.GetSelection()
+        nuovo = sel + passo
+        if sel == wx.NOT_FOUND or not 0 <= nuovo < len(self.players):
+            return
+        self.players[sel], self.players[nuovo] = self.players[nuovo], self.players[sel]
+        # Si riscrivono le due righe scambiate e si sposta la selezione: lo
+        # screen reader annuncia la riga selezionata, con la posizione nuova.
+        self.list_players.SetString(sel, self._voce(sel))
+        self.list_players.SetString(nuovo, self._voce(nuovo))
+        self.list_players.SetSelection(nuovo)
+
     def on_wait(self, event):
         self.EndModal(wx.ID_APPLY)
 
@@ -414,6 +466,131 @@ class SetupPlayersDialog(wx.Dialog):
             )
             return
         event.Skip()
+
+
+class ManualUnionDialog(wx.Dialog):
+    """Il primo passo dell'unione manuale (richiesta di Gabriele del 18
+    novembre 2026): titolo e date di un torneo giocato fuori da questo
+    Dadillo, da incidere nella Hall of Fame senza il suo file. I campi sono
+    di testo, con il formato nell'etichetta, come in Modifica date del
+    torneo, e arrivano gia' compilati quando si torna qui dalla finestra dei
+    partecipanti. Invio in un campo vale Avanti.
+    ShowModal da' wx.ID_OK con valori in (titolo, inizio, fine), le date
+    come timestamp di Dadillo; altrimenti wx.ID_CANCEL con valori None.
+    """
+
+    def __init__(self, parent, titolo="", inizio="", fine=""):
+        super().__init__(parent, title="Unione manuale: il torneo", style=STILE_ADATTABILE)
+        self.valori = None
+        panel = pannello_scorrevole(self)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        avviso = (
+            "Qui incidi nella Hall of Fame un torneo giocato fuori da questo\n"
+            "Dadillo, per esempio da un amico con la sua copia. Scrivi titolo\n"
+            "e date; nella finestra seguente indicherai i partecipanti\n"
+            "nell'ordine della classifica finale."
+        )
+        vbox.Add(wx.StaticText(panel, label=avviso), 0, wx.ALL | wx.EXPAND, 10)
+        self.txt_titolo = self._campo(panel, vbox, "Titolo del torneo:", titolo)
+        self.txt_inizio = self._campo(
+            panel, vbox, "Data di inizio, giorno/mese/anno:", timestamp_to_fields(inizio)[0]
+        )
+        self.txt_fine = self._campo(
+            panel, vbox, "Data di fine, giorno/mese/anno:", timestamp_to_fields(fine)[0]
+        )
+        btn_box = wx.BoxSizer(wx.HORIZONTAL)
+        self.btn_ok = wx.Button(panel, wx.ID_OK, "Avanti, ai partecipanti")
+        self.btn_ok.Bind(wx.EVT_BUTTON, self.on_ok)
+        btn_cancel = wx.Button(panel, wx.ID_CANCEL, "Annulla")
+        btn_box.Add(self.btn_ok, 0, wx.ALL, 5)
+        btn_box.Add(btn_cancel, 0, wx.ALL, 5)
+        vbox.Add(btn_box, 0, wx.ALIGN_CENTER | wx.ALL, 10)
+        panel.SetSizer(vbox)
+        adatta_finestra(self, panel, (500, 380))
+        self.btn_ok.SetDefault()
+        wx.CallAfter(self.txt_titolo.SetFocus)
+
+    @staticmethod
+    def _campo(panel, vbox, etichetta, valore):
+        """Un campo di testo con la sua etichetta sopra."""
+        vbox.Add(wx.StaticText(panel, label=etichetta), 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
+        campo = wx.TextCtrl(panel, value=valore)
+        vbox.Add(campo, 0, wx.LEFT | wx.RIGHT | wx.EXPAND, 10)
+        return campo
+
+    def on_ok(self, event):
+        valori = self._leggi()
+        if valori is not None:
+            self.valori = valori
+            event.Skip()
+
+    def _leggi(self):
+        """Titolo e date come li ha scritti l'utente, controllati. None se
+        qualcosa non va: allora l'utente e' stato avvisato e il fuoco sta
+        sul campo da correggere."""
+        titolo = self.txt_titolo.GetValue().strip()
+        if not titolo:
+            self._avvisa("Il torneo deve avere un titolo.", "Titolo mancante", self.txt_titolo)
+            return None
+        date = []
+        for campo, nome in ((self.txt_inizio, "inizio"), (self.txt_fine, "fine")):
+            try:
+                date.append(fields_to_timestamp(campo.GetValue(), ""))
+            except ValueError as e:
+                self._avvisa(
+                    f"Data di {nome} non valida:\n{e}.\nEsempio: 2/9/2026.",
+                    "Data non valida",
+                    campo,
+                )
+                return None
+        inizio, fine = date
+        if parse_timestamp(fine) < parse_timestamp(inizio):
+            self._avvisa(
+                "La fine viene prima dell'inizio.\nControlla le due date.",
+                "Date incoerenti",
+                self.txt_fine,
+            )
+            return None
+        return titolo, inizio, fine
+
+    @staticmethod
+    def _avvisa(testo, titolo, campo):
+        wx.MessageBox(testo, titolo, wx.OK | wx.ICON_WARNING)
+        campo.SetFocus()
+
+
+class ManualUnionPlayersDialog(SetupPlayersDialog):
+    """Il secondo passo dell'unione manuale: i partecipanti, raccolti come
+    per un torneo nuovo, dall'archivio o scritti, ma nell'ordine della
+    classifica finale. Ogni riga dell'elenco porta la posizione, Ctrl con
+    Freccia su o giu' sposta il discepolo selezionato, Canc lo toglie.
+    Inserisci torneo nello storico chiude con wx.ID_OK; Esc e Torna a titolo
+    e date con wx.ID_CANCEL, e i nomi raccolti restano in players per quando
+    si torna qui.
+    """
+
+    TITOLO = "Unione manuale: i partecipanti"
+    ETICHETTA_ELENCO = "Classifica finale (Ctrl con Freccia su o giù sposta, Canc toglie):"
+    MISURA = (520, 680)
+    IN_CLASSIFICA = True
+
+    def __init__(self, parent, titolo, existing_players=None, db=None):
+        self.MESSAGGIO = (
+            f"Indica i partecipanti del torneo {titolo}, dall'archivio con\n"
+            "Spazio o scrivendo il nome, nell'ordine della classifica finale:\n"
+            "il primo dell'elenco prende l'oro. Per correggere l'ordine,\n"
+            "nell'elenco Ctrl con Freccia su o giù sposta il discepolo selezionato."
+        )
+        super().__init__(parent, existing_players, db)
+
+    def _pulsanti(self, panel):
+        btn_box = wx.BoxSizer(wx.HORIZONTAL)
+        self.btn_ok = wx.Button(panel, wx.ID_OK, "Inserisci torneo nello storico")
+        self.btn_ok.Bind(wx.EVT_BUTTON, self.on_ok)
+        btn_cancel = wx.Button(panel, wx.ID_CANCEL, "Torna a titolo e date")
+        btn_box.Add(self.btn_ok, 0, wx.ALL, 5)
+        btn_box.Add(btn_cancel, 0, wx.ALL, 5)
+        return btn_box
 
 
 class MatchResultDialog(wx.Dialog):
