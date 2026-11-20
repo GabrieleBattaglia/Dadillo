@@ -148,6 +148,14 @@ def _tornei(quanti):
     return "1 torneo" if quanti == 1 else f"{quanti} tornei"
 
 
+def _periodo(inizio, fine):
+    """Le date di un torneo in parole: da e a, oppure una sola se un torneo
+    e' cominciato e finito lo stesso giorno."""
+    if inizio == fine:
+        return f"giocato {inizio}"
+    return f"da {inizio} a {fine}"
+
+
 def _discepoli(quanti):
     return "1 discepolo" if quanti == 1 else f"{quanti} discepoli"
 
@@ -196,7 +204,7 @@ def righe_stato(tourney, stato):
         ]
     else:
         righe = [
-            f"L'ultimo torneo, {tourney.title}, da {inizio} a {fine}, è concluso e "
+            f"L'ultimo torneo, {tourney.title}, {_periodo(inizio, fine)}, è concluso e "
             "finalizzato: medaglie e piazzamenti sono nella Hall of Fame.",
             "Cosa puoi fare adesso:",
             "- Classifica finale, col pulsante qui sotto o con Ctrl+L.",
@@ -227,8 +235,8 @@ def _righe_tornei(tornei):
         righe.append(f"Il primo torneo: {primo['titolo']}, iniziato {primo['inizio']}.")
     ultimo = tornei[-1]
     righe.append(
-        f"L'ultimo torneo: {ultimo['titolo']}, da {ultimo['inizio']} a "
-        f"{ultimo['fine']}: {_podio(ultimo)}."
+        f"L'ultimo torneo: {ultimo['titolo']}, {_periodo(ultimo['inizio'], ultimo['fine'])}: "
+        f"{_podio(ultimo)}."
     )
     durate = []
     for torneo in tornei:

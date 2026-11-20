@@ -91,6 +91,16 @@ def test_la_data_si_legge_dalla_forma_estesa():
     assert data_da_estesa("") is None
 
 
+def test_un_torneo_di_un_giorno_solo_ha_una_data_sola():
+    from riepilogo import _periodo
+
+    assert _periodo("sabato 30 maggio 2026", "sabato 30 maggio 2026") == "giocato sabato 30 maggio 2026"
+    assert (
+        _periodo("venerdì 1 maggio 2026", "sabato 30 maggio 2026")
+        == "da venerdì 1 maggio 2026 a sabato 30 maggio 2026"
+    )
+
+
 def test_il_testo_racconta_l_archivio(tmp_path):
     from riepilogo import testo_riepilogo
 
